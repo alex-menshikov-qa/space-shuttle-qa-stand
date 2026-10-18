@@ -1,0 +1,10 @@
+.git
+.github
+.env
+tests
+allure-results
+allure-report
+**/__pycache__
+**/*.py[cod]
+.venv
+venv
