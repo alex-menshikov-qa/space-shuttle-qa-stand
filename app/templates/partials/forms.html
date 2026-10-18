@@ -1,0 +1,23 @@
+{#
+  One labelled input with its error slot. ids and testids follow
+  <page>-<field>-input / <page>-<field>-error. The error element is always in
+  the DOM (hidden when empty), so the server and forms.js fill the same node.
+  `rule` names the check forms.js runs on submit (see static/js/forms.js).
+#}
+{% macro field(page, name, label, type="text", value="", error=None, rule="", autocomplete="") -%}
+<div class="field">
+  <label class="field__label" for="{{ page }}-{{ name }}-input">{{ label }}</label>
+  <input class="field__input{% if error %} field__input--invalid{% endif %}"
+         id="{{ page }}-{{ name }}-input" data-testid="{{ page }}-{{ name }}-input"
+         name="{{ name }}" type="{{ type }}" value="{{ value or '' }}"
+         data-rule="{{ rule }}" aria-describedby="{{ page }}-{{ name }}-error"
+         {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
+         {%- if error %} aria-invalid="true"{% endif %}>
+  <p class="field__error" id="{{ page }}-{{ name }}-error" data-testid="{{ page }}-{{ name }}-error"
+     {%- if not error %} hidden{% endif %}>{{ error or "" }}</p>
+</div>
+{%- endmacro %}
+
+{% macro submit(page, label) -%}
+<button class="button" type="submit" id="{{ page }}-submit-button" data-testid="{{ page }}-submit-button">{{ label }}</button>
+{%- endmacro %}

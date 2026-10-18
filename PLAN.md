@@ -63,6 +63,7 @@ Validation rules (one implementation in `validation.py`, shared by API and UI):
 - `name` — non-empty after trim;
 - `email` — matches `^[^\s@]+@[^\s@]+\.[^\s@]+$` (an own pattern instead of `EmailStr`, which rejects reserved domains and would make API and UI disagree); the same pattern is rendered into the templates for client-side checks, so there is a single source; unique case-insensitively (stored trimmed + lowercased, unique index). The same normalization (trim + lowercase) is applied on **login** too — in the API and in the web form — via one `normalize_email()` in `validation.py`;
 - `password` — at least 6 characters.
+- Max lengths (added at Sasha's request in stage 3, for boundary-value testing): `name` 1–50, `email` up to 254, `password` 6–128 characters. Enforced in `validation.py` (API, server forms and JS alike) with their own messages ("Name is too long", …), mirrored by DB column limits (`VARCHAR(50)` / `VARCHAR(254)`, migration `0002`). The UI does **not** use the `maxlength` attribute: over-limit input stays typeable and produces our own error under the field.
 
 | Endpoint | Success | Errors |
 |---|---|---|

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t.HOME_TITLE }}{% endblock %}
+{% block page %}home{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="home-title">{{ t.HOME_TITLE }}</h1>
+<section class="placeholder" data-testid="home-builder-placeholder">
+  <p>{{ t.HOME_PLACEHOLDER }}</p>
+</section>
+<div class="actions">
+  {% if user %}
+  <button class="button" type="button" id="home-place-order-button" data-testid="home-place-order-button">{{ t.HOME_PLACE_ORDER }}</button>
+  {% else %}
+  <a class="button" href="/login" id="home-sign-in-button" data-testid="home-sign-in-button">{{ t.HOME_SIGN_IN }}</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t.ACCOUNT_TITLE }}{% endblock %}
+{% block page %}account{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="account-title">{{ t.ACCOUNT_TITLE }}</h1>
+<dl class="profile">
+  <dt>{{ t.LABEL_NAME }}</dt>
+  <dd id="account-name" data-testid="account-name">{{ user.name }}</dd>
+  <dt>{{ t.LABEL_EMAIL }}</dt>
+  <dd id="account-email" data-testid="account-email">{{ user.email }}</dd>
+</dl>
+<form method="post" action="/logout" novalidate id="account-logout-form" data-testid="account-logout-form">
+  <button class="button button--secondary" type="submit" id="account-logout-button" data-testid="account-logout-button">{{ t.ACCOUNT_LOGOUT }}</button>
+</form>
+{% endblock %}

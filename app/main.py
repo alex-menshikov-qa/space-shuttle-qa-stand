@@ -3,13 +3,16 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
-from app import defects, errors, strings
+from app import defects, errors, strings, web
 from app.api import health, v1
 
 log = logging.getLogger("uvicorn.error")
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 @asynccontextmanager
@@ -27,8 +30,10 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     errors.register_handlers(app)
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(health.router)
     app.include_router(v1.router)
+    app.include_router(web.router)
     _drop_422_from_openapi(app)
     return app
 

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field, submit %}
+{% block title %}{{ t.REGISTER_TITLE }}{% endblock %}
+{% block page %}register{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="register-title">{{ t.REGISTER_TITLE }}</h1>
+<form class="form" method="post" action="/register" novalidate data-validate
+      id="register-form" data-testid="register-form">
+  {{ field("register", "name", t.LABEL_NAME, value=values.name, error=errors.name, rule="name", autocomplete="name") }}
+  {{ field("register", "email", t.LABEL_EMAIL, type="email", value=values.email, error=errors.email, rule="email", autocomplete="email") }}
+  {{ field("register", "password", t.LABEL_PASSWORD, type="password", error=errors.password, rule="password", autocomplete="new-password") }}
+  {{ submit("register", t.REGISTER_SUBMIT) }}
+</form>
+<p class="form__hint">
+  {{ t.REGISTER_LOGIN_PROMPT }}
+  <a href="/login" id="register-login-link" data-testid="register-login-link">{{ t.REGISTER_LOGIN_LINK }}</a>
+</p>
+{% endblock %}

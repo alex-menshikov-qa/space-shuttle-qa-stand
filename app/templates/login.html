@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "partials/forms.html" import field, submit %}
+{% block title %}{{ t.LOGIN_TITLE }}{% endblock %}
+{% block page %}login{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="login-title">{{ t.LOGIN_TITLE }}</h1>
+<form class="form" method="post" action="/login" novalidate data-validate
+      id="login-form" data-testid="login-form">
+  <p class="form__error" id="login-form-error" data-testid="login-form-error"
+     {%- if not form_error %} hidden{% endif %}>{{ form_error or "" }}</p>
+  {{ field("login", "email", t.LABEL_EMAIL, type="email", value=values.email, error=errors.email, rule="email-required", autocomplete="email") }}
+  {{ field("login", "password", t.LABEL_PASSWORD, type="password", error=errors.password, rule="password-required", autocomplete="current-password") }}
+  {{ submit("login", t.LOGIN_SUBMIT) }}
+</form>
+<p class="form__hint">
+  {{ t.LOGIN_REGISTER_PROMPT }}
+  <a href="/register" id="login-register-link" data-testid="login-register-link">{{ t.LOGIN_REGISTER_LINK }}</a>
+</p>
+<p class="form__hint">
+  <a href="/forgot-password" id="login-forgot-password-link" data-testid="login-forgot-password-link">{{ t.LOGIN_FORGOT_LINK }}</a>
+</p>
+{% endblock %}

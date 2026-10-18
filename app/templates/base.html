@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · {{ t.APP_TITLE }}</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+  {% include "partials/header.html" %}
+  <main class="page" data-testid="{% block page %}{% endblock %}-page">
+    {% block content %}{% endblock %}
+  </main>
+  <script id="validation-rules" type="application/json">{{ validation_rules | tojson }}</script>
+  <script src="/static/js/forms.js" defer></script>
+</body>
+</html>

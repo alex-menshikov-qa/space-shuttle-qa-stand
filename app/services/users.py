@@ -61,6 +61,16 @@ def authenticate(session: Session, email: str, password: str) -> User | None:
     return user
 
 
+def request_password_reset(email: str) -> None:
+    """Validate the email. Nothing is sent: the stand has no mail delivery.
+
+    Raises InvalidFields. The result never reveals whether the email is registered.
+    """
+    errors = validation.email_only_errors(validation.normalize_email(email))
+    if errors:
+        raise InvalidFields(errors)
+
+
 def get_by_token(session: Session, token: str) -> User | None:
     user_id = security.decode_access_token(token)
     return session.get(User, user_id) if user_id is not None else None
