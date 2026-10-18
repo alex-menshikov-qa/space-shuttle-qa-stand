@@ -92,7 +92,7 @@ Working English paths and texts. Every interactive element and every error messa
 
 ### Stage 4 — Test scaffolding + CI + Allure + README
 - `tests/requirements.txt` (pinned): pytest, requests, selenium, faker, allure-pytest, python-dotenv. Root `pytest.ini`: `testpaths = tests`, markers `api` and `ui`, `--alluredir=allure-results`. `BASE_URL` and credentials come only from env. No conftest, fixtures or tests.
-- `.github/workflows/ci.yml` on `push` (any branch) and `pull_request`:
+- `.github/workflows/ci.yml` on `push` to `main`, `pull_request` and `workflow_dispatch` (changed in stage 4 at Sasha's request: push to any branch plus `pull_request` would run CI twice for every commit on a PR branch):
   1. checkout → `cp .env.example .env`
   2. `docker compose up -d --build --wait` → `curl -fsS $BASE_URL/health`
   3. `actions/setup-python` 3.12 → `pip install -r tests/requirements.txt`

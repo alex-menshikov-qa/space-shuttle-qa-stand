@@ -1,8 +1,21 @@
 # space-shuttle-qa-stand
 
-Portfolio test stand (not production) for API and UI test automation. Work in progress — see `PLAN.md`.
+[![CI](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml)
+
+**A portfolio test stand, not a production service.** It is a small web app with a JSON API,
+built to be tested: the API and UI automation suites (pytest + Requests / Selenium / Allure)
+run against it instead of third-party training stands. It has stable locators, a documented
+contract, a seeded test user and switchable "known defects" for the tests to catch.
+
+The stand is story-agnostic for now (accounts only). Story features — a builder, a booking
+section and a pilots/flights API — come later; see `PLAN.md`.
+
+**Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
+JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
 
 ## Quick start
+
+Requires Docker with Compose v2.
 
 ```bash
 cp .env.example .env
@@ -10,12 +23,37 @@ docker compose up -d --build --wait
 curl http://localhost:8000/health   # {"status":"ok"}
 ```
 
-- Swagger UI: http://localhost:8000/docs
-- Health check: http://localhost:8000/health
+| What | URL |
+|---|---|
+| Web UI | http://localhost:8000/ |
+| Swagger UI (API docs) | http://localhost:8000/docs |
+| Health check | http://localhost:8000/health — `200 {"status":"ok"}`, or `503 {"status":"error"}` if the database is down |
+
+- Logs: `docker compose logs app`
 - Stop and wipe the database: `docker compose down -v`
 
 On every start the stand applies migrations and seeds the test user from
 `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the same variables the tests read).
+If a test deletes that user, a restart (`docker compose restart app`) brings it back.
+
+## Environment variables
+
+One `.env` (copied from `.env.example`, which holds fake values only) feeds both the stand and the tests.
+`.env` is git-ignored.
+
+| Variable | Used by | Meaning |
+|---|---|---|
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | stand, tests | Database credentials (avoid `@ : / #` in the password: it goes into a URL) |
+| `POSTGRES_PORT` | stand, tests | Host port the database is published on |
+| `DB_HOST` | tests | Database host for SQL checks (`localhost`) |
+| `APP_PORT` | stand | Host port the app is published on |
+| `BASE_URL` | tests | Stand URL; keep it in sync with `APP_PORT` |
+| `JWT_SECRET` | stand | HS256 key for access tokens |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | stand | Token and session lifetime (default 60) |
+| `TEST_NAME`, `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Seeded test user |
+| `BUG_<NAME>` | stand | Switches a seeded defect on (see [Known defects](#known-defects)) |
+
+The app gets `DATABASE_URL` from `docker-compose.yml`, assembled from the `POSTGRES_*` variables.
 
 ## Account API
 
@@ -76,11 +114,81 @@ Pattern: `<page>-<element>-<kind>`.
 
 Error elements are always in the DOM and `hidden` while empty: check visibility, not presence.
 
+## Tests
+
+The suites live in this repo, next to the stand:
+
+```
+tests/
+  api/              API tests (requests), marker `api`
+  ui/               UI tests (Selenium), marker `ui`
+  requirements.txt  pinned test dependencies
+pytest.ini          test paths, markers, Allure results directory
+```
+
+Run them against a running stand:
+
+```bash
+python3.12 -m venv .venv && . .venv/bin/activate
+pip install -r tests/requirements.txt
+pytest                 # everything
+pytest -m api          # API only
+pytest -m ui           # UI only
+allure serve allure-results   # needs the Allure CLI locally
+```
+
+`BASE_URL`, the test user and the database settings come only from the environment
+(`python-dotenv` can load them from `.env`). To test another stand, change `BASE_URL`.
+
+**Browsers.** UI tests run headless Chrome (`--headless=new`) or Firefox (`-headless`).
+Selenium ≥ 4.6 includes Selenium Manager: it finds the installed browser and a matching
+driver, downloading the driver on first use if needed, so there is nothing to install by hand.
+How a run picks a browser (for example a `BROWSER` env var) is up to the test suite.
+
+**SQL checks** connect to `DB_HOST:POSTGRES_PORT` with the `POSTGRES_*` credentials,
+e.g. to assert that `users.password_hash` holds an argon2id hash, not the password.
+
+## CI
+
+`.github/workflows/ci.yml` runs on pushes to `main`, on pull requests and manually
+(**Run workflow** in the Actions tab):
+
+1. `.env` from `.env.example`, exported to the job environment
+2. `docker compose up --build --wait`, then `curl $BASE_URL/health`
+3. Python 3.12 + `tests/requirements.txt`
+4. Prints the versions of Chrome, ChromeDriver, Firefox and geckodriver on the runner
+   (the runner image ships all four; the step fails if one is missing)
+5. `pytest`. Exit code 5 ("no tests collected") is reported as a notice and treated as success;
+   any other failure fails the job
+6. Allure report (pinned Allure CLI) uploaded as the `allure-report` artifact
+7. On failure: `docker compose logs`; always: `docker compose down -v`
+
+The Allure report is not published to GitHub Pages yet.
+
+## Project layout
+
+```
+app/                FastAPI app
+  api/              /health and the JSON API (/api/v1)
+  web/              server-rendered pages and the cookie session
+  services/         account logic shared by API and pages
+  templates/        Jinja2 templates
+  static/           CSS and the form-validation JS
+  migrations/       Alembic migrations
+  strings.py        every user-visible text
+  validation.py     field rules shared by API, forms and JS
+  defects.py        seeded-defect flags
+tests/              test suites (see above)
+docker-compose.yml  db + app
+```
+
 ## Known defects
 
 The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them.
 Each defect is off by default and is switched on with `BUG_<NAME>=1` in `.env`
-(registry: `app/defects.py`).
+(registry: `app/defects.py`). A misspelled `BUG_*` name or a value other than
+`1/true/yes/on` or `0/false/no/off` stops the stand from starting, so a typo can never
+silently switch a defect off.
 
 | Flag | Area | Behaviour when enabled | Expected behaviour |
 |---|---|---|---|
