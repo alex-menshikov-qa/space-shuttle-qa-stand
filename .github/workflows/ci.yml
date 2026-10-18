@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  ALLURE_VERSION: "2.46.1"
+
+jobs:
+  stand-and-tests:
+    name: Stand + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Create .env from .env.example
+        run: cp .env.example .env
+
+      # BASE_URL, TEST_EMAIL, DB_HOST, ... become env vars for the steps below.
+      - name: Export .env to the job environment
+        run: grep -Ev '^[[:space:]]*(#|$)' .env >> "$GITHUB_ENV"
+
+      - name: Start the stand
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Health check
+        run: curl -fsS "$BASE_URL/health"
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: tests/requirements.txt
+
+      - name: Install test dependencies
+        run: pip install -r tests/requirements.txt
+
+      # The runner image ships both browsers and their drivers; Selenium Manager
+      # finds them, so UI tests need no extra setup. Fails if any is missing.
+      - name: Browsers and drivers on the runner
+        run: |
+          google-chrome --version
+          "$CHROMEWEBDRIVER/chromedriver" --version
+          firefox --version
+          "$GECKOWEBDRIVER/geckodriver" --version
+
+      - name: Run tests
+        run: |
+          set +e
+          pytest
+          code=$?
+          if [ "$code" -eq 5 ]; then
+            echo "::notice title=No tests collected::pytest exit code 5 (no tests collected yet) is treated as success"
+            exit 0
+          fi
+          exit "$code"
+
+      - name: Generate Allure report
+        if: ${{ !cancelled() }}
+        run: |
+          java -version
+          curl -fsSL -o allure.tgz \
+            "https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz"
+          tar -xzf allure.tgz
+          mkdir -p allure-results
+          "./allure-${ALLURE_VERSION}/bin/allure" generate allure-results -o allure-report --clean
+
+      - name: Upload Allure report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: allure-report
+          if-no-files-found: error
+
+      - name: Stand logs
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop the stand
+        if: always()
+        run: docker compose down -v
