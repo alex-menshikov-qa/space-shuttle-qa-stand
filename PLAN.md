@@ -137,3 +137,141 @@ Working English paths and texts. Every interactive element and every error messa
 - Stage 2: curl / Swagger through every row of the API table; `psql` → `SELECT email, password_hash FROM users;` shows `$argon2id$...`; restart app → seed user is still single.
 - Stage 3: click through the four login entry points, the validation cases, logout, guest redirect from `/account`; check testids in DevTools.
 - Stage 4: CI run on the PR is green; log shows browser versions and the explicit "no tests collected" notice; the Allure artifact is downloadable.
+
+---
+
+# Track 2 — the Space Shuttle Inc story
+
+## Goal
+Dress the stand in its story and add the rest of the contract: A6 (shipyard), B (rental landing, order form, order status), C1–C5 (autopilot / station / order API) and the first seeded defects (E). Section F is not touched.
+
+Space Shuttle Inc rents shuttles on Coruscant. A shuttle flies itself: its autopilot is a droid employee (login, password, first name) who takes orders through the API. At the Shipyard a customer builds a shuttle from parts. Company, product and world are our own: no third-party logos, images or quotes; the logo and part pictures are our own inline SVG / CSS, no external files or fonts.
+
+## Ground rules (same as track 1, plus)
+- Branch `feat/story`, draft PR into `main`, merge only after Sasha's OK. After each stage: report (done / how to check by hand / deviations from PLAN.md as a separate list) and stop.
+- No tests from me; verification scripts live outside the repo.
+- Every visible text in `strings.py` + templates. Catalog, stations, FAQ and fleet are **data** in `app/data/*.json`, not code.
+- Functional texts (labels, errors, buttons) are plain and serious; irony only in decoration (FAQ, 404, empty states, part descriptions). API error texts and field limits come from the 2023 checklists verbatim and are not "improved".
+- `data-testid` on every interactive element and message, `<page>-<element>-<kind>`; full list in README. Account-page testids are unchanged.
+- One validation implementation for API, server and JS (`validation.py` → `client_rules()`), `novalidate`, no `maxlength`.
+- Error body stays `{"ok": false, "message": "..."}`.
+
+## New layout
+```
+app/
+  data/               stations.json, fleet.json, faq.json, shipyard_parts.json
+  clock.py            stand "now"/"today" in STAND_TZ; per-order clock offset
+  models.py           + Autopilot, Station, Order, ShipyardPart, ShipyardOrder(+items)
+  seed.py             + stations, fleet, shipyard parts (idempotent sync from app/data)
+  services/           autopilots.py, stations.py, orders.py, shipyard.py
+  api/v1/             autopilot.py, stations.py, orders.py, shipyard.py, testing.py
+  web/                landing.py, order.py, track.py, shipyard.py
+  templates/          home (landing), holonet, order, track, shipyard, not_found, partials/modal
+  static/js/          header.js, landing.js, order.js, track.js, shipyard.js
+  migrations/versions 0003 autopilots+stations+orders, 0004 shipyard
+```
+
+## Stage 1 — Re-skin and landing
+- **Header (all pages):** logo "Space **Shuttle** Inc" — "Space Shuttle" links to `/` (`header-logo-link`), "Inc" is plain text (`header-logo-inc`). Partner mark "HoloNet" → `/holonet`, `target="_blank"` (`header-holonet-link`). Nav: "Shipyard" → `/shipyard` (`header-shipyard-link`); "Order" → `/order` (`header-order-button`); "Order Status" (`header-status-button`) reveals "Order Number" input + "Go!" (`header-status-input`, `header-status-go-button`), click or Enter → `/track?t=<number>`; "Account" unchanged.
+- **`/` landing:** title + short pitch, bottom "Order" (`home-order-button`), cookie banner with accept button (home only, fixed to the bottom, remembered in a cookie), FAQ accordion of 8 from `faq.json`: one panel open at a time, ids exactly `accordion__heading-N` / `accordion__panel-N`, N = 0…7.
+- **`/holonet`:** own HoloNet news stub page.
+- **`/shipyard` stub:** the builder placeholder plus "Sign in" (`shipyard-sign-in-button`) for guests / "Place order" (`shipyard-order-button`) when logged in. Login success now redirects to `/shipyard`. Four login entry points: `/shipyard` button, header "Account", `/register` link, `/forgot-password` link.
+- **404:** paths outside `/api/` get an HTML page with the header, the "Our autopilots searched every sector…" text and a link home; `/api/*` keeps JSON.
+- Renamed testids: `header-logo`, `header-builder-link`, `home-sign-in-button`, `home-place-order-button` (see above).
+
+## Stage 2 — Autopilot, station and order API (`/api/v1`)
+Autopilots are their own entity (table `autopilots`), no tokens. Request fields are accepted untyped and checked by `validation.py`, so a number or null gets the documented 400, not a pydantic message.
+
+| Request | Success | Errors |
+|---|---|---|
+| POST /autopilot {login, password, firstName} | 201 {"ok": true} | 400 "Insufficient data to create an account" (any field missing or invalid) · 409 "This login is already in use. Please try another one" |
+| POST /autopilot/login {login, password} | 200 {"id": int} | 400 "Insufficient data to log in" · 404 "Account not found" |
+| DELETE /autopilot/{id} | 200 {"ok": true} | 400 "Insufficient data to delete the autopilot" (no id) · 404 "There is no autopilot with such id" (also for a non-numeric id) |
+| GET /stations/search?s= | 200 {"stations": [{number, name, color}]}, case-insensitive substring, no `s` → all | — |
+| POST /orders | 201 {"track": int} | 400 with the field's form message |
+| GET /orders[?autopilotId=] | 200 {"orders": [...]} | 404 "Autopilot with identifier {autopilotId} not found" |
+| GET /orders/track?t= | 200 {"order": {...}} | 400 "Insufficient data to perform the search" · 404 "Order not found" |
+| PUT /orders/accept/{id}?autopilotId= | 200 {"ok": true} | 400 "Insufficient data to perform the search" · 404 "There is no order with such id" / "There is no autopilot with such id" · 409 "This order is already in progress" |
+| PUT /orders/finish/{id} | 200 {"ok": true} | 404 "There is no order with such id" · 409 "This order cannot be finished" (not accepted, or already finished) |
+| PUT /orders/cancel {track} | 200 {"ok": true} | 400 "Insufficient data to perform the search" · 404 "Order not found" · 409 "This order is already in progress" |
+
+- **Autopilot rules:** login — string of 2–10 Aurebesh (Latin) letters; password — string of exactly 4 digits; firstName — string of 2–10 letters, required. Password stored as an argon2id hash (`security.hash_password`). Columns are `TEXT` so seeded defects can store out-of-rule values.
+- **Delete** is a hard delete (login becomes free again). Orders keep `autopilot_first_name` as a snapshot and get `autopilot_deleted = true`; such orders are no longer found by track or listed.
+- **Order fields:** firstName, lastName, address, station (number), phone, rentTime (1–7), deliveryDate (`YYYY-MM-DD`, not before tomorrow), comment, color (`[]`, `["PINKY_SWEAR"]`, `["GRAY_RAINBOW"]`, both). Limits as in the form (stage 3); address is trimmed before the check. `track` — random unique 5-digit number (10000–99999), as in the canonical "Order number NNNNN".
+- **Order object:** `{id, track, firstName, lastName, address, station: {number, name, color}, phone, rentTime, deliveryDate, comment, color, status, autopilotId, autopilotFirstName, createdAt, acceptedAt, finishedAt, rentalEndsAt}`; `status` is one of `hangar`, `heading`, `on_site`, `flying`, `ended`, `delayed`.
+- Cancel is a soft delete (`canceled_at`); canceled orders are not found or listed.
+- **"Tomorrow"** is computed by the server in `STAND_TZ` (default `UTC`).
+- **Seed (idempotent):** stations and fleet from `app/data`; fleet password from `FLEET_PASSWORD` (default `0101`), re-synced on start like the test user.
+
+## Stage 3 — Order form and order status
+- **`/order`**, one page, two steps switched by JS; a direct URL opens step 1. Submits to `POST /api/v1/orders`.
+- **Step 1 "For Whom is the Shuttle":** Name · Last Name · "Address: where the shuttle will arrive" · Shuttle Station (search from 1 character via `/stations/search`, colored dot before the name, pick by click) · "Phone: the autopilot will call" · "Next". Placeholders are the field names, required ones with an asterisk. Error under the field + red border; errors block step 2.
+
+| Field | Rule | Message |
+|---|---|---|
+| Name | Aurebesh letters, space, hyphen; 2–15 | Enter the correct name |
+| Last Name | Aurebesh letters; 2–15 | Enter the correct last name |
+| Address | letters, digits, space, hyphen, dot, comma; 5–50; trimmed on blur | Enter the correct address |
+| Station | required, must be picked from the list | Select a station |
+| Phone | digits and "+"; 10–12 | Enter the correct phone number |
+
+- **Step 2 "About Rent":** "When to Bring the Shuttle" — own date picker opening on the current month, days before tomorrow disabled, typing allowed in **`DD.MM.YYYY`**, required · Rental Period — custom dropdown (not `<select>`) "one day" … "seven days", required · Shuttle Color — checkboxes "pinky swear", "gray rainbow" · "Comment for Autopilot" — letters, space, hyphen, dot, comma; up to 24; optional · "Back" (step 1 data kept) and "Order".
+- Step 2 errors: "Enter a valid date", "Enter a valid rental period", "Enter a valid comment".
+- Valid → modal "Do you want to place the order?" Yes / No → modal "Order number NNNNN. Write it down: it will come in handy to track the status" + "View Status" → `/track?t=`. Several orders in a row work.
+- **`/track?t=`** (server-rendered), as in the 2023 checklist:
+  - Its own search row under the header: a long "Order Number" input (`track-number-input`) with a "View" button on the right (`track-view-button`); search by click and by Enter. Present in both variants of the page, "found" and "not found". The header "Go!" search stays as well.
+  - Order data in three groups separated by gray lines: (Name, Last Name, Address, Shuttle Station with its colored dot, Phone) · (When to Bring the Shuttle, Rental Period) · (Shuttle Color, Comment for Autopilot). With no comment only the caption is shown and the value is empty. Every value has its own testid (`track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`).
+  - The status chain, current one highlighted:
+  1. "Shuttle in the hangar" — "Your autopilot is warming up for departure"
+  2. "Autopilot <firstName> is heading towards you" — after accept; shows support phone 0101
+  3. "Autopilot is on site" — after finish; "Pick up the shuttle and pay the rental fee"
+  4. "Okay, let's fly now" — `PICKUP_MINUTES` (default 10) after finish; "Rental ends on <day> at <time>" (finish + rentTime days)
+  5. "Rental time has ended" — after the rental end; caption, verbatim: "<firstName> is heading home to recharge. Thanks for flying with us."
+  - "Autopilot delayed" — delivery day is over (after 23:59 `STAND_TZ`) and the order is not finished (status 1 or 2); finish returns it to 3. Caption, verbatim from the 2023 checklist: "We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101". Both the status and the caption are red.
+- "Cancel order" only while not accepted: modal "Do you want to cancel the order?" → "Order canceled. Come back, we are always waiting for you :)". Not found (incl. canceled) → "There is no such order. Are you sure you entered the correct number?".
+- **Time travel for tests.** Status is a pure function of the order's timestamps and the order's own clock (`now + clock_offset`). `POST /api/v1/testing/orders/{track}/time-shift {"hours": N}` (also `minutes`, `days`) adds to that order's offset → 200 `{"order": {...}}`. Enabled only with `TEST_HOOKS=1`; off by default (code and `.env.example`) → 404. CI switches it on explicitly. Per-order, so tests stay parallel-safe and date validation is unaffected.
+
+## Stage 4 — Shipyard `/shipyard`
+- Title "Build your shuttle". Tabs Hulls / Engines / Modules: click scrolls to the section's `<h2>`, scroll-spy switches the active tab, first is active by default; active = class `tab--active` + `data-active="true"`.
+- Part cards: inline SVG picture, name, price in credits, in-build counter (hidden at 0), "Add". Card click → modal with description and Mass, t · Power, MW · Cargo, m³ · Comfort, ★; closed by ✕, Esc, backdrop click.
+- **Build:** add by drag into the build area or by "Add". Dragging and in-build reordering are built on `mousedown` / `mousemove` / `mouseup`, **not** HTML5 Drag and Drop; verified by me with Selenium ActionChains (`click_and_hold → move_to_element → release`) in headless Chrome and Firefox.
+- One hull (a new one replaces the old), shown as "<name> (Top plating)" and "<name> (Belly plating)", priced twice. Any number of engines and modules, reorderable, removable. Empty: "No hull, no shuttle. Drag one here to begin."
+- Total recalculated on every change on the client; the server recomputes from its own prices on order. Build state lives in `sessionStorage` (survives the guest → login round trip).
+- Guest: "Sign in" → `/login`; logged in: "Order this shuttle". No hull → clear error, no order. Success → modal with the build order number. Not related to `/order` and `/track`.
+- **API:** `GET /api/v1/shipyard/parts` → 200 `{"parts": [{id, category, name, price, description, mass, power, cargo, comfort}]}` · `POST /api/v1/shipyard/orders` (Bearer) `{"parts": [id, ...]}` → 201 `{"number", "total"}`; 401 without token; 400 for no hull / two hulls / unknown id · `GET /api/v1/shipyard/orders` (Bearer) → own orders. The page itself posts to the cookie-authenticated web route `POST /shipyard/orders`, same service.
+- Catalog from `shipyard_parts.json` (stable `id` per part; order items snapshot name and price, so renames and re-pricing never rewrite old orders). Specs chosen by me and shown in the stage report.
+
+## Stage 5 — Seeded defects, README, finish
+Flags registered in `app/defects.py`, all off by default.
+
+| Flag | With the flag | Without |
+|---|---|---|
+| BUG_AUTOPILOT_LOGIN_RULES | any non-empty login is accepted (Cyrillic, 1 or 11 chars, spaces, a number) | 400 |
+| BUG_AUTOPILOT_PASSWORD_RULES | "123", "12345", "lttr", an unquoted number pass | 400 |
+| BUG_AUTOPILOT_NAME_RULES | "K", 11 chars, "1234", spaces pass | 400 |
+| BUG_MISSING_NAME_409 | create without firstName → 409 (login-in-use message) | 400 |
+| BUG_LOGIN_NO_PASSWORD_504 | autopilot login without password → 504 | 400 |
+| BUG_TRACK_DELETED_AUTOPILOT | a deleted autopilot's order is still found by track (page and API) | 404 |
+| BUG_CANCELED_ORDER_VISIBLE | a canceled order is still shown (status 1; page and API) | "There is no such order…" |
+| BUG_STATUS_SEARCH_ENTER | Enter in the header order search does nothing | works |
+| BUG_ADD_BUTTON_STALE_TOTAL | "Add" adds the part but the total is not recalculated | recalculated |
+
+README: Known defects table (flag, what breaks, expected behaviour), site map, all new endpoints, field rules, full testid list, updated "four login entry points". CI green → PR to ready → wait for review.
+
+## New environment variables
+`FLEET_PASSWORD` (default `0101`) · `STAND_TZ` (default `UTC`) · `PICKUP_MINUTES` (default `10`) · `TEST_HOOKS` (default off) · `BUG_*` flags above.
+
+## Decisions (track 2)
+| Topic | Decision | Why |
+|---|---|---|
+| Story data | JSON files in `app/data`, synced into tables by the seed (FAQ read directly) | Sasha edits names and texts without touching code |
+| Time-dependent statuses | per-order clock offset behind `TEST_HOOKS` | no waiting, parallel-safe, off by default |
+| Date in the UI | `DD.MM.YYYY`; API keeps `YYYY-MM-DD` | matches the existing UI tests |
+| "Today" | server clock in `STAND_TZ`, passed to the date picker | browser and server never disagree |
+| Deleted / canceled | autopilot hard-deleted, orders flagged; cancel is a soft delete | needed for the two "still visible" defects |
+| Shipyard order from the page | cookie web route + Bearer API over one service | httpOnly cookie is unreadable by JS; API stays strictly Bearer |
+| Drag and drop | mouse events, no HTML5 DnD | Selenium ActionChains works without JS workarounds |
+| HTML vs JSON 404 | by path prefix (`/api/`), not by `Accept` | deterministic for `requests` and browsers |
+
+## Out of scope
+Autopilot mobile app, payment, real emails, hosting, Playwright, Allure on Pages, linking a build to a rental.
