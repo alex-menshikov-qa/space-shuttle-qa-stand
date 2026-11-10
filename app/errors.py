@@ -1,16 +1,26 @@
 """Unified error format: {"ok": false, "message": "<text>"} for every error.
 
 Request validation errors are answered with 400 instead of FastAPI's default 422.
+The one exception is a 404 outside /api/*: a browser gets an HTML page.
 """
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import strings
 from app.validation import REQUIRED_MESSAGES
+from app.web.pages import not_found_page
+
+# A 404 under these paths stays JSON; anywhere else a browser gets an HTML page.
+_API_PREFIXES = ("/api/", "/health")
+
+
+def _is_api_path(path: str) -> bool:
+    return path == "/api" or path.startswith(_API_PREFIXES)
 
 
 class ErrorResponse(BaseModel):
@@ -60,7 +70,9 @@ def register_handlers(app: FastAPI) -> None:
         return error_response(400, validation_message(exc))
 
     @app.exception_handler(StarletteHTTPException)
-    async def http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
+    async def http_error(request: Request, exc: StarletteHTTPException) -> Response:
+        if exc.status_code == 404 and not _is_api_path(request.url.path):
+            return await run_in_threadpool(not_found_page, request)
         return error_response(exc.status_code, str(exc.detail), exc.headers)
 
     # Starlette still re-raises the exception afterwards, so uvicorn logs the traceback.

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ t.NOT_FOUND_TITLE }}{% endblock %}
+{% block page %}not-found{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="not-found-title">404</h1>
+<p data-testid="not-found-message">{{ t.NOT_FOUND_TEXT }}</p>
+<p class="form__hint">
+  <a href="/" id="not-found-home-link" data-testid="not-found-home-link">{{ t.NOT_FOUND_HOME_LINK }}</a>
+</p>
+{% endblock %}

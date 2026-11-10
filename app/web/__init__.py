@@ -1,4 +1,4 @@
-"""Server-rendered pages. Future site sections (e.g. booking) add their router here."""
+"""Server-rendered pages. Each site section adds its router here."""
 
 from fastapi import APIRouter
 

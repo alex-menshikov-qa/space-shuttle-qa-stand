@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ t.SHIPYARD_TITLE }}{% endblock %}
+{% block page %}shipyard{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="shipyard-title">{{ t.SHIPYARD_TITLE }}</h1>
+<section class="placeholder" data-testid="shipyard-builder-placeholder">
+  <p>{{ t.SHIPYARD_PLACEHOLDER }}</p>
+</section>
+<div class="actions">
+  {% if user %}
+  <button class="button" type="button" id="shipyard-order-button" data-testid="shipyard-order-button">{{ t.SHIPYARD_PLACE_ORDER }}</button>
+  {% else %}
+  <a class="button" href="/login" id="shipyard-sign-in-button" data-testid="shipyard-sign-in-button">{{ t.SHIPYARD_SIGN_IN }}</a>
+  {% endif %}
+</div>
+{% endblock %}

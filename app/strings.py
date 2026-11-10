@@ -4,8 +4,10 @@ The story PR re-skins the stand by editing this module and the templates only.
 """
 
 # --- OpenAPI / Swagger, page titles ---
-APP_TITLE = "QA Test Stand"
-APP_DESCRIPTION = "Portfolio test stand for API and UI test automation. Not production."
+APP_TITLE = "Space Shuttle Inc"
+APP_DESCRIPTION = (
+    "Space Shuttle Inc: a portfolio test stand for API and UI test automation. Not production."
+)
 
 # --- Field validation (shared by API and web forms) ---
 NAME_REQUIRED = "Name is required"
@@ -32,8 +34,16 @@ TOKEN_INVALID = "Invalid or expired token"
 INTERNAL_ERROR = "Internal server error"
 
 # --- UI: header ---
-LOGO_TEXT = "QA Stand"
-NAV_BUILDER = "Builder"
+# Logo "Space Shuttle Inc": only "Shuttle" is bold; "Inc" is not part of the link.
+LOGO_SPACE = "Space"
+LOGO_SHUTTLE = "Shuttle"
+LOGO_INC = "Inc"
+PARTNER_NAME = "HoloNet"
+NAV_SHIPYARD = "Shipyard"
+NAV_ORDER = "Order"
+NAV_ORDER_STATUS = "Order Status"
+NAV_ORDER_NUMBER = "Order Number"
+NAV_ORDER_STATUS_GO = "Go!"
 NAV_ACCOUNT = "Account"
 
 # --- UI: form labels ---
@@ -41,11 +51,43 @@ LABEL_NAME = "Name"
 LABEL_EMAIL = "Email"
 LABEL_PASSWORD = "Password"
 
-# --- UI: home ---
-HOME_TITLE = "Builder"
-HOME_PLACEHOLDER = "The builder will be here."
-HOME_SIGN_IN = "Sign in"
-HOME_PLACE_ORDER = "Place order"
+# --- UI: home (rental landing) ---
+HOME_PAGE_TITLE = "Shuttle rental"
+HOME_TITLE = "A shuttle that flies to you"
+HOME_PITCH = (
+    "Rent a shuttle on Coruscant for one to seven days. "
+    "Its autopilot brings it to your door and takes it home afterwards."
+)
+HOME_ORDER = "Order"
+HOME_FAQ_TITLE = "Questions about the important things"
+COOKIE_TEXT = "We use cookies. The autopilots do not eat them, they only count them."
+COOKIE_ACCEPT = "Got it"
+
+# --- UI: HoloNet (partner stub page) ---
+HOLONET_TITLE = "HoloNet News"
+HOLONET_INTRO = "All of Coruscant, level by level."
+HOLONET_NEWS = [
+    "Traffic on level 1313 is slow again. Nobody is surprised.",
+    "Space Shuttle Inc adds a ninth autopilot to its fleet.",
+    "Weather control promises rain over the Senate District at noon sharp.",
+]
+
+# --- UI: shipyard (builder placeholder until the builder arrives) ---
+SHIPYARD_TITLE = "Build your shuttle"
+SHIPYARD_PLACEHOLDER = "The shipyard is still under construction. Hard hats on."
+SHIPYARD_SIGN_IN = "Sign in"
+SHIPYARD_PLACE_ORDER = "Place order"
+
+# --- UI: pages that arrive in a later stage ---
+ORDER_TITLE = "Order a shuttle"
+ORDER_PLACEHOLDER = "The order form is being assembled."
+TRACK_TITLE = "Order status"
+TRACK_PLACEHOLDER = "Order tracking is being assembled."
+
+# --- UI: 404 ---
+NOT_FOUND_TITLE = "Page not found"
+NOT_FOUND_TEXT = "Our autopilots searched every sector. This page isn't in any of them."
+NOT_FOUND_HOME_LINK = "Back to the home page"
 
 # --- UI: register ---
 REGISTER_TITLE = "Sign up"

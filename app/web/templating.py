@@ -18,10 +18,11 @@ class NavItem:
     testid: str
 
 
-# Header links after the logo. "Account" is added by the template, because its
-# target depends on the session. A new site section is one more item here.
+# Plain header links after the logo and the partner mark. The "Order" and
+# "Order Status" buttons and "Account" (whose target depends on the session)
+# are added by the template. A new site section is one more item here.
 NAV_ITEMS = [
-    NavItem(label=strings.NAV_BUILDER, href="/", testid="header-builder-link"),
+    NavItem(label=strings.NAV_SHIPYARD, href="/shipyard", testid="header-shipyard-link"),
 ]
 
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")

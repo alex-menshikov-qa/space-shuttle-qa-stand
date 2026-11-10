@@ -7,8 +7,10 @@ built to be tested: the API and UI automation suites (pytest + Requests / Seleni
 run against it instead of third-party training stands. It has stable locators, a documented
 contract, a seeded test user and switchable "known defects" for the tests to catch.
 
-The stand is story-agnostic for now (accounts only). Story features — a builder, a booking
-section and a pilots/flights API — come later; see `PLAN.md`.
+The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
+itself, steered by its autopilot. The story is being added stage by stage (see `PLAN.md`, Track 2):
+the landing and the re-skin are in; the autopilot / order API, the order form, order tracking and
+the shipyard builder come next.
 
 **Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
 JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
@@ -85,15 +87,34 @@ Lengths are counted in characters. Passwords are stored as argon2id hashes in
 
 | Page | What it does |
 |---|---|
-| `/` | Placeholder for the future builder. Guest: **Sign in** button → `/login`. Logged in: **Place order** button (no action yet). |
+| `/` | Rental landing: title and pitch, FAQ accordion of 8 questions (one answer open at a time), a second **Order** button at the bottom → `/order`, cookie banner with **Got it** (not shown again once accepted). |
+| `/holonet` | Partner stub page (HoloNet news); the header mark opens it in a new tab. |
+| `/shipyard` | Placeholder for the future builder. Guest: **Sign in** button → `/login`. Logged in: **Place order** button (no action yet). |
+| `/order`, `/track` | Placeholders until the order form and order tracking arrive. |
 | `/register` | Name, Email, Password, **Sign up**; "Already registered? **Sign in**" → `/login`. Success → `/login` (no auto-login). |
-| `/login` | Email, Password, **Sign in**; **Sign up** → `/register`; **Forgot password?** → `/forgot-password`. Success → `/`. |
+| `/login` | Email, Password, **Sign in**; **Sign up** → `/register`; **Forgot password?** → `/forgot-password`. Success → `/shipyard`. |
 | `/forgot-password` | Email + **Recover** → success message (no email is actually sent); "Remembered your password? **Sign in**" → `/login`. |
 | `/account` | Logged-in only (guests are redirected to `/login`): name, email, **Log out** → `/login`. |
 
-Header on every page: logo → `/`, **Builder** → `/`, **Account** → `/login` for guests, `/account` when logged in.
-There are exactly four entry points to `/login`: the home button, header **Account**, the link on `/register`
-and the link on `/forgot-password`.
+Header on every page:
+
+- logo "Space **Shuttle** Inc": "Space Shuttle" links to `/`, "Inc" is plain text and leads nowhere;
+- partner mark **HoloNet** → `/holonet` in a **new tab**;
+- **Shipyard** → `/shipyard`; **Order** → `/order`;
+- **Order Status** reveals the **Order Number** field and **Go!**; the button or Enter → `/track?t=<number>`;
+- **Account** → `/login` for guests, `/account` when logged in.
+
+There are exactly four entry points to `/login`: the **Sign in** button on `/shipyard`, header **Account**,
+the link on `/register` and the link on `/forgot-password`.
+
+An unknown path gets an HTML 404 page with the header and a link home; under `/api/` a 404 stays JSON.
+
+The cookie banner (home page only) is fixed to the bottom of the window. Until it is accepted it
+covers whatever is under it, including the lower **Order** button when that is scrolled to the
+bottom edge. Acceptance is remembered in the `cookies_accepted` cookie.
+
+FAQ elements also have fixed ids: `accordion__heading-N` (question) and `accordion__panel-N` (answer), N = 0…7.
+Texts live in `app/data/faq.json`.
 
 The session is an httpOnly cookie `access_token` holding the same JWT the API issues.
 Forms have `novalidate` and no `maxlength`: every error is our own DOM element under the field.
@@ -105,14 +126,19 @@ Pattern: `<page>-<element>-<kind>`.
 
 | Page | `data-testid` |
 |---|---|
-| every page | `header-logo`, `header-builder-link`, `header-account-link`, `<page>-page` on `<main>`, `<page>-title` on `<h1>` |
-| `/` | `home-sign-in-button`, `home-place-order-button`, `home-builder-placeholder` |
+| every page | `header-logo-link`, `header-logo-inc`, `header-holonet-link`, `header-shipyard-link`, `header-order-button`, `header-status-button`, `header-status-form`, `header-status-input`, `header-status-go-button`, `header-account-link`, `<page>-page` on `<main>`, `<page>-title` on `<h1>` |
+| `/` | `home-pitch`, `home-faq-title`, `home-faq`, `home-faq-question-N`, `home-faq-answer-N` (N = 0…7), `home-order-button`, `home-cookie-banner`, `home-cookie-text`, `home-cookie-accept-button` |
+| `/holonet` | `holonet-intro`, `holonet-news`, `holonet-news-item-N` |
+| `/shipyard` | `shipyard-sign-in-button`, `shipyard-order-button`, `shipyard-builder-placeholder` |
+| `/order`, `/track` | `order-placeholder`, `track-placeholder` (temporary) |
+| 404 | `not-found-message`, `not-found-home-link` |
 | `/register` | `register-form`, `register-name-input`, `register-name-error`, `register-email-input`, `register-email-error`, `register-password-input`, `register-password-error`, `register-submit-button`, `register-login-link` |
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |
 | `/forgot-password` | `forgot-password-form`, `forgot-password-email-input`, `forgot-password-email-error`, `forgot-password-submit-button`, `forgot-password-success-message`, `forgot-password-login-link` |
 | `/account` | `account-name`, `account-email`, `account-logout-form`, `account-logout-button` |
 
 Error elements are always in the DOM and `hidden` while empty: check visibility, not presence.
+The same goes for the header search form and the FAQ answers.
 
 ## Tests
 
@@ -173,7 +199,8 @@ app/                FastAPI app
   web/              server-rendered pages and the cookie session
   services/         account logic shared by API and pages
   templates/        Jinja2 templates
-  static/           CSS and the form-validation JS
+  static/           CSS and page scripts
+  data/             story data as JSON (FAQ, ...): edit texts here, not in code
   migrations/       Alembic migrations
   strings.py        every user-visible text
   validation.py     field rules shared by API, forms and JS

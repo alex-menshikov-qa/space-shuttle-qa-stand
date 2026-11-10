@@ -8,10 +8,13 @@
 </head>
 <body>
   {% include "partials/header.html" %}
-  <main class="page" data-testid="{% block page %}{% endblock %}-page">
+  <main class="page{% block page_class %}{% endblock %}" data-testid="{% block page %}{% endblock %}-page">
     {% block content %}{% endblock %}
   </main>
+  {% block after_main %}{% endblock %}
   <script id="validation-rules" type="application/json">{{ validation_rules | tojson }}</script>
   <script src="/static/js/forms.js" defer></script>
+  <script src="/static/js/header.js" defer></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

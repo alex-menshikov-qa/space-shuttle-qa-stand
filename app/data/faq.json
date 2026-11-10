@@ -1,0 +1,34 @@
+[
+  {
+    "question": "How much does a rental cost, and how do I pay?",
+    "answer": "One day costs 400 credits. You pay the autopilot on arrival, in credits or by card."
+  },
+  {
+    "question": "Can I rent several shuttles at once?",
+    "answer": "One order, one shuttle. Want a fleet? Place several orders in a row; the autopilots enjoy the company."
+  },
+  {
+    "question": "How is the rental time counted?",
+    "answer": "From the moment the autopilot hands you the shuttle. Rent for one day at 16:30 on the 8th, and the rental ends at 16:30 on the 9th."
+  },
+  {
+    "question": "Can I order a shuttle for today?",
+    "answer": "Only from tomorrow. Our autopilots like to plan their evenings."
+  },
+  {
+    "question": "Can I extend the rental or return the shuttle early?",
+    "answer": "Not yet. If you need more time, call support at 0101."
+  },
+  {
+    "question": "How many parsecs until delivery?",
+    "answer": "Parsecs measure distance, not time. Our autopilots know that. Mostly."
+  },
+  {
+    "question": "Can I cancel my order?",
+    "answer": "Yes, while the shuttle is still in the hangar. No fee, and no explanations required."
+  },
+  {
+    "question": "I live in the Outer Rim. Will you deliver?",
+    "answer": "Yes. Bring snacks: it is a long flight."
+  }
+]
