@@ -1,16 +1,113 @@
 {% extends "base.html" %}
+{% from "partials/modal.html" import modal %}
 {% block title %}{{ t.SHIPYARD_TITLE }}{% endblock %}
 {% block page %}shipyard{% endblock %}
+{% block page_class %} page--shipyard{% endblock %}
+
+{# Own simple pictures: one shape per category, tinted with the part's color. #}
+{% macro picture(part) -%}
+<svg class="part__picture" viewBox="0 0 80 56" width="80" height="56" aria-hidden="true" style="color: {{ part.color }}">
+  {% if part.category == "hull" %}
+  <path d="M6 30c10-14 30-20 52-18 9 1 15 6 16 12-2 8-9 13-18 14-20 2-38-1-50-8z" fill="currentColor"/>
+  <path d="M30 17c8-2 18-2 26 0l-4 8H34z" fill="#ffffff" opacity=".65"/>
+  <path d="M10 32h62" stroke="#ffffff" stroke-width="2" opacity=".5"/>
+  {% elif part.category == "engine" %}
+  <rect x="12" y="16" width="34" height="24" rx="5" fill="currentColor"/>
+  <path d="M46 20l18-8v32l-18-8z" fill="currentColor" opacity=".7"/>
+  <path d="M66 22l10 6-10 6z" fill="#e8590c"/>
+  <path d="M20 22h18M20 28h18M20 34h18" stroke="#ffffff" stroke-width="2" opacity=".6"/>
+  {% else %}
+  <rect x="14" y="10" width="52" height="36" rx="6" fill="currentColor"/>
+  <circle cx="40" cy="28" r="10" fill="#ffffff" opacity=".65"/>
+  <rect x="6" y="22" width="8" height="12" fill="currentColor" opacity=".7"/>
+  <rect x="66" y="22" width="8" height="12" fill="currentColor" opacity=".7"/>
+  {% endif %}
+</svg>
+{%- endmacro %}
+
 {% block content %}
 <h1 class="page__title" data-testid="shipyard-title">{{ t.SHIPYARD_TITLE }}</h1>
-<section class="placeholder" data-testid="shipyard-builder-placeholder">
-  <p>{{ t.SHIPYARD_PLACEHOLDER }}</p>
-</section>
-<div class="actions">
-  {% if user %}
-  <button class="button" type="button" id="shipyard-order-button" data-testid="shipyard-order-button">{{ t.SHIPYARD_PLACE_ORDER }}</button>
-  {% else %}
-  <a class="button" href="/login" id="shipyard-sign-in-button" data-testid="shipyard-sign-in-button">{{ t.SHIPYARD_SIGN_IN }}</a>
-  {% endif %}
+
+<div class="shipyard">
+  <div class="shipyard__catalog">
+    <div class="tabs" role="tablist" data-testid="shipyard-tabs">
+      {% for section in sections %}
+      <button class="tab{% if loop.first %} tab--active{% endif %}" type="button" role="tab"
+              data-active="{{ 'true' if loop.first else 'false' }}" aria-selected="{{ 'true' if loop.first else 'false' }}"
+              data-section="shipyard-section-{{ section.slug }}"
+              id="shipyard-tab-{{ section.slug }}" data-testid="shipyard-tab-{{ section.slug }}">{{ section.title }}</button>
+      {% endfor %}
+    </div>
+
+    <div class="catalog" id="shipyard-catalog" data-testid="shipyard-catalog">
+      {% for section in sections %}
+      <section class="catalog__section" id="shipyard-section-{{ section.slug }}" data-testid="shipyard-section-{{ section.slug }}">
+        <h2 class="catalog__title" data-testid="shipyard-section-{{ section.slug }}-title">{{ section.title }}</h2>
+        <div class="catalog__grid">
+          {% for part in section.parts %}
+          <article class="part" data-part-id="{{ part.id }}" data-category="{{ part.category }}"
+                   id="shipyard-part-{{ part.id }}" data-testid="shipyard-part-{{ part.id }}">
+            <span class="part__count" hidden data-testid="shipyard-part-{{ part.id }}-count">0</span>
+            {{ picture(part) }}
+            <p class="part__price"><span data-testid="shipyard-part-{{ part.id }}-price">{{ part.price }}</span> {{ t.SHIPYARD_CREDITS }}</p>
+            <p class="part__name" data-testid="shipyard-part-{{ part.id }}-name">{{ part.name }}</p>
+            <button class="button button--small" type="button"
+                    id="shipyard-part-{{ part.id }}-add-button" data-testid="shipyard-part-{{ part.id }}-add-button">{{ t.SHIPYARD_ADD }}</button>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+      {# Lets the last section scroll up to the top of the catalog. #}
+      <div class="catalog__spacer" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <aside class="build" id="shipyard-build" data-testid="shipyard-build">
+    <h2 class="build__title" data-testid="shipyard-build-title">{{ t.SHIPYARD_BUILD_TITLE }}</h2>
+    <p class="build__empty" id="shipyard-build-empty" data-testid="shipyard-build-empty">{{ t.SHIPYARD_BUILD_EMPTY }}</p>
+    <div class="build__hull" hidden id="shipyard-build-hull-top" data-testid="shipyard-build-hull-top">
+      <span class="build__name" data-testid="shipyard-build-hull-top-name"></span>
+      <span class="build__price"><span data-testid="shipyard-build-hull-top-price"></span> {{ t.SHIPYARD_CREDITS }}</span>
+    </div>
+    <ol class="build__items" id="shipyard-build-items" data-testid="shipyard-build-items"></ol>
+    <div class="build__hull" hidden id="shipyard-build-hull-bottom" data-testid="shipyard-build-hull-bottom">
+      <span class="build__name" data-testid="shipyard-build-hull-bottom-name"></span>
+      <span class="build__price"><span data-testid="shipyard-build-hull-bottom-price"></span> {{ t.SHIPYARD_CREDITS }}</span>
+    </div>
+    <p class="build__total">{{ t.SHIPYARD_TOTAL }}: <strong id="shipyard-total" data-testid="shipyard-total">0</strong> {{ t.SHIPYARD_CREDITS }}</p>
+    <p class="form__error" id="shipyard-order-error" data-testid="shipyard-order-error" hidden></p>
+    <div class="actions">
+      {% if user %}
+      <button class="button" type="button" id="shipyard-order-button" data-testid="shipyard-order-button">{{ t.SHIPYARD_ORDER }}</button>
+      {% else %}
+      <a class="button" href="/login" id="shipyard-sign-in-button" data-testid="shipyard-sign-in-button">{{ t.SHIPYARD_SIGN_IN }}</a>
+      {% endif %}
+    </div>
+  </aside>
 </div>
+
+{% call modal("shipyard-part", dismissible=True) %}
+<button class="modal__close" type="button" data-modal-close aria-label="{{ t.SHIPYARD_MODAL_CLOSE }}"
+        id="shipyard-part-modal-close-button" data-testid="shipyard-part-modal-close-button">&times;</button>
+<h2 class="modal__title" data-testid="shipyard-part-modal-name"></h2>
+<p class="modal__description" data-testid="shipyard-part-modal-description"></p>
+<dl class="specs">
+  <div class="specs__item"><dt>{{ t.SHIPYARD_SPEC_MASS }}</dt><dd data-testid="shipyard-part-modal-mass"></dd></div>
+  <div class="specs__item"><dt>{{ t.SHIPYARD_SPEC_POWER }}</dt><dd data-testid="shipyard-part-modal-power"></dd></div>
+  <div class="specs__item"><dt>{{ t.SHIPYARD_SPEC_CARGO }}</dt><dd data-testid="shipyard-part-modal-cargo"></dd></div>
+  <div class="specs__item"><dt>{{ t.SHIPYARD_SPEC_COMFORT }}</dt><dd data-testid="shipyard-part-modal-comfort"></dd></div>
+</dl>
+{% endcall %}
+
+{% call modal("shipyard-order", dismissible=True) %}
+<button class="modal__close" type="button" data-modal-close aria-label="{{ t.SHIPYARD_MODAL_CLOSE }}"
+        id="shipyard-order-modal-close-button" data-testid="shipyard-order-modal-close-button">&times;</button>
+<p class="modal__text" id="shipyard-order-modal-text" data-testid="shipyard-order-modal-text"></p>
+<p class="modal__description">{{ t.SHIPYARD_ORDER_SUCCESS_NOTE }}</p>
+<p class="modal__description">{{ t.SHIPYARD_TOTAL }}: <strong data-testid="shipyard-order-modal-total"></strong> {{ t.SHIPYARD_CREDITS }}</p>
+{% endcall %}
+
+<script id="shipyard-config" type="application/json">{{ shipyard_config | tojson }}</script>
 {% endblock %}
+{% block scripts %}<script src="/static/js/shipyard.js" defer></script>{% endblock %}

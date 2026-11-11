@@ -13,7 +13,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import strings
 from app.validation import REQUIRED_MESSAGES
-from app.web.pages import not_found_page
 
 # A 404 under these paths stays JSON; anywhere else a browser gets an HTML page.
 _API_PREFIXES = ("/api/", "/health")
@@ -72,6 +71,9 @@ def register_handlers(app: FastAPI) -> None:
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, exc: StarletteHTTPException) -> Response:
         if exc.status_code == 404 and not _is_api_path(request.url.path):
+            # Imported here: the page modules themselves import this module.
+            from app.web.pages import not_found_page
+
             return await run_in_threadpool(not_found_page, request)
         return error_response(exc.status_code, str(exc.detail), exc.headers)
 

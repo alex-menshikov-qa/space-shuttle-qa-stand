@@ -81,3 +81,45 @@ class OrderResponse(BaseModel):
 
 class OrdersResponse(BaseModel):
     orders: list[OrderOut]
+
+
+# --- Shipyard ---
+
+
+class ShipyardPartOut(BaseModel):
+    id: int
+    category: str = Field(description="hull | engine | module")
+    name: str
+    price: int = Field(description="Credits")
+    description: str
+    mass: int = Field(description="t")
+    power: int = Field(description="MW")
+    cargo: int = Field(description="m3")
+    comfort: int = Field(description="Stars, 1-5")
+
+
+class ShipyardPartsResponse(BaseModel):
+    parts: list[ShipyardPartOut]
+
+
+class ShipyardOrderCreated(BaseModel):
+    number: int
+    total: int = Field(description="Computed by the server; the hull counts twice")
+
+
+class ShipyardOrderItemOut(BaseModel):
+    id: int
+    category: str
+    name: str
+    price: int
+
+
+class ShipyardOrderOut(BaseModel):
+    number: int
+    total: int
+    createdAt: str
+    parts: list[ShipyardOrderItemOut]
+
+
+class ShipyardOrdersResponse(BaseModel):
+    orders: list[ShipyardOrderOut]

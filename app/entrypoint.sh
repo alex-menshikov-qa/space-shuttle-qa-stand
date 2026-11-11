@@ -1,5 +1,5 @@
 #!/bin/sh
-# Container start: apply migrations, seed (test user, stations, fleet), then serve the app.
+# Container start: apply migrations, seed (test user, stations, shipyard parts, fleet), then serve the app.
 set -e
 
 alembic -c app/alembic.ini upgrade head

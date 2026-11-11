@@ -57,6 +57,12 @@ ORDER_PERIOD_INVALID = "Enter a valid rental period"
 ORDER_COMMENT_INVALID = "Enter a valid comment"
 ORDER_COLOR_INVALID = "Enter a valid color"
 
+# --- Shipyard API ---
+SHIPYARD_PARTS_INVALID = "Field 'parts' must be a list of part ids"
+SHIPYARD_UNKNOWN_PART = "Unknown part: {part_id}"
+SHIPYARD_NO_HULL = "A shuttle needs a hull"
+SHIPYARD_TWO_HULLS = "A shuttle can have only one hull"
+
 # --- Testing hooks (only with TEST_HOOKS=1) ---
 TIME_SHIFT_INVALID = "Provide days, hours or minutes as numbers"
 
@@ -102,11 +108,32 @@ HOLONET_NEWS = [
     "Weather control promises rain over the Senate District at noon sharp.",
 ]
 
-# --- UI: shipyard (builder placeholder until the builder arrives) ---
+# --- UI: shipyard ---
 SHIPYARD_TITLE = "Build your shuttle"
-SHIPYARD_PLACEHOLDER = "The shipyard is still under construction. Hard hats on."
+# category -> (slug used in ids and testids, tab and section title)
+SHIPYARD_CATEGORIES = {
+    "hull": ("hulls", "Hulls"),
+    "engine": ("engines", "Engines"),
+    "module": ("modules", "Modules"),
+}
+SHIPYARD_CREDITS = "cr"
+SHIPYARD_ADD = "Add"
+SHIPYARD_REMOVE = "Remove"
+SHIPYARD_SPEC_MASS = "Mass, t"
+SHIPYARD_SPEC_POWER = "Power, MW"
+SHIPYARD_SPEC_CARGO = "Cargo, m\u00b3"
+SHIPYARD_SPEC_COMFORT = "Comfort, \u2605"
+SHIPYARD_MODAL_CLOSE = "Close"
+SHIPYARD_BUILD_TITLE = "Your shuttle"
+SHIPYARD_BUILD_EMPTY = "No hull, no shuttle. Drag one here to begin."
+SHIPYARD_HULL_TOP = "{name} (Top plating)"
+SHIPYARD_HULL_BOTTOM = "{name} (Belly plating)"
+SHIPYARD_TOTAL = "Total"
 SHIPYARD_SIGN_IN = "Sign in"
-SHIPYARD_PLACE_ORDER = "Place order"
+SHIPYARD_ORDER = "Order this shuttle"
+SHIPYARD_ORDER_SUCCESS = "Build order number {number}"
+SHIPYARD_ORDER_SUCCESS_NOTE = "The shipyard has started on your shuttle."
+SHIPYARD_ORDER_FAILED = "The build was not ordered. Please try again."
 
 # --- UI: order form ---
 ORDER_PAGE_TITLE = "Order a shuttle"

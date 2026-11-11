@@ -1,5 +1,5 @@
-"""Landing, HoloNet stub, shipyard, the account page and the HTML 404.
-The order form and order status pages live in web/orders.py."""
+"""Landing, HoloNet stub, the account page and the HTML 404.
+The order form and order status live in web/orders.py, the shipyard in web/shipyard.py."""
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -31,11 +31,6 @@ def home(request: Request, user: User | None = Depends(optional_user)) -> HTMLRe
 @router.get("/holonet")
 def holonet(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
     return render(request, "holonet.html", user)
-
-
-@router.get("/shipyard")
-def shipyard(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
-    return render(request, "shipyard.html", user)
 
 
 @router.get("/account", response_model=None)

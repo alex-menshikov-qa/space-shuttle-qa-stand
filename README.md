@@ -9,8 +9,8 @@ contract, a seeded test user and switchable "known defects" for the tests to cat
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
 itself, steered by its autopilot. The story is being added stage by stage (see `PLAN.md`, Track 2):
-the landing, the re-skin, the autopilot / station / order API, the order form and order tracking
-are in; the shipyard builder comes next.
+the landing, the re-skin, the autopilot / station / order API, the order form, order tracking and
+the shipyard builder are in; seeded defects come next.
 
 **Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
 JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
@@ -38,6 +38,7 @@ On every start the stand applies migrations and seeds, idempotently:
 
 - the test user from `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the same variables the tests read);
 - the eight Coruscant stations from `app/data/stations.json`;
+- the shipyard catalog of 16 parts from `app/data/shipyard_parts.json`;
 - the fleet of nine autopilots from `app/data/fleet.json` (`ilves`, `pupu`, `kissa`, `kettu`, `karhu`,
   `pollo`, `siili`, `orava`, `hirvi`), all with the password `FLEET_PASSWORD`.
 
@@ -146,6 +147,20 @@ Every order has its own clock. The call moves that clock forward (shifts add up)
 `flying` and `ended` are reachable without waiting, and no other order or date check is affected.
 For example: finish an order, shift it by `{"minutes": 10}` → `flying`; by `{"days": 7}` more → `ended`.
 
+## Shipyard API
+
+| Endpoint | Success | Errors |
+|---|---|---|
+| `GET /shipyard/parts` | `200 {"parts": [{id, category, name, price, description, mass, power, cargo, comfort}]}` — the catalog in display order; `category` is `hull`, `engine` or `module` | — |
+| `POST /shipyard/orders` (Bearer token of a web account) `{"parts": [id, ...]}` | `201 {"number": <int>, "total": <int>}` | `401` no / bad token · `400` "A shuttle needs a hull" · "A shuttle can have only one hull" · "Unknown part: {id}" · "Field 'parts' must be a list of part ids" |
+| `GET /shipyard/orders` (Bearer token) | `200 {"orders": [{number, total, createdAt, parts: [{id, category, name, price}]}]}` — the account's own build orders | `401` |
+
+A build is exactly one hull plus any number of engines and modules, in build order; a part may
+repeat. The server computes `total` from its own prices and ignores anything else in the body;
+the hull counts **twice** (top and belly plating). `number` is a random unique 6-digit number.
+A build order is not a rental: it has nothing to do with `/orders` and `/track`. Order items keep
+the name and price the part had when ordered.
+
 ## Validation rules
 
 The same rules and messages apply to the API, the web forms (server side) and the
@@ -166,7 +181,7 @@ Lengths are counted in characters. Passwords are stored as argon2id hashes in
 |---|---|
 | `/` | Rental landing: title and pitch, FAQ accordion of 8 questions (one answer open at a time), a second **Order** button at the bottom → `/order`, cookie banner with **Got it** (not shown again once accepted). |
 | `/holonet` | Partner stub page (HoloNet news); the header mark opens it in a new tab. |
-| `/shipyard` | Placeholder for the future builder. Guest: **Sign in** button → `/login`. Logged in: **Place order** button (no action yet). |
+| `/shipyard` | Shuttle builder (see [Shipyard](#shipyard)). Guest: **Sign in** → `/login`. Logged in: **Order this shuttle**. |
 | `/order` | Order form in two steps (see [Order form](#order-form)). A direct URL always opens step 1. |
 | `/track?t=<number>` | Order status (see [Order status](#order-status)): own search row, order data, status chain, **Cancel order**. |
 | `/register` | Name, Email, Password, **Sign up**; "Already registered? **Sign in**" → `/login`. Success → `/login` (no auto-login). |
@@ -253,6 +268,39 @@ Every status is an element with `data-state` = `done` / `current` / `upcoming` a
 order?" with **Back** (closes the modal, the order stays) and **Cancel** → "Order canceled. Come
 back, we are always waiting for you :)" with **Okay** → `/`. A canceled order is no longer found.
 
+### Shipyard
+
+`/shipyard`, title "Build your shuttle": the catalog on the left, the build on the right.
+
+- **Tabs** Hulls / Engines / Modules. A click scrolls the catalog to that section's `<h2>`; scrolling
+  the catalog by hand switches the active tab by itself; the first tab is active by default.
+  The active tab has the class `tab--active` and `data-active="true"` (the others `data-active="false"`).
+  The catalog scrolls inside its own box (`shipyard-catalog`), so the build stays in view.
+- **Part card:** picture, price in credits, name, **Add**, and a counter of how many of this part
+  are in the build (hidden at 0; a hull counts as 2). A click on the card (not on **Add**) opens a
+  modal with the description and Mass, t · Power, MW · Cargo, m³ · Comfort, ★; it closes by the
+  cross, Esc or a click on the backdrop.
+- **Adding:** drag a card into the build area, or press **Add**. A drop anywhere else adds nothing.
+- **Hull:** one per build, a new one replaces the old. It is shown twice — "<name> (Top plating)"
+  above and "<name> (Belly plating)" below the other parts — and priced twice. Without a hull the
+  build shows "No hull, no shuttle. Drag one here to begin."
+- **Engines and modules:** any number. Drag one onto another inside the build to reorder (the
+  dragged part takes the place of the one it is dropped on); the cross removes it.
+- **Total** is recalculated on every change. The server recomputes it on order.
+- **Order this shuttle:** without a hull — "A shuttle needs a hull" and no order; otherwise a modal
+  "Build order number NNNNNN" with the total, and the build is cleared. The page posts to the
+  cookie-authenticated `POST /shipyard/orders`, which uses the same service as the API.
+- The build is kept in `sessionStorage`, so a guest's build survives signing in.
+
+**Dragging is built on mouse events** (`mousedown` / `mousemove` / `mouseup`), not HTML5 Drag and
+Drop, so Selenium needs no JavaScript workaround:
+
+```python
+ActionChains(driver).click_and_hold(card).move_to_element(build).release().perform()
+```
+
+Checked with Selenium in headless Chrome and headless Firefox.
+
 ### Locators
 
 Every interactive element and every message has a `data-testid` (form controls also have the same `id`).
@@ -263,7 +311,10 @@ Pattern: `<page>-<element>-<kind>`.
 | every page | `header-logo-link`, `header-logo-inc`, `header-holonet-link`, `header-shipyard-link`, `header-order-button`, `header-status-button`, `header-status-form`, `header-status-input`, `header-status-go-button`, `header-account-link`, `<page>-page` on `<main>`, `<page>-title` on `<h1>` |
 | `/` | `home-pitch`, `home-faq-title`, `home-faq`, `home-faq-question-N`, `home-faq-answer-N` (N = 0…7), `home-order-button`, `home-cookie-banner`, `home-cookie-text`, `home-cookie-accept-button` |
 | `/holonet` | `holonet-intro`, `holonet-news`, `holonet-news-item-N` |
-| `/shipyard` | `shipyard-sign-in-button`, `shipyard-order-button`, `shipyard-builder-placeholder` |
+| `/shipyard` catalog | `shipyard-tabs`, `shipyard-tab-hulls`, `shipyard-tab-engines`, `shipyard-tab-modules`, `shipyard-catalog`, `shipyard-section-<hulls\|engines\|modules>`, `shipyard-section-<…>-title`, `shipyard-part-<id>` (also `data-part-id`, `data-category`), `shipyard-part-<id>-name`, `shipyard-part-<id>-price`, `shipyard-part-<id>-count`, `shipyard-part-<id>-add-button` |
+| `/shipyard` part modal | `shipyard-part-modal` (also `data-part-id`), `shipyard-part-modal-close-button`, `shipyard-part-modal-name`, `shipyard-part-modal-description`, `shipyard-part-modal-mass`, `shipyard-part-modal-power`, `shipyard-part-modal-cargo`, `shipyard-part-modal-comfort` |
+| `/shipyard` build | `shipyard-build` (the drop area), `shipyard-build-title`, `shipyard-build-empty`, `shipyard-build-hull-top`, `shipyard-build-hull-top-name`, `shipyard-build-hull-top-price`, `shipyard-build-hull-bottom`, `shipyard-build-hull-bottom-name`, `shipyard-build-hull-bottom-price`, `shipyard-build-items`, `shipyard-build-item-<index>` (also `data-part-id`, `data-index`), `shipyard-build-item-<index>-name`, `shipyard-build-item-<index>-price`, `shipyard-build-item-<index>-remove-button`, `shipyard-total`, `shipyard-order-error`, `shipyard-sign-in-button`, `shipyard-order-button` |
+| `/shipyard` order modal | `shipyard-order-modal` (also `data-number`), `shipyard-order-modal-text`, `shipyard-order-modal-total`, `shipyard-order-modal-close-button` |
 | `/order` step 1 | `order-form`, `order-step-1`, `order-name-input`, `order-last-name-input`, `order-address-input`, `order-station-input`, `order-station-list`, `order-station-option-<number>`, `order-phone-input`, `order-next-button`; errors `order-name-error`, `order-last-name-error`, `order-address-error`, `order-station-error`, `order-phone-error` |
 | `/order` step 2 | `order-step-2`, `order-date-input`, `order-datepicker`, `order-datepicker-prev-button`, `order-datepicker-month`, `order-datepicker-next-button`, `order-datepicker-days`, `order-datepicker-day-<YYYY-MM-DD>`, `order-period-dropdown`, `order-period-value`, `order-period-list`, `order-period-option-<1…7>`, `order-color-group`, `order-color-pinky-swear-checkbox`, `order-color-gray-rainbow-checkbox`, `order-comment-input`, `order-back-button`, `order-submit-button`; errors `order-date-error`, `order-period-error`, `order-comment-error`, `order-form-error` |
 | `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`), `order-view-status-button` |
@@ -274,6 +325,9 @@ Pattern: `<page>-<element>-<kind>`.
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |
 | `/forgot-password` | `forgot-password-form`, `forgot-password-email-input`, `forgot-password-email-error`, `forgot-password-submit-button`, `forgot-password-success-message`, `forgot-password-login-link` |
 | `/account` | `account-name`, `account-email`, `account-logout-form`, `account-logout-button` |
+
+`<index>` of a build item is its position among the engines and modules, from 0; it changes when
+items are reordered or removed. `<id>` of a part is its `id` in `GET /api/v1/shipyard/parts`.
 
 Error elements are always in the DOM and `hidden` while empty: check visibility, not presence.
 The same goes for the header search form, the FAQ answers, the second step of the order form,
@@ -340,7 +394,7 @@ app/                FastAPI app
   services/         business logic shared by API and pages
   templates/        Jinja2 templates
   static/           CSS and page scripts
-  data/             story data as JSON (FAQ, stations, fleet): edit names and texts here, not in code
+  data/             story data as JSON (FAQ, stations, fleet, shipyard parts): edit names and texts here, not in code
   clock.py          stand time zone and the per-order clock
   migrations/       Alembic migrations
   strings.py        every user-visible text
