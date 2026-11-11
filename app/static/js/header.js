@@ -8,6 +8,13 @@
   var form = document.getElementById("header-status-form");
   if (!button || !form) return;
 
+  // Seeded defect STATUS_SEARCH_ENTER: Enter in the field does nothing.
+  if (form.hasAttribute("data-enter-off")) {
+    form.querySelector("input").addEventListener("keydown", function (event) {
+      if (event.key === "Enter") event.preventDefault();
+    });
+  }
+
   button.addEventListener("click", function () {
     var open = form.hidden;
     form.hidden = !open;

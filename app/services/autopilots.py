@@ -9,7 +9,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import security, validation
+from app import defects, security, validation
 from app.models import Autopilot, Order
 
 
@@ -21,6 +21,10 @@ class LoginTaken(Exception):
     pass
 
 
+class Unavailable(Exception):
+    """Seeded defect LOGIN_NO_PASSWORD_504: the service "times out"."""
+
+
 def get_by_login(session: Session, login: str) -> Autopilot | None:
     return session.scalar(select(Autopilot).where(Autopilot.login == login))
 
@@ -29,13 +33,35 @@ def get(session: Session, autopilot_id: int) -> Autopilot | None:
     return session.get(Autopilot, autopilot_id)
 
 
+def _loose(value: Any) -> str | None:
+    """What a "rules are not checked" defect lets through: any non-empty
+    string, or a number (stored as its text). Missing and empty stay invalid."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int | float):
+        return str(value)
+    return value if isinstance(value, str) and value else None
+
+
+def _field(value: Any, valid: bool, defect: str) -> str | None:
+    """The value to store, or None if it must be rejected."""
+    if valid:
+        return value
+    return _loose(value) if defects.is_enabled(defect) else None
+
+
 def create(session: Session, login: Any, password: Any, first_name: Any) -> Autopilot:
     """Raises InsufficientData or LoginTaken."""
-    if not (
-        validation.autopilot_login_valid(login)
-        and validation.autopilot_password_valid(password)
-        and validation.autopilot_name_valid(first_name)
-    ):
+    if first_name is None and defects.is_enabled("MISSING_NAME_409"):
+        raise LoginTaken  # seeded defect: the wrong error for a missing firstName
+    login = _field(login, validation.autopilot_login_valid(login), "AUTOPILOT_LOGIN_RULES")
+    password = _field(
+        password, validation.autopilot_password_valid(password), "AUTOPILOT_PASSWORD_RULES"
+    )
+    first_name = _field(
+        first_name, validation.autopilot_name_valid(first_name), "AUTOPILOT_NAME_RULES"
+    )
+    if login is None or password is None or first_name is None:
         raise InsufficientData
     if get_by_login(session, login) is not None:
         raise LoginTaken
@@ -55,7 +81,11 @@ def authenticate(session: Session, login: Any, password: Any) -> Autopilot | Non
     """The autopilot for a correct login/password pair, otherwise None.
 
     Raises InsufficientData if either field is missing, empty or not a string.
+    Autopilots created through a rules defect log in with the text of what
+    was sent (the number 1234 as "1234").
     """
+    if password in (None, "") and defects.is_enabled("LOGIN_NO_PASSWORD_504"):
+        raise Unavailable
     if not (isinstance(login, str) and login and isinstance(password, str) and password):
         raise InsufficientData
     autopilot = get_by_login(session, login)

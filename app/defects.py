@@ -21,7 +21,17 @@ _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"", "0", "false", "no", "off"}
 
 # name -> one-line description (keep in sync with README.md)
-KNOWN_DEFECTS: dict[str, str] = {}
+KNOWN_DEFECTS: dict[str, str] = {
+    "AUTOPILOT_LOGIN_RULES": "POST /autopilot accepts a login that breaks the rules",
+    "AUTOPILOT_PASSWORD_RULES": "POST /autopilot accepts a password that breaks the rules",
+    "AUTOPILOT_NAME_RULES": "POST /autopilot accepts a firstName that breaks the rules",
+    "MISSING_NAME_409": "POST /autopilot without firstName answers 409 instead of 400",
+    "LOGIN_NO_PASSWORD_504": "POST /autopilot/login without password answers 504 instead of 400",
+    "TRACK_DELETED_AUTOPILOT": "an order of a deleted autopilot is still found by track",
+    "CANCELED_ORDER_VISIBLE": "a canceled order is still found by track",
+    "STATUS_SEARCH_ENTER": "Enter does not start the order search in the header",
+    "ADD_BUTTON_STALE_TOTAL": "the shipyard Add button does not update the total",
+}
 
 
 class DefectFlagError(RuntimeError):

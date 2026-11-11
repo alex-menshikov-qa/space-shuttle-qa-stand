@@ -37,6 +37,8 @@ AUTOPILOT_LOGIN_INSUFFICIENT = "Insufficient data to log in"
 AUTOPILOT_ACCOUNT_NOT_FOUND = "Account not found"
 AUTOPILOT_DELETE_INSUFFICIENT = "Insufficient data to delete the autopilot"
 AUTOPILOT_NO_SUCH_ID = "There is no autopilot with such id"
+# Only with the seeded defect LOGIN_NO_PASSWORD_504.
+SERVICE_UNAVAILABLE = "Service unavailable"
 AUTOPILOT_NOT_FOUND = "Autopilot with identifier {autopilot_id} not found"
 
 # --- Orders API ---

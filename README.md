@@ -8,9 +8,10 @@ run against it instead of third-party training stands. It has stable locators, a
 contract, a seeded test user and switchable "known defects" for the tests to catch.
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
-itself, steered by its autopilot. The story is being added stage by stage (see `PLAN.md`, Track 2):
-the landing, the re-skin, the autopilot / station / order API, the order form, order tracking and
-the shipyard builder are in; seeded defects come next.
+itself, steered by its autopilot — a droid employee who takes orders through the API. At the
+Shipyard a customer builds a shuttle from parts. The stand has a rental landing, an order form,
+order tracking, a shuttle builder, a JSON API for all of it, and nine switchable
+[known defects](#known-defects). How it was planned: `PLAN.md`.
 
 **Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
 JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
@@ -176,6 +177,23 @@ Lengths are counted in characters. Passwords are stored as argon2id hashes in
 `users.password_hash`; `users.name` is `VARCHAR(50)`, `users.email` is `VARCHAR(254)`.
 
 ## UI
+
+### Site map
+
+```
+/                    rental landing: pitch, FAQ, Order, cookie banner
+├── /order           order form, two steps        → /track?t=<number>
+├── /track?t=        order status, search, cancel
+├── /shipyard        shuttle builder              → /login (guest)
+├── /holonet         partner stub (opens in a new tab)
+├── /login           → /shipyard on success       ← /shipyard, header, /register, /forgot-password
+├── /register        → /login on success
+├── /forgot-password
+├── /account         logged-in only, otherwise → /login
+├── /docs            Swagger UI
+├── /health
+└── anything else    HTML 404 (JSON under /api/)
+```
 
 | Page | What it does |
 |---|---|
@@ -412,6 +430,25 @@ Each defect is off by default and is switched on with `BUG_<NAME>=1` in `.env`
 `1/true/yes/on` or `0/false/no/off` stops the stand from starting, so a typo can never
 silently switch a defect off.
 
-| Flag | Area | Behaviour when enabled | Expected behaviour |
+| Flag | Area | What it breaks (with the flag) | Expected behaviour (without) |
 |---|---|---|---|
-| — | — | No seeded defects yet | — |
+| `BUG_AUTOPILOT_LOGIN_RULES` | API | `POST /autopilot` creates an autopilot whose `login` breaks the rules: Cyrillic, 1 or 11 characters, spaces, digits, a JSON number | `400` "Insufficient data to create an account" |
+| `BUG_AUTOPILOT_PASSWORD_RULES` | API | `POST /autopilot` accepts the passwords `"123"`, `"12345"`, `"lttr"` and a JSON number (`1234`) | `400` |
+| `BUG_AUTOPILOT_NAME_RULES` | API | `POST /autopilot` accepts the first names `"K"`, 11 characters, `"1234"`, names with spaces | `400` |
+| `BUG_MISSING_NAME_409` | API | `POST /autopilot` without `firstName` → `409` "This login is already in use. Please try another one" | `400` "Insufficient data to create an account" |
+| `BUG_LOGIN_NO_PASSWORD_504` | API | `POST /autopilot/login` without `password` → `504` "Service unavailable" | `400` "Insufficient data to log in" |
+| `BUG_TRACK_DELETED_AUTOPILOT` | API, UI | an order accepted by a since-deleted autopilot is still found by track: `GET /orders/track` → `200`, `/track` shows it | `404` "Order not found"; "There is no such order…" |
+| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order. Are you sure you entered the correct number?"; `404` |
+| `BUG_STATUS_SEARCH_ENTER` | UI | Enter in the header **Order Number** field does nothing (the **Go!** button still works) | Enter opens `/track?t=<number>` |
+| `BUG_ADD_BUTTON_STALE_TOTAL` | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
+
+Notes:
+
+- With a `*_RULES` flag the field accepts any non-empty string or a number; a missing, `null` or
+  empty value is still `400`. A number is stored as its text, so an autopilot created with the
+  password `1234` logs in with `"1234"`. Each flag relaxes its own field only.
+- `BUG_MISSING_NAME_409` answers `409` whenever `firstName` is absent or `null`, whatever the other fields are.
+- `BUG_LOGIN_NO_PASSWORD_504` covers a missing, `null` or empty `password`; a missing `login` is still `400`.
+- The two "still found" flags affect the search by track number only: such orders are not
+  listed by `GET /orders` and cannot be accepted or finished.
+- The enabled flags are logged when the stand starts: `Seeded defects enabled: ...`.

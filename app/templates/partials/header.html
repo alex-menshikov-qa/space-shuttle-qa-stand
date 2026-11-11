@@ -25,6 +25,7 @@
       <button class="button button--small button--secondary" type="button" aria-expanded="false" aria-controls="header-status-form"
               id="header-status-button" data-testid="header-status-button">{{ t.NAV_ORDER_STATUS }}</button>
       <form class="header__status" method="get" action="/track" novalidate hidden
+            {%- if defect("STATUS_SEARCH_ENTER") %} data-enter-off{% endif %}
             id="header-status-form" data-testid="header-status-form">
         <input class="field__input header__status-input" name="t" type="text" inputmode="numeric" autocomplete="off"
                placeholder="{{ t.NAV_ORDER_NUMBER }}" aria-label="{{ t.NAV_ORDER_NUMBER }}"

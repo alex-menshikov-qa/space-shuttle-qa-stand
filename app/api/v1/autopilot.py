@@ -64,6 +64,8 @@ def login(
         autopilot = autopilots.authenticate(session, data.get("login"), data.get("password"))
     except autopilots.InsufficientData:
         raise ApiError(400, strings.AUTOPILOT_LOGIN_INSUFFICIENT) from None
+    except autopilots.Unavailable:
+        raise ApiError(504, strings.SERVICE_UNAVAILABLE) from None
     if autopilot is None:
         raise ApiError(404, strings.AUTOPILOT_ACCOUNT_NOT_FOUND)
     return AutopilotIdResponse(id=autopilot.id)

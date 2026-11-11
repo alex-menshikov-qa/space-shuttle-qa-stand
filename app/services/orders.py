@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import clock, validation
+from app import clock, defects, validation
 from app.config import get_settings
 from app.models import Autopilot, Order, Station
 
@@ -77,9 +77,18 @@ def status(order: Order) -> str:
 # --- lookups -------------------------------------------------------------------
 
 
-def _is_visible(order: Order) -> bool:
-    """Canceled orders and orders of a deleted autopilot are gone for clients."""
-    return order.canceled_at is None and not order.autopilot_deleted
+def _is_visible(order: Order, by_track: bool = False) -> bool:
+    """Canceled orders and orders of a deleted autopilot are gone for clients.
+
+    Two seeded defects leave such orders findable by track number (on the
+    status page and in GET /orders/track); nothing else sees them.
+    """
+    canceled = order.canceled_at is not None
+    orphaned = order.autopilot_deleted
+    if by_track:
+        canceled = canceled and not defects.is_enabled("CANCELED_ORDER_VISIBLE")
+        orphaned = orphaned and not defects.is_enabled("TRACK_DELETED_AUTOPILOT")
+    return not (canceled or orphaned)
 
 
 def parse_number(raw: Any) -> int | None:
@@ -98,7 +107,7 @@ def find_by_track(session: Session, track: Any) -> Order | None:
     if number is None:
         return None
     order = session.scalar(select(Order).where(Order.track == number))
-    return order if order is not None and _is_visible(order) else None
+    return order if order is not None and _is_visible(order, by_track=True) else None
 
 
 def find_by_id(session: Session, order_id: Any) -> Order | None:

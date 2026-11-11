@@ -11,7 +11,7 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-from app import strings
+from app import defects, strings
 from app.db import get_session
 from app.errors import error_response
 from app.models import User
@@ -40,6 +40,7 @@ def shipyard_page(
     config = {
         "parts": [shipyard.part_as_dict(part) for part in parts],
         "loggedIn": user is not None,
+        "staleTotalOnAdd": defects.is_enabled("ADD_BUTTON_STALE_TOTAL"),
         "strings": {
             "hullTop": strings.SHIPYARD_HULL_TOP,
             "hullBottom": strings.SHIPYARD_HULL_BOTTOM,
