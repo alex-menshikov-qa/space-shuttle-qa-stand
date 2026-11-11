@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import defects, errors, strings, web
 from app.api import health, v1
+from app.web import scripts
 
 log = logging.getLogger("uvicorn.error")
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -30,6 +31,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     errors.register_handlers(app)
+    # Before the static mount: scripts go through the defect preprocessor.
+    app.include_router(scripts.router)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(health.router)
     app.include_router(v1.router)

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ t.HOLONET_TITLE }}{% endblock %}
+{% block page %}holonet{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="holonet-title">{{ t.HOLONET_TITLE }}</h1>
+<p class="form__hint" data-testid="holonet-intro">{{ t.HOLONET_INTRO }}</p>
+<ul class="news" data-testid="holonet-news">
+  {% for item in t.HOLONET_NEWS %}
+  <li class="news__item" data-testid="holonet-news-item-{{ loop.index0 }}">{{ item }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

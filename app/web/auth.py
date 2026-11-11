@@ -65,7 +65,7 @@ def login_submit(
     if authenticated is None:
         context = {"values": values, "errors": {}, "form_error": strings.LOGIN_FAILED}
         return render(request, "login.html", user, 401, **context)
-    response = RedirectResponse("/", status_code=303)
+    response = RedirectResponse("/shipyard", status_code=303)
     start_session(response, authenticated)
     return response
 

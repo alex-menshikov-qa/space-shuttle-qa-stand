@@ -1,9 +1,37 @@
 <header class="header">
   <nav class="header__nav">
-    <a class="header__logo" href="/" id="header-logo" data-testid="header-logo">{{ t.LOGO_TEXT }}</a>
+    <span class="header__logo">
+      <a class="header__logo-link" href="/" id="header-logo-link" data-testid="header-logo-link">
+        <svg class="header__logo-mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M12 2c3 3 4.5 7 4.5 11v3h-9v-3C7.5 9 9 5 12 2z" fill="currentColor"/>
+          <path d="M7.5 13 4 18h3.5zM16.5 13 20 18h-3.5z" fill="currentColor" opacity=".6"/>
+          <path d="M10 17.5h4L12 22z" fill="#e8590c"/>
+        </svg>
+        <span>{{ t.LOGO_SPACE }} <b>{{ t.LOGO_SHUTTLE }}</b></span></a>
+      <span class="header__logo-inc" id="header-logo-inc" data-testid="header-logo-inc">{{ t.LOGO_INC }}</span>
+    </span>
+    <a class="header__partner" href="/holonet" target="_blank" rel="noopener" id="header-holonet-link" data-testid="header-holonet-link">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/>
+        <ellipse cx="8" cy="8" rx="2.8" ry="6.5" fill="none" stroke="currentColor"/>
+        <path d="M1.5 8h13" stroke="currentColor"/>
+      </svg>
+      <span>{{ t.PARTNER_NAME }}</span></a>
     {% for item in nav_items %}
     <a class="header__link" href="{{ item.href }}" id="{{ item.testid }}" data-testid="{{ item.testid }}">{{ item.label }}</a>
     {% endfor %}
-    <a class="header__link header__link--account" href="{{ '/account' if user else '/login' }}" id="header-account-link" data-testid="header-account-link">{{ t.NAV_ACCOUNT }}</a>
+    <div class="header__actions">
+      <a class="button button--small button--order" href="/order" id="header-order-button" data-testid="header-order-button">{{ t.NAV_ORDER }}</a>
+      <button class="button button--small button--secondary" type="button" aria-expanded="false" aria-controls="header-status-form"
+              id="header-status-button" data-testid="header-status-button">{{ t.NAV_ORDER_STATUS }}</button>
+      <form class="header__status" method="get" action="/track" novalidate hidden
+            id="header-status-form" data-testid="header-status-form">
+        <input class="field__input header__status-input" name="t" type="text" inputmode="numeric" autocomplete="off"
+               placeholder="{{ t.NAV_ORDER_NUMBER }}" aria-label="{{ t.NAV_ORDER_NUMBER }}"
+               id="header-status-input" data-testid="header-status-input">
+        <button class="button button--small" type="submit" id="header-status-go-button" data-testid="header-status-go-button">{{ t.NAV_ORDER_STATUS_GO }}</button>
+      </form>
+      <a class="header__link" href="{{ '/account' if user else '/login' }}" id="header-account-link" data-testid="header-account-link">{{ t.NAV_ACCOUNT }}</a>
+    </div>
   </nav>
 </header>

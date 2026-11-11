@@ -5,6 +5,8 @@ so the three can never disagree.
 """
 
 import re
+from datetime import date
+from typing import Any
 
 from app import strings
 
@@ -99,6 +101,24 @@ def client_rules() -> dict:
         "emailMax": EMAIL_MAX_LENGTH,
         "passwordMin": PASSWORD_MIN_LENGTH,
         "passwordMax": PASSWORD_MAX_LENGTH,
+        "order": {
+            "namePattern": ORDER_NAME_PATTERN,
+            "lastNamePattern": ORDER_LAST_NAME_PATTERN,
+            "addressPattern": ORDER_ADDRESS_PATTERN,
+            "phonePattern": ORDER_PHONE_PATTERN,
+            "commentPattern": ORDER_COMMENT_PATTERN,
+            "messages": {
+                "firstName": strings.ORDER_NAME_INVALID,
+                "lastName": strings.ORDER_LAST_NAME_INVALID,
+                "address": strings.ORDER_ADDRESS_INVALID,
+                "station": strings.ORDER_STATION_INVALID,
+                "phone": strings.ORDER_PHONE_INVALID,
+                "deliveryDate": strings.ORDER_DATE_INVALID,
+                "rentTime": strings.ORDER_PERIOD_INVALID,
+                "comment": strings.ORDER_COMMENT_INVALID,
+                "submitFailed": strings.ORDER_SUBMIT_FAILED,
+            },
+        },
         "messages": {
             "nameRequired": strings.NAME_REQUIRED,
             "nameTooLong": strings.NAME_TOO_LONG,
@@ -110,3 +130,99 @@ def client_rules() -> dict:
             "passwordTooLong": strings.PASSWORD_TOO_LONG,
         },
     }
+
+
+# --- Autopilots (API only) ---------------------------------------------------
+# "Aurebesh" letters are Latin letters. Values must be JSON strings: a number
+# or null is invalid even if it would look right as text.
+
+AUTOPILOT_LOGIN_PATTERN = r"^[A-Za-z]{2,10}$"
+AUTOPILOT_PASSWORD_PATTERN = r"^[0-9]{4}$"
+AUTOPILOT_NAME_PATTERN = r"^[A-Za-z]{2,10}$"
+
+
+def _matches(pattern: str, value: Any) -> bool:
+    return isinstance(value, str) and re.fullmatch(pattern, value) is not None
+
+
+def autopilot_login_valid(value: Any) -> bool:
+    return _matches(AUTOPILOT_LOGIN_PATTERN, value)
+
+
+def autopilot_password_valid(value: Any) -> bool:
+    return _matches(AUTOPILOT_PASSWORD_PATTERN, value)
+
+
+def autopilot_name_valid(value: Any) -> bool:
+    return _matches(AUTOPILOT_NAME_PATTERN, value)
+
+
+# --- Orders (API and the order form) ------------------------------------------
+
+ORDER_NAME_PATTERN = r"^[A-Za-z -]{2,15}$"
+ORDER_LAST_NAME_PATTERN = r"^[A-Za-z]{2,15}$"
+ORDER_ADDRESS_PATTERN = r"^[A-Za-z0-9 .,-]{5,50}$"
+ORDER_PHONE_PATTERN = r"^[0-9+]{10,12}$"
+ORDER_COMMENT_PATTERN = r"^[A-Za-z .,-]{0,24}$"
+RENT_TIME_MIN = 1
+RENT_TIME_MAX = 7
+ORDER_COLORS = ("PINKY_SWEAR", "GRAY_RAINBOW")
+
+
+def _is_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def parse_delivery_date(value: Any) -> date | None:
+    """A strict YYYY-MM-DD string -> date, anything else -> None."""
+    if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def order_errors(data: dict[str, Any], station_numbers: set[int], tomorrow: date) -> dict[str, str]:
+    """Return {field: message} for every invalid order field, in form order.
+
+    Expects the address already trimmed. `comment` and `color` are optional
+    (missing, null, "" / [] all mean "none").
+    """
+    delivery_date = parse_delivery_date(data.get("deliveryDate"))
+    comment = data.get("comment")
+    color = data.get("color")
+    return _collect(
+        firstName=None
+        if _matches(ORDER_NAME_PATTERN, data.get("firstName"))
+        else strings.ORDER_NAME_INVALID,
+        lastName=None
+        if _matches(ORDER_LAST_NAME_PATTERN, data.get("lastName"))
+        else strings.ORDER_LAST_NAME_INVALID,
+        address=None
+        if _matches(ORDER_ADDRESS_PATTERN, data.get("address"))
+        else strings.ORDER_ADDRESS_INVALID,
+        station=None
+        if _is_int(data.get("station")) and data["station"] in station_numbers
+        else strings.ORDER_STATION_INVALID,
+        phone=None
+        if _matches(ORDER_PHONE_PATTERN, data.get("phone"))
+        else strings.ORDER_PHONE_INVALID,
+        deliveryDate=None
+        if delivery_date is not None and delivery_date >= tomorrow
+        else strings.ORDER_DATE_INVALID,
+        rentTime=None
+        if _is_int(data.get("rentTime")) and RENT_TIME_MIN <= data["rentTime"] <= RENT_TIME_MAX
+        else strings.ORDER_PERIOD_INVALID,
+        color=None
+        if color is None
+        or (
+            isinstance(color, list)
+            and all(isinstance(item, str) and item in ORDER_COLORS for item in color)
+            and len(set(color)) == len(color)
+        )
+        else strings.ORDER_COLOR_INVALID,
+        comment=None
+        if comment is None or _matches(ORDER_COMMENT_PATTERN, comment)
+        else strings.ORDER_COMMENT_INVALID,
+    )

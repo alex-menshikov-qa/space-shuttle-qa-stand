@@ -1,16 +1,40 @@
 {% extends "base.html" %}
-{% block title %}{{ t.HOME_TITLE }}{% endblock %}
+{% block title %}{{ t.HOME_PAGE_TITLE }}{% endblock %}
 {% block page %}home{% endblock %}
+{% block page_class %} page--wide{% endblock %}
 {% block content %}
-<h1 class="page__title" data-testid="home-title">{{ t.HOME_TITLE }}</h1>
-<section class="placeholder" data-testid="home-builder-placeholder">
-  <p>{{ t.HOME_PLACEHOLDER }}</p>
+<section class="hero">
+  <h1 class="page__title" data-testid="home-title">{{ t.HOME_TITLE }}</h1>
+  <p class="hero__pitch" data-testid="home-pitch">{{ t.HOME_PITCH }}</p>
 </section>
-<div class="actions">
-  {% if user %}
-  <button class="button" type="button" id="home-place-order-button" data-testid="home-place-order-button">{{ t.HOME_PLACE_ORDER }}</button>
-  {% else %}
-  <a class="button" href="/login" id="home-sign-in-button" data-testid="home-sign-in-button">{{ t.HOME_SIGN_IN }}</a>
-  {% endif %}
+
+<section class="faq">
+  <h2 class="faq__title" data-testid="home-faq-title">{{ t.HOME_FAQ_TITLE }}</h2>
+  <div class="accordion" data-testid="home-faq">
+    {% for item in faq %}
+    <div class="accordion__item">
+      <button class="accordion__button" type="button" aria-expanded="false"
+              aria-controls="accordion__panel-{{ loop.index0 }}"
+              id="accordion__heading-{{ loop.index0 }}" data-testid="home-faq-question-{{ loop.index0 }}">{{ item.question }}</button>
+      <div class="accordion__panel" role="region" aria-labelledby="accordion__heading-{{ loop.index0 }}" hidden
+           id="accordion__panel-{{ loop.index0 }}" data-testid="home-faq-answer-{{ loop.index0 }}">
+        <p>{{ item.answer }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="actions actions--center">
+  <a class="button button--large button--order" href="/order" id="home-order-button" data-testid="home-order-button">{{ t.HOME_ORDER }}</a>
 </div>
 {% endblock %}
+{% block after_main %}
+{% if not cookies_accepted %}
+<div class="cookie-banner" id="home-cookie-banner" data-testid="home-cookie-banner">
+  <p class="cookie-banner__text" data-testid="home-cookie-text">{{ t.COOKIE_TEXT }}</p>
+  <button class="button button--small" type="button" id="home-cookie-accept-button" data-testid="home-cookie-accept-button">{{ t.COOKIE_ACCEPT }}</button>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="/static/js/landing.js" defer></script>{% endblock %}
