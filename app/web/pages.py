@@ -1,9 +1,10 @@
-"""Landing, HoloNet stub, shipyard, the account page and the HTML 404."""
+"""Landing, HoloNet stub, shipyard, the account page and the HTML 404.
+The order form and order status pages live in web/orders.py."""
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app import story_data, strings
+from app import story_data
 from app.db import SessionLocal
 from app.models import User
 from app.services import users
@@ -35,20 +36,6 @@ def holonet(request: Request, user: User | None = Depends(optional_user)) -> HTM
 @router.get("/shipyard")
 def shipyard(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
     return render(request, "shipyard.html", user)
-
-
-# /order and /track get their real pages in stage 3; until then the header
-# links lead to a placeholder instead of a 404.
-@router.get("/order")
-def order(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
-    context = {"page": "order", "title": strings.ORDER_TITLE, "text": strings.ORDER_PLACEHOLDER}
-    return render(request, "placeholder.html", user, **context)
-
-
-@router.get("/track")
-def track(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
-    context = {"page": "track", "title": strings.TRACK_TITLE, "text": strings.TRACK_PLACEHOLDER}
-    return render(request, "placeholder.html", user, **context)
 
 
 @router.get("/account", response_model=None)

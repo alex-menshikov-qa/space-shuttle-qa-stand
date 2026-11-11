@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% from "partials/modal.html" import modal %}
+{% block title %}{{ t.ORDER_PAGE_TITLE }}{% endblock %}
+{% block page %}order{% endblock %}
+
+{# A text input with its placeholder as the field name and an error slot below. #}
+{% macro text_field(name, label, required=True, autocomplete="off", inputmode="") -%}
+<div class="field">
+  <input class="field__input" type="text" name="{{ name }}" autocomplete="{{ autocomplete }}"
+         {%- if inputmode %} inputmode="{{ inputmode }}"{% endif %}
+         placeholder="{{ (t.ORDER_REQUIRED_MARK ~ ' ') if required }}{{ label }}" aria-label="{{ label }}"
+         aria-describedby="order-{{ name }}-error"
+         id="order-{{ name }}-input" data-testid="order-{{ name }}-input">
+  {{ caller() if caller }}
+  <p class="field__error" id="order-{{ name }}-error" data-testid="order-{{ name }}-error" hidden></p>
+</div>
+{%- endmacro %}
+
+{% block content %}
+<h1 class="page__title" id="order-title" data-testid="order-title"
+    data-step-1="{{ t.ORDER_STEP_1_TITLE }}" data-step-2="{{ t.ORDER_STEP_2_TITLE }}">{{ t.ORDER_STEP_1_TITLE }}</h1>
+
+<form class="form" novalidate id="order-form" data-testid="order-form">
+  <section class="form" id="order-step-1" data-testid="order-step-1">
+    {{ text_field("name", t.ORDER_FIELD_NAME, autocomplete="given-name") }}
+    {{ text_field("last-name", t.ORDER_FIELD_LAST_NAME, autocomplete="family-name") }}
+    {{ text_field("address", t.ORDER_FIELD_ADDRESS) }}
+    {% call text_field("station", t.ORDER_FIELD_STATION) %}
+    <ul class="options" role="listbox" hidden id="order-station-list" data-testid="order-station-list"></ul>
+    {% endcall %}
+    {{ text_field("phone", t.ORDER_FIELD_PHONE, autocomplete="tel", inputmode="tel") }}
+    <div class="actions">
+      <button class="button" type="button" id="order-next-button" data-testid="order-next-button">{{ t.ORDER_NEXT }}</button>
+    </div>
+  </section>
+
+  <section class="form" hidden id="order-step-2" data-testid="order-step-2">
+    {% call text_field("date", t.ORDER_FIELD_DATE, inputmode="numeric") %}
+    <div class="datepicker" hidden id="order-datepicker" data-testid="order-datepicker">
+      <div class="datepicker__header">
+        <button class="datepicker__nav" type="button" aria-label="{{ t.ORDER_DATE_PREV_MONTH }}"
+                id="order-datepicker-prev-button" data-testid="order-datepicker-prev-button">&lsaquo;</button>
+        <span class="datepicker__month" id="order-datepicker-month" data-testid="order-datepicker-month"></span>
+        <button class="datepicker__nav" type="button" aria-label="{{ t.ORDER_DATE_NEXT_MONTH }}"
+                id="order-datepicker-next-button" data-testid="order-datepicker-next-button">&rsaquo;</button>
+      </div>
+      <div class="datepicker__grid" id="order-datepicker-days" data-testid="order-datepicker-days"></div>
+    </div>
+    {% endcall %}
+
+    <div class="field">
+      <button class="field__input dropdown" type="button" aria-haspopup="listbox" aria-expanded="false"
+              aria-label="{{ t.ORDER_FIELD_PERIOD }}" aria-describedby="order-period-error"
+              data-placeholder="{{ t.ORDER_REQUIRED_MARK }} {{ t.ORDER_FIELD_PERIOD }}"
+              id="order-period-dropdown" data-testid="order-period-dropdown">
+        <span class="dropdown__value dropdown__value--empty" id="order-period-value" data-testid="order-period-value">{{ t.ORDER_REQUIRED_MARK }} {{ t.ORDER_FIELD_PERIOD }}</span>
+      </button>
+      <ul class="options" role="listbox" hidden id="order-period-list" data-testid="order-period-list">
+        {% for label in t.RENTAL_PERIODS %}
+        <li class="options__item" role="option" data-value="{{ loop.index }}"
+            id="order-period-option-{{ loop.index }}" data-testid="order-period-option-{{ loop.index }}">{{ label }}</li>
+        {% endfor %}
+      </ul>
+      <p class="field__error" id="order-period-error" data-testid="order-period-error" hidden></p>
+    </div>
+
+    <fieldset class="checks" data-testid="order-color-group">
+      <legend class="checks__legend">{{ t.ORDER_FIELD_COLOR }}</legend>
+      {% for value, label in t.SHUTTLE_COLORS.items() %}
+      {% set slug = value | lower | replace("_", "-") %}
+      <label class="checks__item" for="order-color-{{ slug }}-checkbox">
+        <input type="checkbox" name="color" value="{{ value }}"
+               id="order-color-{{ slug }}-checkbox" data-testid="order-color-{{ slug }}-checkbox">
+        {{ label }}
+      </label>
+      {% endfor %}
+    </fieldset>
+
+    {{ text_field("comment", t.ORDER_FIELD_COMMENT, required=False) }}
+
+    <p class="form__error" id="order-form-error" data-testid="order-form-error" hidden></p>
+    <div class="actions actions--split">
+      <button class="button button--secondary" type="button" id="order-back-button" data-testid="order-back-button">{{ t.ORDER_BACK }}</button>
+      <button class="button" type="button" id="order-submit-button" data-testid="order-submit-button">{{ t.ORDER_SUBMIT }}</button>
+    </div>
+  </section>
+</form>
+
+{% call modal("order-confirm") %}
+<p class="modal__text" data-testid="order-confirm-text">{{ t.ORDER_CONFIRM_TEXT }}</p>
+<div class="actions actions--split">
+  <button class="button button--secondary" type="button" id="order-confirm-no-button" data-testid="order-confirm-no-button">{{ t.ORDER_CONFIRM_NO }}</button>
+  <button class="button" type="button" id="order-confirm-yes-button" data-testid="order-confirm-yes-button">{{ t.ORDER_CONFIRM_YES }}</button>
+</div>
+{% endcall %}
+
+{% call modal("order-success") %}
+<p class="modal__text" id="order-success-text" data-testid="order-success-text"
+   data-template="{{ t.ORDER_SUCCESS_TEXT }}"></p>
+<div class="actions actions--center-tight">
+  <a class="button" href="/track" id="order-view-status-button" data-testid="order-view-status-button">{{ t.ORDER_VIEW_STATUS }}</a>
+</div>
+{% endcall %}
+
+<script id="order-config" type="application/json">{{ order_config | tojson }}</script>
+{% endblock %}
+{% block scripts %}<script src="/static/js/order.js" defer></script>{% endblock %}

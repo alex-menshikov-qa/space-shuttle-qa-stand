@@ -309,6 +309,330 @@ a {
   margin-bottom: 8px;
 }
 
+/* --- Order form --- */
+
+.actions--split {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.actions--center-tight {
+  text-align: center;
+}
+
+/* Lists that open under a field (station search, rental period). They are in
+   the normal flow: opening one pushes the rest of the form down instead of
+   covering it. */
+.options {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.options__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.options__item:hover,
+.options__item[aria-selected="true"] {
+  background: var(--surface);
+}
+
+.station-dot {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.options__item .station-dot {
+  margin-right: 0;
+}
+
+.dropdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.dropdown::after {
+  content: "\25BE";
+  color: var(--muted);
+}
+
+.dropdown__value--empty {
+  color: #757575;
+}
+
+.datepicker {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.datepicker__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.datepicker__nav {
+  width: 32px;
+  height: 32px;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.datepicker__nav:hover {
+  background: var(--surface);
+}
+
+.datepicker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.datepicker__weekday {
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.datepicker__day {
+  padding: 6px 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.datepicker__day:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.datepicker__day:disabled {
+  color: #b6bdc5;
+  cursor: default;
+}
+
+.datepicker__day--today {
+  font-weight: 700;
+}
+
+.datepicker__day--selected {
+  color: var(--accent-text);
+  background: var(--accent);
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.checks__legend {
+  margin-bottom: 4px;
+  padding: 0;
+  font-weight: 600;
+}
+
+.checks__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* --- Modal --- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(31, 35, 40, 0.5);
+}
+
+.modal__dialog {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 100%;
+  padding: 24px;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+.modal__text {
+  margin: 0 0 20px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* --- Order status --- */
+
+.track-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.track-search__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .track {
+    grid-template-columns: 1fr;
+  }
+}
+
+.track__group {
+  display: grid;
+  grid-template-columns: minmax(110px, 2fr) 3fr;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.track__group:first-child {
+  padding-top: 0;
+}
+
+.track__group dt {
+  color: var(--muted);
+}
+
+.track__group dd {
+  margin: 0;
+  min-height: 1.5em;
+  overflow-wrap: anywhere;
+}
+
+.track__data .actions {
+  margin-top: 16px;
+}
+
+.track__not-found {
+  font-size: 18px;
+}
+
+.statuses {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status {
+  position: relative;
+  padding: 0 0 24px 28px;
+  color: var(--muted);
+}
+
+/* The dot and the line that links the statuses into a chain. */
+.status::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+}
+
+.status::after {
+  content: "";
+  position: absolute;
+  top: 21px;
+  bottom: 0;
+  left: 7px;
+  width: 2px;
+  background: var(--border);
+}
+
+.status:last-child::after {
+  display: none;
+}
+
+.status--done::before {
+  background: var(--border);
+}
+
+.status--current {
+  color: var(--text);
+}
+
+.status--current::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.status__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.status--current .status__title {
+  font-size: 18px;
+}
+
+.status__caption {
+  margin: 4px 0 0;
+}
+
+.status--delayed,
+.status--delayed .status__caption {
+  color: var(--error);
+}
+
+.status--delayed::before {
+  background: var(--error);
+  border-color: var(--error);
+}
+
 [hidden] {
   display: none !important;
 }

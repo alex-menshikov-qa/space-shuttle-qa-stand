@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "partials/modal.html" import modal %}
+{% block title %}{{ t.TRACK_TITLE }}{% endblock %}
+{% block page %}track{% endblock %}
+{% block page_class %} page--wide{% endblock %}
+{% block content %}
+<h1 class="page__title" data-testid="track-title">{{ t.TRACK_TITLE }}</h1>
+
+<form class="track-search" method="get" action="/track" novalidate id="track-search-form" data-testid="track-search-form">
+  <input class="field__input track-search__input" name="t" type="text" inputmode="numeric" autocomplete="off"
+         value="{{ number }}" placeholder="{{ t.TRACK_NUMBER }}" aria-label="{{ t.TRACK_NUMBER }}"
+         id="track-number-input" data-testid="track-number-input">
+  <button class="button" type="submit" id="track-view-button" data-testid="track-view-button">{{ t.TRACK_VIEW }}</button>
+</form>
+
+{% if order %}
+<div class="track" data-testid="track-order" data-track="{{ order.track }}">
+  <div class="track__data">
+    <dl class="track__group" data-testid="track-group-1">
+      <dt>{{ t.ORDER_FIELD_NAME }}</dt>
+      <dd id="track-name-value" data-testid="track-name-value">{{ order.first_name }}</dd>
+      <dt>{{ t.ORDER_FIELD_LAST_NAME }}</dt>
+      <dd id="track-last-name-value" data-testid="track-last-name-value">{{ order.last_name }}</dd>
+      <dt>{{ t.ORDER_FIELD_ADDRESS }}</dt>
+      <dd id="track-address-value" data-testid="track-address-value">{{ order.address }}</dd>
+      <dt>{{ t.ORDER_FIELD_STATION }}</dt>
+      <dd><span class="station-dot" style="background: {{ order.station_color }}" data-color="{{ order.station_color }}" data-testid="track-station-dot"></span><span id="track-station-value" data-testid="track-station-value">{{ order.station_name }}</span></dd>
+      <dt>{{ t.ORDER_FIELD_PHONE }}</dt>
+      <dd id="track-phone-value" data-testid="track-phone-value">{{ order.phone }}</dd>
+    </dl>
+    <dl class="track__group" data-testid="track-group-2">
+      <dt>{{ t.ORDER_FIELD_DATE }}</dt>
+      <dd id="track-date-value" data-testid="track-date-value">{{ delivery_date }}</dd>
+      <dt>{{ t.ORDER_FIELD_PERIOD }}</dt>
+      <dd id="track-period-value" data-testid="track-period-value">{{ rental_period }}</dd>
+    </dl>
+    <dl class="track__group" data-testid="track-group-3">
+      <dt>{{ t.ORDER_FIELD_COLOR }}</dt>
+      <dd id="track-color-value" data-testid="track-color-value">{{ colors }}</dd>
+      <dt>{{ t.ORDER_FIELD_COMMENT }}</dt>
+      <dd id="track-comment-value" data-testid="track-comment-value">{{ order.comment }}</dd>
+    </dl>
+    {% if can_cancel %}
+    <div class="actions">
+      <button class="button button--secondary" type="button" id="track-cancel-button" data-testid="track-cancel-button">{{ t.TRACK_CANCEL }}</button>
+    </div>
+    {% endif %}
+  </div>
+
+  <ol class="statuses" data-testid="track-statuses">
+    {% for step in steps %}
+    <li class="status status--{{ step.state }}{% if step.delayed %} status--delayed{% endif %}"
+        data-state="{{ step.state }}" data-current="{{ 'true' if step.state == 'current' else 'false' }}"
+        id="track-status-{{ step.key }}" data-testid="track-status-{{ step.key }}">
+      <p class="status__title" data-testid="track-status-{{ step.key }}-title">{{ step.title }}</p>
+      {% if step.caption %}
+      <p class="status__caption" data-testid="track-status-{{ step.key }}-caption">{{ step.caption }}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</div>
+
+{% if can_cancel %}
+{% call modal("track-cancel") %}
+<p class="modal__text" data-testid="track-cancel-text">{{ t.TRACK_CANCEL_CONFIRM }}</p>
+<p class="form__error" id="track-cancel-error" data-testid="track-cancel-error" hidden></p>
+<div class="actions actions--split">
+  <button class="button button--secondary" type="button" id="track-cancel-no-button" data-testid="track-cancel-no-button">{{ t.TRACK_CANCEL_NO }}</button>
+  <button class="button" type="button" id="track-cancel-yes-button" data-testid="track-cancel-yes-button">{{ t.TRACK_CANCEL_YES }}</button>
+</div>
+{% endcall %}
+{% call modal("track-canceled") %}
+<p class="modal__text" data-testid="track-canceled-text">{{ t.TRACK_CANCELED }}</p>
+<div class="actions actions--center-tight">
+  <a class="button" href="/" id="track-canceled-ok-button" data-testid="track-canceled-ok-button">{{ t.TRACK_CANCELED_OK }}</a>
+</div>
+{% endcall %}
+<script id="track-config" type="application/json">{{ {"track": order.track, "cancelFailed": t.TRACK_CANCEL_FAILED} | tojson }}</script>
+{% endif %}
+{% elif number %}
+<p class="track__not-found" id="track-not-found-message" data-testid="track-not-found-message">{{ t.TRACK_NOT_FOUND }}</p>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="/static/js/track.js" defer></script>{% endblock %}

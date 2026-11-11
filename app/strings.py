@@ -108,11 +108,75 @@ SHIPYARD_PLACEHOLDER = "The shipyard is still under construction. Hard hats on."
 SHIPYARD_SIGN_IN = "Sign in"
 SHIPYARD_PLACE_ORDER = "Place order"
 
-# --- UI: pages that arrive in a later stage ---
-ORDER_TITLE = "Order a shuttle"
-ORDER_PLACEHOLDER = "The order form is being assembled."
+# --- UI: order form ---
+ORDER_PAGE_TITLE = "Order a shuttle"
+ORDER_STEP_1_TITLE = "For Whom is the Shuttle"
+ORDER_STEP_2_TITLE = "About Rent"
+ORDER_FIELD_NAME = "Name"
+ORDER_FIELD_LAST_NAME = "Last Name"
+ORDER_FIELD_ADDRESS = "Address: where the shuttle will arrive"
+ORDER_FIELD_STATION = "Shuttle Station"
+ORDER_FIELD_PHONE = "Phone: the autopilot will call"
+ORDER_FIELD_DATE = "When to Bring the Shuttle"
+ORDER_FIELD_PERIOD = "Rental Period"
+ORDER_FIELD_COLOR = "Shuttle Color"
+ORDER_FIELD_COMMENT = "Comment for Autopilot"
+ORDER_REQUIRED_MARK = "*"
+ORDER_NEXT = "Next"
+ORDER_BACK = "Back"
+ORDER_SUBMIT = "Order"
+ORDER_DATE_PREV_MONTH = "Previous month"
+ORDER_DATE_NEXT_MONTH = "Next month"
+# Index 0 is one day ... index 6 is seven days (rentTime 1-7).
+RENTAL_PERIODS = [
+    "one day",
+    "two days",
+    "three days",
+    "four days",
+    "five days",
+    "six days",
+    "seven days",
+]
+# API value -> label, in display order.
+SHUTTLE_COLORS = {"PINKY_SWEAR": "pinky swear", "GRAY_RAINBOW": "gray rainbow"}
+ORDER_CONFIRM_TEXT = "Do you want to place the order?"
+ORDER_CONFIRM_YES = "Yes"
+ORDER_CONFIRM_NO = "No"
+ORDER_SUCCESS_TEXT = "Order number {track}. Write it down: it will come in handy to track the status"
+ORDER_VIEW_STATUS = "View Status"
+ORDER_SUBMIT_FAILED = "The order was not placed. Please try again."
+
+# --- UI: order status ---
+SUPPORT_PHONE = "0101"
 TRACK_TITLE = "Order status"
-TRACK_PLACEHOLDER = "Order tracking is being assembled."
+TRACK_NUMBER = "Order Number"
+TRACK_VIEW = "View"
+TRACK_NOT_FOUND = "There is no such order. Are you sure you entered the correct number?"
+TRACK_STATUS_HANGAR = "Shuttle in the hangar"
+TRACK_STATUS_HANGAR_CAPTION = "Your autopilot is warming up for departure"
+TRACK_STATUS_HEADING = "Autopilot {first_name} is heading towards you"
+TRACK_STATUS_HEADING_UNASSIGNED = "Autopilot is heading towards you"
+TRACK_STATUS_HEADING_CAPTION = "Support phone: {phone}"
+TRACK_STATUS_ON_SITE = "Autopilot is on site"
+TRACK_STATUS_ON_SITE_CAPTION = "Pick up the shuttle and pay the rental fee"
+TRACK_STATUS_FLYING = "Okay, let's fly now"
+TRACK_STATUS_FLYING_CAPTION = "Rental ends on {day} at {time}"
+TRACK_STATUS_ENDED = "Rental time has ended"
+TRACK_STATUS_ENDED_CAPTION = (
+    "{first_name} is heading home to recharge. Thanks for flying with us."
+)
+TRACK_STATUS_DELAYED = "Autopilot delayed"
+TRACK_STATUS_DELAYED_CAPTION = (
+    "We won't be able to deliver the shuttle on time. "
+    "To check the status of your order, please call support at: {phone}"
+)
+TRACK_CANCEL = "Cancel order"
+TRACK_CANCEL_CONFIRM = "Do you want to cancel the order?"
+TRACK_CANCEL_YES = "Yes"
+TRACK_CANCEL_NO = "No"
+TRACK_CANCELED = "Order canceled. Come back, we are always waiting for you :)"
+TRACK_CANCELED_OK = "OK"
+TRACK_CANCEL_FAILED = "The order was not canceled. Please try again."
 
 # --- UI: 404 ---
 NOT_FOUND_TITLE = "Page not found"

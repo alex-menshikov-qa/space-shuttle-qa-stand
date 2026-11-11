@@ -9,8 +9,8 @@ contract, a seeded test user and switchable "known defects" for the tests to cat
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
 itself, steered by its autopilot. The story is being added stage by stage (see `PLAN.md`, Track 2):
-the landing, the re-skin and the autopilot / station / order API are in; the order form, order
-tracking and the shipyard builder come next.
+the landing, the re-skin, the autopilot / station / order API, the order form and order tracking
+are in; the shipyard builder comes next.
 
 **Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
 JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
@@ -167,7 +167,8 @@ Lengths are counted in characters. Passwords are stored as argon2id hashes in
 | `/` | Rental landing: title and pitch, FAQ accordion of 8 questions (one answer open at a time), a second **Order** button at the bottom → `/order`, cookie banner with **Got it** (not shown again once accepted). |
 | `/holonet` | Partner stub page (HoloNet news); the header mark opens it in a new tab. |
 | `/shipyard` | Placeholder for the future builder. Guest: **Sign in** button → `/login`. Logged in: **Place order** button (no action yet). |
-| `/order`, `/track` | Placeholders until the order form and order tracking arrive. |
+| `/order` | Order form in two steps (see [Order form](#order-form)). A direct URL always opens step 1. |
+| `/track?t=<number>` | Order status (see [Order status](#order-status)): own search row, order data, status chain, **Cancel order**. |
 | `/register` | Name, Email, Password, **Sign up**; "Already registered? **Sign in**" → `/login`. Success → `/login` (no auto-login). |
 | `/login` | Email, Password, **Sign in**; **Sign up** → `/register`; **Forgot password?** → `/forgot-password`. Success → `/shipyard`. |
 | `/forgot-password` | Email + **Recover** → success message (no email is actually sent); "Remembered your password? **Sign in**" → `/login`. |
@@ -196,6 +197,62 @@ Texts live in `app/data/faq.json`.
 The session is an httpOnly cookie `access_token` holding the same JWT the API issues.
 Forms have `novalidate` and no `maxlength`: every error is our own DOM element under the field.
 
+### Order form
+
+One page, two steps; the page posts to `POST /api/v1/orders`, so the form and the API share the
+field rules and messages listed under [Order fields](#autopilot-station-and-order-api).
+Placeholders are the field names; required fields start with `*`. An invalid field gets its
+message under it and a red border.
+
+**Step 1, "For Whom is the Shuttle":** Name, Last Name, Address, Shuttle Station, Phone, **Next**.
+Fields are checked when they lose focus and on **Next**; with errors the form stays on step 1.
+The address is trimmed when it loses focus. Shuttle Station is a search: focusing it lists all
+stations, typing filters them from the first character (`GET /api/v1/stations/search`), each with a
+dot in its line color; a station counts only when picked from the list by click.
+
+**Step 2, "About Rent":**
+
+- **When to Bring the Shuttle** — a date picker that opens on the current month with days before
+  tomorrow disabled. The date can also be typed, as `DD.MM.YYYY`; a malformed, non-existent or too
+  early date gives "Enter a valid date". "Today" is the stand's (`STAND_TZ`), not the browser's.
+- **Rental Period** — a custom dropdown (a `<button>` and a list, not a `<select>`): "one day" … "seven days".
+- **Shuttle Color** — checkboxes "pinky swear" and "gray rainbow": both, one or none.
+- **Comment for Autopilot** — optional.
+- **Back** returns to step 1 with all data kept; **Order** validates step 2.
+
+With no errors **Order** opens the modal "Do you want to place the order?" (**Yes** / **No**).
+**Yes** places the order and shows "Order number NNNNN. Write it down: it will come in handy to
+track the status" with **View Status** → `/track?t=NNNNN`.
+
+The station list, the date picker and the period list open in the page flow: they push the rest
+of the form down and never cover another field.
+
+### Order status
+
+`/track?t=<number>` has three variants: no number (search row only), found, not found (HTTP 404 with
+"There is no such order. Are you sure you entered the correct number?"). The search row — the
+**Order Number** field and **View**, by click or Enter — is present in all of them.
+
+A found order shows its data in three groups (Name, Last Name, Address, Shuttle Station with its
+colored dot, Phone · When to Bring the Shuttle, Rental Period · Shuttle Color, Comment for
+Autopilot; an empty comment or color keeps its caption with an empty value) and the status chain:
+
+| # | Title | Caption (shown for the current status) |
+|---|---|---|
+| 1 | Shuttle in the hangar | Your autopilot is warming up for departure |
+| 2 | Autopilot <firstName> is heading towards you ("Autopilot is heading towards you" before accept) | Support phone: 0101 |
+| 3 | Autopilot is on site | Pick up the shuttle and pay the rental fee |
+| 4 | Okay, let's fly now | Rental ends on <day> at <time> |
+| 5 | Rental time has ended | <firstName> is heading home to recharge. Thanks for flying with us. |
+| — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 |
+
+Every status is an element with `data-state` = `done` / `current` / `upcoming` and
+`data-current` = `true` / `false`. The page is rendered on the server: reload it to see a new status.
+
+**Cancel order** is shown until an autopilot accepts the order: modal "Do you want to cancel the
+order?" (**Yes** / **No**) → "Order canceled. Come back, we are always waiting for you :)" with
+**OK** → `/`. A canceled order is no longer found.
+
 ### Locators
 
 Every interactive element and every message has a `data-testid` (form controls also have the same `id`).
@@ -207,7 +264,11 @@ Pattern: `<page>-<element>-<kind>`.
 | `/` | `home-pitch`, `home-faq-title`, `home-faq`, `home-faq-question-N`, `home-faq-answer-N` (N = 0…7), `home-order-button`, `home-cookie-banner`, `home-cookie-text`, `home-cookie-accept-button` |
 | `/holonet` | `holonet-intro`, `holonet-news`, `holonet-news-item-N` |
 | `/shipyard` | `shipyard-sign-in-button`, `shipyard-order-button`, `shipyard-builder-placeholder` |
-| `/order`, `/track` | `order-placeholder`, `track-placeholder` (temporary) |
+| `/order` step 1 | `order-form`, `order-step-1`, `order-name-input`, `order-last-name-input`, `order-address-input`, `order-station-input`, `order-station-list`, `order-station-option-<number>`, `order-phone-input`, `order-next-button`; errors `order-name-error`, `order-last-name-error`, `order-address-error`, `order-station-error`, `order-phone-error` |
+| `/order` step 2 | `order-step-2`, `order-date-input`, `order-datepicker`, `order-datepicker-prev-button`, `order-datepicker-month`, `order-datepicker-next-button`, `order-datepicker-days`, `order-datepicker-day-<YYYY-MM-DD>`, `order-period-dropdown`, `order-period-value`, `order-period-list`, `order-period-option-<1…7>`, `order-color-group`, `order-color-pinky-swear-checkbox`, `order-color-gray-rainbow-checkbox`, `order-comment-input`, `order-back-button`, `order-submit-button`; errors `order-date-error`, `order-period-error`, `order-comment-error`, `order-form-error` |
+| `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`), `order-view-status-button` |
+| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message`, `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-title` and (current only) `-caption` |
+| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-yes-button`, `track-cancel-no-button`, `track-canceled-modal`, `track-canceled-text`, `track-canceled-ok-button` |
 | 404 | `not-found-message`, `not-found-home-link` |
 | `/register` | `register-form`, `register-name-input`, `register-name-error`, `register-email-input`, `register-email-error`, `register-password-input`, `register-password-error`, `register-submit-button`, `register-login-link` |
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |
@@ -215,7 +276,8 @@ Pattern: `<page>-<element>-<kind>`.
 | `/account` | `account-name`, `account-email`, `account-logout-form`, `account-logout-button` |
 
 Error elements are always in the DOM and `hidden` while empty: check visibility, not presence.
-The same goes for the header search form and the FAQ answers.
+The same goes for the header search form, the FAQ answers, the second step of the order form,
+its lists and date picker, and the modals. `order-title` is one `<h1>` whose text is the current step's title.
 
 ## Tests
 
