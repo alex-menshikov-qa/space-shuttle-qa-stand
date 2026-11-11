@@ -237,21 +237,21 @@ A found order shows its data in three groups (Name, Last Name, Address, Shuttle 
 colored dot, Phone · When to Bring the Shuttle, Rental Period · Shuttle Color, Comment for
 Autopilot; an empty comment or color keeps its caption with an empty value) and the status chain:
 
-| # | Title | Caption (shown for the current status) |
-|---|---|---|
-| 1 | Shuttle in the hangar | Your autopilot is warming up for departure |
-| 2 | Autopilot <firstName> is heading towards you ("Autopilot is heading towards you" before accept) | Support phone: 0101 |
-| 3 | Autopilot is on site | Pick up the shuttle and pay the rental fee |
-| 4 | Okay, let's fly now | Rental ends on <day> at <time> |
-| 5 | Rental time has ended | <firstName> is heading home to recharge. Thanks for flying with us. |
-| — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 |
+| # | Title | Caption while current | Caption while not current |
+|---|---|---|---|
+| 1 | Shuttle in the hangar | Your autopilot is warming up for departure | same |
+| 2 | Autopilot <firstName> is heading towards you ("Autopilot is heading towards you" before accept) | Contact number: 0101 | same |
+| 3 | Autopilot is on site | Pick up the shuttle and pay the rental fee | same |
+| 4 | Okay, let's fly now | Rental ends on <day> at <time> | Until the rental is over |
+| 5 | Rental time has ended | <firstName> is heading home to recharge. Thanks for flying with us. | no caption |
+| — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 | — |
 
 Every status is an element with `data-state` = `done` / `current` / `upcoming` and
 `data-current` = `true` / `false`. The page is rendered on the server: reload it to see a new status.
 
 **Cancel order** is shown until an autopilot accepts the order: modal "Do you want to cancel the
-order?" (**Yes** / **No**) → "Order canceled. Come back, we are always waiting for you :)" with
-**OK** → `/`. A canceled order is no longer found.
+order?" with **Back** (closes the modal, the order stays) and **Cancel** → "Order canceled. Come
+back, we are always waiting for you :)" with **Okay** → `/`. A canceled order is no longer found.
 
 ### Locators
 
@@ -267,8 +267,8 @@ Pattern: `<page>-<element>-<kind>`.
 | `/order` step 1 | `order-form`, `order-step-1`, `order-name-input`, `order-last-name-input`, `order-address-input`, `order-station-input`, `order-station-list`, `order-station-option-<number>`, `order-phone-input`, `order-next-button`; errors `order-name-error`, `order-last-name-error`, `order-address-error`, `order-station-error`, `order-phone-error` |
 | `/order` step 2 | `order-step-2`, `order-date-input`, `order-datepicker`, `order-datepicker-prev-button`, `order-datepicker-month`, `order-datepicker-next-button`, `order-datepicker-days`, `order-datepicker-day-<YYYY-MM-DD>`, `order-period-dropdown`, `order-period-value`, `order-period-list`, `order-period-option-<1…7>`, `order-color-group`, `order-color-pinky-swear-checkbox`, `order-color-gray-rainbow-checkbox`, `order-comment-input`, `order-back-button`, `order-submit-button`; errors `order-date-error`, `order-period-error`, `order-comment-error`, `order-form-error` |
 | `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`), `order-view-status-button` |
-| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message`, `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-title` and (current only) `-caption` |
-| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-yes-button`, `track-cancel-no-button`, `track-canceled-modal`, `track-canceled-text`, `track-canceled-ok-button` |
+| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message`, `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-title` and `-caption` (status 5 has a caption only while current) |
+| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-back-button`, `track-cancel-confirm-button`, `track-canceled-modal`, `track-canceled-text`, `track-canceled-ok-button` |
 | 404 | `not-found-message`, `not-found-home-link` |
 | `/register` | `register-form`, `register-name-input`, `register-name-error`, `register-email-input`, `register-email-error`, `register-password-input`, `register-password-error`, `register-submit-button`, `register-login-link` |
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |

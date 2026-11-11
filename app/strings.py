@@ -156,12 +156,14 @@ TRACK_STATUS_HANGAR = "Shuttle in the hangar"
 TRACK_STATUS_HANGAR_CAPTION = "Your autopilot is warming up for departure"
 TRACK_STATUS_HEADING = "Autopilot {first_name} is heading towards you"
 TRACK_STATUS_HEADING_UNASSIGNED = "Autopilot is heading towards you"
-TRACK_STATUS_HEADING_CAPTION = "Support phone: {phone}"
+TRACK_STATUS_HEADING_CAPTION = "Contact number: {phone}"
 TRACK_STATUS_ON_SITE = "Autopilot is on site"
 TRACK_STATUS_ON_SITE_CAPTION = "Pick up the shuttle and pay the rental fee"
 TRACK_STATUS_FLYING = "Okay, let's fly now"
-TRACK_STATUS_FLYING_CAPTION = "Rental ends on {day} at {time}"
+TRACK_STATUS_FLYING_CAPTION = "Rental ends on {day} at {time}"  # while current
+TRACK_STATUS_FLYING_CAPTION_INACTIVE = "Until the rental is over"
 TRACK_STATUS_ENDED = "Rental time has ended"
+# Shown only while current; the inactive status has no caption.
 TRACK_STATUS_ENDED_CAPTION = (
     "{first_name} is heading home to recharge. Thanks for flying with us."
 )
@@ -172,10 +174,10 @@ TRACK_STATUS_DELAYED_CAPTION = (
 )
 TRACK_CANCEL = "Cancel order"
 TRACK_CANCEL_CONFIRM = "Do you want to cancel the order?"
-TRACK_CANCEL_YES = "Yes"
-TRACK_CANCEL_NO = "No"
+TRACK_CANCEL_BACK = "Back"
+TRACK_CANCEL_CONFIRM_BUTTON = "Cancel"
 TRACK_CANCELED = "Order canceled. Come back, we are always waiting for you :)"
-TRACK_CANCELED_OK = "OK"
+TRACK_CANCELED_OK = "Okay"
 TRACK_CANCEL_FAILED = "The order was not canceled. Please try again."
 
 # --- UI: 404 ---

@@ -35,7 +35,7 @@ def order_form(request: Request, user: User | None = Depends(optional_user)) -> 
 class StatusStep:
     key: str  # testid suffix: "1".."5", or "delayed"
     title: str
-    caption: str | None  # shown for the current step only
+    caption: str | None
     state: str  # "done" | "current" | "upcoming"
     delayed: bool = False
 
@@ -46,8 +46,12 @@ def _format_moment(order: Order) -> tuple[str, str]:
 
 
 def status_steps(order: Order) -> list[StatusStep]:
-    """The chain of five statuses with the current one marked. "Delayed" takes
-    the place of step 2 (the autopilot should be on its way and is not on site)."""
+    """The chain of five statuses with the current one marked.
+
+    Every status has a caption; statuses 4 and 5 have a different one (or
+    none) while they are not current. "Delayed" takes the place of step 2
+    (the autopilot should be on its way and is not on site).
+    """
     status = orders.status(order)
     name = order.autopilot_first_name
     heading = (
@@ -61,12 +65,19 @@ def status_steps(order: Order) -> list[StatusStep]:
         day, time = _format_moment(order)
         flying_caption = strings.TRACK_STATUS_FLYING_CAPTION.format(day=day, time=time)
         ended_caption = strings.TRACK_STATUS_ENDED_CAPTION.format(first_name=name)
+    contact = strings.TRACK_STATUS_HEADING_CAPTION.format(phone=phone)
+    # (key, title, caption while current, caption while not current)
     chain = [
-        ("1", strings.TRACK_STATUS_HANGAR, strings.TRACK_STATUS_HANGAR_CAPTION),
-        ("2", heading, strings.TRACK_STATUS_HEADING_CAPTION.format(phone=phone)),
-        ("3", strings.TRACK_STATUS_ON_SITE, strings.TRACK_STATUS_ON_SITE_CAPTION),
-        ("4", strings.TRACK_STATUS_FLYING, flying_caption),
-        ("5", strings.TRACK_STATUS_ENDED, ended_caption),
+        ("1", strings.TRACK_STATUS_HANGAR, *[strings.TRACK_STATUS_HANGAR_CAPTION] * 2),
+        ("2", heading, contact, contact),
+        ("3", strings.TRACK_STATUS_ON_SITE, *[strings.TRACK_STATUS_ON_SITE_CAPTION] * 2),
+        (
+            "4",
+            strings.TRACK_STATUS_FLYING,
+            flying_caption,
+            strings.TRACK_STATUS_FLYING_CAPTION_INACTIVE,
+        ),
+        ("5", strings.TRACK_STATUS_ENDED, ended_caption, None),
     ]
     position = {
         orders.HANGAR: 0,
@@ -77,14 +88,15 @@ def status_steps(order: Order) -> list[StatusStep]:
         orders.ENDED: 4,
     }[status]
     steps = []
-    for index, (key, title, caption) in enumerate(chain):
+    for index, (key, title, active_caption, inactive_caption) in enumerate(chain):
         if index == position and status == orders.DELAYED:
-            delayed_caption = strings.TRACK_STATUS_DELAYED_CAPTION.format(phone=phone)
-            step = StatusStep("delayed", strings.TRACK_STATUS_DELAYED, delayed_caption, "current", True)
+            caption = strings.TRACK_STATUS_DELAYED_CAPTION.format(phone=phone)
+            step = StatusStep("delayed", strings.TRACK_STATUS_DELAYED, caption, "current", True)
         elif index == position:
-            step = StatusStep(key, title, caption, "current")
+            step = StatusStep(key, title, active_caption, "current")
         else:
-            step = StatusStep(key, title, None, "done" if index < position else "upcoming")
+            state = "done" if index < position else "upcoming"
+            step = StatusStep(key, title, inactive_caption, state)
         steps.append(step)
     return steps
 

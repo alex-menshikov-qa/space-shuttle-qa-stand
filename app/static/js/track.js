@@ -7,7 +7,7 @@
   if (!configNode || !cancelButton) return;
   var config = JSON.parse(configNode.textContent);
   var errorNode = document.getElementById("track-cancel-error");
-  var yesButton = document.getElementById("track-cancel-yes-button");
+  var confirmButton = document.getElementById("track-cancel-confirm-button");
 
   function showError(message) {
     errorNode.textContent = message || "";
@@ -19,12 +19,12 @@
     window.Modal.open("track-cancel-modal");
   });
 
-  document.getElementById("track-cancel-no-button").addEventListener("click", function () {
+  document.getElementById("track-cancel-back-button").addEventListener("click", function () {
     window.Modal.close("track-cancel-modal");
   });
 
-  yesButton.addEventListener("click", function () {
-    yesButton.disabled = true;
+  confirmButton.addEventListener("click", function () {
+    confirmButton.disabled = true;
     fetch("/api/v1/orders/cancel", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -43,7 +43,7 @@
         showError(error.message || config.cancelFailed);
       })
       .then(function () {
-        yesButton.disabled = false;
+        confirmButton.disabled = false;
       });
   });
 })();
