@@ -7,7 +7,7 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app import defects, strings, validation
+from app import strings, validation
 from app.models import User
 
 
@@ -30,7 +30,6 @@ templates.env.globals.update(
     t=strings,
     nav_items=NAV_ITEMS,
     validation_rules=validation.client_rules(),
-    defect=defects.is_enabled,  # templates ask at render time, flags come from env
 )
 
 

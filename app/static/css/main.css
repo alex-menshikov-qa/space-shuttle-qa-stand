@@ -205,6 +205,12 @@ a {
   font-size: 18px;
 }
 
+/* "Order": header, landing and the order form. */
+.button--order {
+  color: #ffffff;
+  background: #000000;
+}
+
 .button--secondary {
   color: var(--text);
   background: var(--surface);

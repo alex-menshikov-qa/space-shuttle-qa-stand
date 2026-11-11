@@ -8,12 +8,11 @@
   var form = document.getElementById("header-status-form");
   if (!button || !form) return;
 
-  // Seeded defect STATUS_SEARCH_ENTER: Enter in the field does nothing.
-  if (form.hasAttribute("data-enter-off")) {
-    form.querySelector("input").addEventListener("keydown", function (event) {
-      if (event.key === "Enter") event.preventDefault();
-    });
-  }
+  // #if STATUS_SEARCH_ENTER
+  form.querySelector("input").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") event.preventDefault();
+  });
+  // #endif
 
   button.addEventListener("click", function () {
     var open = form.hidden;

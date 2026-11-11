@@ -452,3 +452,6 @@ Notes:
 - The two "still found" flags affect the search by track number only: such orders are not
   listed by `GET /orders` and cannot be accepted or finished.
 - The enabled flags are logged when the stand starts: `Seeded defects enabled: ...`.
+- An enabled UI defect leaves no marker in the page — no attribute, flag or comment. Page scripts
+  are served through a small preprocessor (`app/web/scripts.py`) that sends a different variant
+  of the fragment, so only the behaviour differs.

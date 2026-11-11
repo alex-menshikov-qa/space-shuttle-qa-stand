@@ -144,15 +144,18 @@
     totalNode.textContent = total();
   }
 
-  // skipTotal is only used by the seeded defect ADD_BUTTON_STALE_TOTAL.
-  function render(skipTotal) {
+  function renderBuild() {
     emptyNode.hidden = build.hull !== null;
     renderHull(hullTop, "shipyard-build-hull-top", text.hullTop);
     renderHull(hullBottom, "shipyard-build-hull-bottom", text.hullBottom);
     renderItems();
     renderCounts();
-    if (!skipTotal) renderTotal();
     save();
+  }
+
+  function render() {
+    renderBuild();
+    renderTotal();
   }
 
   function showError(message) {
@@ -162,13 +165,16 @@
 
   // --- build commands ----------------------------------------------------------
 
-  function addPart(id, viaButton) {
+  function place(id) {
     var part = parts[id];
-    if (!part) return;
     if (part.category === HULL) build.hull = part.id; // a new hull replaces the old one
     else build.items.push(part.id);
     showError(null);
-    render(Boolean(viaButton && config.staleTotalOnAdd));
+  }
+
+  function addPart(id) {
+    place(id);
+    render();
   }
 
   function removeItem(index) {
@@ -297,8 +303,16 @@
     var card = event.target.closest(".part");
     if (!card) return;
     var id = Number(card.getAttribute("data-part-id"));
-    if (event.target.closest("button")) addPart(id, true);
-    else if (!suppressClick) openPart(id);
+    if (event.target.closest("button")) {
+      // #if ADD_BUTTON_STALE_TOTAL
+      place(id);
+      renderBuild();
+      // #else
+      addPart(id);
+      // #endif
+    } else if (!suppressClick) {
+      openPart(id);
+    }
   });
 
   itemsNode.addEventListener("click", function (event) {
