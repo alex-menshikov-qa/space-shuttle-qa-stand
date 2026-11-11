@@ -30,6 +30,36 @@ LOGIN_FAILED = "Invalid email or password"
 NOT_AUTHENTICATED = "Not authenticated"
 TOKEN_INVALID = "Invalid or expired token"
 
+# --- Autopilots API (texts are verbatim from the 2023 checklists) ---
+AUTOPILOT_CREATE_INSUFFICIENT = "Insufficient data to create an account"
+AUTOPILOT_LOGIN_TAKEN = "This login is already in use. Please try another one"
+AUTOPILOT_LOGIN_INSUFFICIENT = "Insufficient data to log in"
+AUTOPILOT_ACCOUNT_NOT_FOUND = "Account not found"
+AUTOPILOT_DELETE_INSUFFICIENT = "Insufficient data to delete the autopilot"
+AUTOPILOT_NO_SUCH_ID = "There is no autopilot with such id"
+AUTOPILOT_NOT_FOUND = "Autopilot with identifier {autopilot_id} not found"
+
+# --- Orders API ---
+ORDER_SEARCH_INSUFFICIENT = "Insufficient data to perform the search"
+ORDER_NOT_FOUND = "Order not found"
+ORDER_NO_SUCH_ID = "There is no order with such id"
+ORDER_IN_PROGRESS = "This order is already in progress"
+ORDER_CANNOT_FINISH = "This order cannot be finished"
+
+# --- Order fields (shared by the API and the order form) ---
+ORDER_NAME_INVALID = "Enter the correct name"
+ORDER_LAST_NAME_INVALID = "Enter the correct last name"
+ORDER_ADDRESS_INVALID = "Enter the correct address"
+ORDER_STATION_INVALID = "Select a station"
+ORDER_PHONE_INVALID = "Enter the correct phone number"
+ORDER_DATE_INVALID = "Enter a valid date"
+ORDER_PERIOD_INVALID = "Enter a valid rental period"
+ORDER_COMMENT_INVALID = "Enter a valid comment"
+ORDER_COLOR_INVALID = "Enter a valid color"
+
+# --- Testing hooks (only with TEST_HOOKS=1) ---
+TIME_SHIFT_INVALID = "Provide days, hours or minutes as numbers"
+
 # --- Generic errors ---
 INTERNAL_ERROR = "Internal server error"
 

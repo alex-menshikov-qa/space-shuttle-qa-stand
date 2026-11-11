@@ -19,6 +19,17 @@ class Settings(BaseSettings):
     test_email: str
     test_password: str
 
+    # Password of every seeded fleet autopilot (app/data/fleet.json).
+    fleet_password: str = "0101"
+
+    # Time zone in which the stand counts days: "tomorrow" for a delivery date,
+    # the end of the delivery day, the dates shown on pages.
+    stand_tz: str = "UTC"
+    # Minutes between "Autopilot is on site" (finish) and "Okay, let's fly now".
+    pickup_minutes: int = 10
+    # Switches on /api/v1/testing/* (per-order time shift). Off by default.
+    test_hooks: bool = False
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -27,8 +27,13 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
+      # TEST_HOOKS is off in .env.example; the tests need the per-order time
+      # shift to reach time-dependent order statuses, so CI switches it on.
       - name: Create .env from .env.example
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i 's/^TEST_HOOKS=.*/TEST_HOOKS=1/' .env
+          grep -q '^TEST_HOOKS=1$' .env
 
       # BASE_URL, TEST_EMAIL, DB_HOST, ... become env vars for the steps below.
       - name: Export .env to the job environment

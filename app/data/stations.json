@@ -1,0 +1,42 @@
+[
+  {
+    "number": 1,
+    "name": "Alderaanian",
+    "color": "blue"
+  },
+  {
+    "number": 2,
+    "name": "Senate District",
+    "color": "red"
+  },
+  {
+    "number": 3,
+    "name": "Monument Plaza",
+    "color": "green"
+  },
+  {
+    "number": 4,
+    "name": "Coco Town",
+    "color": "yellow"
+  },
+  {
+    "number": 5,
+    "name": "Uscru District",
+    "color": "purple"
+  },
+  {
+    "number": 6,
+    "name": "Glitannai",
+    "color": "orange"
+  },
+  {
+    "number": 7,
+    "name": "The Works",
+    "color": "brown"
+  },
+  {
+    "number": 8,
+    "name": "Level 1313",
+    "color": "gray"
+  }
+]
