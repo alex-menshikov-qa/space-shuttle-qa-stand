@@ -1,6 +1,7 @@
 # space-shuttle-qa-stand
 
 [![CI](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml)
+[![Allure report](https://img.shields.io/badge/Allure-report-blue)](https://alex-menshikov-qa.github.io/space-shuttle-qa-stand/)
 
 **A portfolio test stand, not a production service.** It is a small web app with a JSON API,
 built to be tested: the API and UI automation suites (pytest + Requests / Selenium / Allure)
@@ -456,9 +457,18 @@ not the password.
 5. `pytest`. Exit code 5 ("no tests collected") is reported as a notice and treated as success;
    any other failure fails the job
 6. Allure report (pinned Allure CLI) uploaded as the `allure-report` artifact
-7. On failure: `docker compose logs`; always: `docker compose down -v`
+7. On `main` only (pushes and manual runs, never pull requests): the same report is published to
+   GitHub Pages by the `publish-report` job
+8. On failure: `docker compose logs`; always: `docker compose down -v`
 
-The Allure report is not published to GitHub Pages yet.
+**The latest report from `main`:** https://alex-menshikov-qa.github.io/space-shuttle-qa-stand/
+
+- It is published when tests fail too; a run that produced no test results at all (the stand
+  did not start) leaves the previous report in place.
+- Trend and history: before generating, CI copies `history/` from the published report into
+  `allure-results`, so each report continues the previous one. The first published run has no trend.
+- Pages must be set to deploy from Actions: **Settings → Pages → Build and deployment → Source:
+  GitHub Actions**.
 
 ## Project layout
 
