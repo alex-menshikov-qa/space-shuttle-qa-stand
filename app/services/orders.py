@@ -6,7 +6,7 @@ time without touching anything else.
 """
 
 import secrets
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
@@ -78,6 +78,13 @@ def status(order: Order) -> str:
     return HEADING if order.accepted_at is not None else HANGAR
 
 
+def earliest_delivery_date() -> date:
+    """The first day a shuttle can be ordered for: tomorrow."""
+    if defects.is_enabled("FORM_DATE_TODAY"):
+        return clock.today()  # seeded defect: today is accepted as well
+    return clock.tomorrow()
+
+
 # --- lookups -------------------------------------------------------------------
 
 
@@ -138,7 +145,7 @@ def create(session: Session, data: dict[str, Any]) -> Order:
     if isinstance(data.get("address"), str):
         data["address"] = data["address"].strip()
     stations = {station.number: station for station in session.scalars(select(Station))}
-    errors = validation.order_errors(data, set(stations), clock.tomorrow())
+    errors = validation.order_errors(data, set(stations), earliest_delivery_date())
     if errors:
         raise InvalidFields(errors)
     station = stations[data["station"]]

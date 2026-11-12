@@ -28,7 +28,10 @@ DATE_FORMAT = "%d.%m.%Y"  # the format the order form shows and accepts
 def order_form(request: Request, user: User | None = Depends(optional_user)) -> HTMLResponse:
     # The server's "today" drives the date picker, so the browser clock can
     # never disagree with the API about what "tomorrow" is.
-    config = {"today": clock.today().isoformat(), "minDate": clock.tomorrow().isoformat()}
+    config = {
+        "today": clock.today().isoformat(),
+        "minDate": orders.earliest_delivery_date().isoformat(),
+    }
     return render(request, "order.html", user, order_config=config)
 
 

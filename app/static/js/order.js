@@ -324,7 +324,10 @@
     showError(inputs.deliveryDate, null);
     var typed = parseTyped(inputs.deliveryDate.value);
     if (typed) {
-      shown = { year: Number(typed.slice(0, 4)), month: Number(typed.slice(5, 7)) };
+      // A complete date leaves the calendar nothing to offer: close it, so it
+      // does not cover the fields below. A click on the field opens it again.
+      closePicker();
+      return;
     }
     if (!picker.hidden) renderPicker();
   });

@@ -118,7 +118,7 @@ longer found by track or listed.
 | `deliveryDate` | `YYYY-MM-DD`, not earlier than tomorrow (in `STAND_TZ`) | Enter a valid date |
 | `rentTime` | integer 1–7 (days) | Enter a valid rental period |
 | `color` | optional; `[]`, `["PINKY_SWEAR"]`, `["GRAY_RAINBOW"]` or both | Enter a valid color |
-| `comment` | optional; Latin letters, space, hyphen, dot, comma; up to 24 | Enter a valid comment |
+| `comment` | optional; Latin letters, digits, space, hyphen, dot, comma; up to 24 | Enter a valid comment |
 
 `track` is a random unique 5-digit number. A canceled order is no longer found or listed.
 
@@ -249,6 +249,7 @@ dot in its line color; a station counts only when picked from the list by click.
 - **When to Bring the Shuttle** — a date picker that opens on the current month with days before
   tomorrow disabled. The date can also be typed, as `DD.MM.YYYY`; a malformed, non-existent or too
   early date gives "Enter a valid date". "Today" is the stand's (`STAND_TZ`), not the browser's.
+  Once a complete date is typed the calendar closes (a click on the field opens it again).
   The calendar drops down under the field, flush with its right edge: month and year in bold with
   the month arrows to their right, weekdays as `MO` … `SU`, Saturdays and Sundays in red. Picking
   a day puts it into the field at once and the field keeps the focus (blue border).
@@ -472,6 +473,14 @@ silently switch a defect off.
 | `BUG_CANCELED_MODAL_FULLSCREEN` | UI | the "Order canceled." window fills the whole screen | the same small centred window as "Do you want to cancel the order?" |
 | `BUG_DELAYED_ONE_DAY_LATE` | API, UI | an undelivered order becomes `delayed` only after the end of the day **after** the delivery day | after 23:59 of the delivery day |
 | `BUG_ENDED_STATUS_4_ACTIVE` | UI | after the rental has ended status 4 stays highlighted together with status 5 and keeps "Rental ends on…"; the API says `ended` | only status 5 is current; status 4 is gray with "Until the rental is over" |
+| `BUG_FORM_NAME_DASH` | UI, API | the order **Name** rejects a hyphen: "Meetra-Koth" → "Enter the correct name" | accepted |
+| `BUG_FORM_LAST_NAME_16` | UI, API | **Last Name** accepts 16 characters ("Grandmoffftarkin"); 17 are still rejected | "Enter the correct last name" from 16 characters |
+| `BUG_FORM_ADDRESS_REQUIRED` | UI, API | an empty **Address** is accepted (1–4 characters are still rejected) | "Enter the correct address" |
+| `BUG_FORM_ADDRESS_50` | UI, API | an **Address** of exactly 50 characters is rejected | accepted; 51 is rejected |
+| `BUG_FORM_PHONE_12` | UI, API | a **Phone** of 12 characters is rejected ("+38160123456"); 10 and 11 pass | accepted; 13 is rejected |
+| `BUG_FORM_COMMENT_CHARSET` | UI, API | **Comment** accepts any characters: Cyrillic ("Хочу"), other scripts ("我要"), quotes; still up to 24 | "Enter a valid comment" |
+| `BUG_FORM_COMMENT_LENGTH` | UI, API | **Comment** has no upper limit: 25 and 90 allowed characters pass | "Enter a valid comment" from 25 characters |
+| `BUG_FORM_DATE_TODAY` | UI, API | today can be picked in the calendar, typed and sent as `deliveryDate`; yesterday cannot | the earliest date is tomorrow |
 | `BUG_ADD_BUTTON_STALE_TOTAL` | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
 
 Notes:
@@ -483,6 +492,10 @@ Notes:
 - `BUG_LOGIN_NO_PASSWORD_504` covers a missing, `null` or empty `password`; a missing `login` is still `400`.
 - The two "still found" flags affect the search by track number only: such orders are not
   listed by `GET /orders` and cannot be accepted or finished.
+- The `BUG_FORM_*` flags bend the one set of field rules the form, the server and
+  `POST /api/v1/orders` share, so each acts in the browser and in the API alike. Each changes its
+  own rule only: with `BUG_FORM_COMMENT_LENGTH` alone a long comment must still consist of allowed
+  characters.
 - The enabled flags are logged when the stand starts: `Seeded defects enabled: ...`.
 - An enabled UI defect leaves no marker in the page — no attribute, flag or comment. Page scripts
   and the stylesheet are served through a small preprocessor (`app/web/scripts.py`) that sends a

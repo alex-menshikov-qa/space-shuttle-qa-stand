@@ -43,6 +43,14 @@ KNOWN_DEFECTS: dict[str, str] = {
     "CANCELED_MODAL_FULLSCREEN": "the 'Order canceled' window is full-screen",
     "DELAYED_ONE_DAY_LATE": "an order becomes 'delayed' a day late",
     "ENDED_STATUS_4_ACTIVE": "status 4 stays highlighted after the rental has ended",
+    "FORM_NAME_DASH": "the order Name rejects a hyphen",
+    "FORM_LAST_NAME_16": "the order Last Name accepts 16 characters",
+    "FORM_ADDRESS_REQUIRED": "the order Address may be empty",
+    "FORM_ADDRESS_50": "the order Address of exactly 50 characters is rejected",
+    "FORM_PHONE_12": "the order Phone of 12 characters is rejected",
+    "FORM_COMMENT_CHARSET": "the order Comment accepts any characters",
+    "FORM_COMMENT_LENGTH": "the order Comment has no length limit",
+    "FORM_DATE_TODAY": "today is accepted as the delivery date",
     "ADD_BUTTON_STALE_TOTAL": "the shipyard Add button does not update the total",
 }
 
