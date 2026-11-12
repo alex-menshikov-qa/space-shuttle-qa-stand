@@ -9,9 +9,9 @@ class ButtonsLocators:
     REGISTRATION_FORM_BUTTON = By.CSS_SELECTOR, "[data-testid='register-login-link']"
     FROM_PASSWORD_RESTORE_BUTTON = By.CSS_SELECTOR, "[data-testid='forgot-password-login-link']"
     PASSWORD_RESTORE_BUTTON = By.CSS_SELECTOR, "[data-testid='login-forgot-password-link']"
-    MAKE_ORDER_BUTTON = By.CSS_SELECTOR, "[data-testid='shipyard-order-button']"
+    ORDER_SHUTTLE_BUTTON = By.CSS_SELECTOR, "[data-testid='shipyard-order-button']"
     LOGO_BUTTON = By.CSS_SELECTOR, "[data-testid='header-logo-link']"
-    CONSTRUCTOR_BUTTON = By.CSS_SELECTOR, "[data-testid='header-shipyard-link']"
+    SHIPYARD_BUTTON = By.CSS_SELECTOR, "[data-testid='header-shipyard-link']"
     ENTER_BUTTON = By.CSS_SELECTOR, "[data-testid='login-submit-button']"
     REGISTER_INSTEAD_LINK = By.CSS_SELECTOR, "[data-testid='login-register-link']"
 
@@ -36,4 +36,6 @@ class ShipyardPageLocators:
     SHIPYARD_PAGE = By.CSS_SELECTOR, "[data-testid='shipyard-title']"  # "Build your shuttle" page title
 
 
+class HomePageLocators:
+    HOME_PAGE = By.CSS_SELECTOR, "[data-testid='home-title']"  # "A shuttle that flies to you" landing title
 

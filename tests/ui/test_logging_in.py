@@ -19,7 +19,7 @@ class TestLoggingIn:
         driver.find_element(*ButtonsLocators.ENTER_BUTTON).click()
 
         make_order_button = WebDriverWait(driver, 3).until(
-            expected_conditions.visibility_of_element_located(ButtonsLocators.MAKE_ORDER_BUTTON))
+            expected_conditions.visibility_of_element_located(ButtonsLocators.ORDER_SHUTTLE_BUTTON))
 
         assert make_order_button.is_displayed()
 
@@ -37,7 +37,7 @@ class TestLoggingIn:
         driver.find_element(*ButtonsLocators.ENTER_BUTTON).click()
 
         make_order_button = WebDriverWait(driver, 3).until(
-            expected_conditions.visibility_of_element_located(ButtonsLocators.MAKE_ORDER_BUTTON))
+            expected_conditions.visibility_of_element_located(ButtonsLocators.ORDER_SHUTTLE_BUTTON))
 
         assert make_order_button.is_displayed()
 
@@ -57,7 +57,7 @@ class TestLoggingIn:
         driver.find_element(*ButtonsLocators.ENTER_BUTTON).click()
 
         make_order_button = WebDriverWait(driver, 3).until(
-            expected_conditions.visibility_of_element_located(ButtonsLocators.MAKE_ORDER_BUTTON))
+            expected_conditions.visibility_of_element_located(ButtonsLocators.ORDER_SHUTTLE_BUTTON))
 
         assert make_order_button.is_displayed()
 
@@ -77,6 +77,6 @@ class TestLoggingIn:
         driver.find_element(*ButtonsLocators.ENTER_BUTTON).click()
 
         make_order_button = WebDriverWait(driver, 3).until(
-            expected_conditions.visibility_of_element_located(ButtonsLocators.MAKE_ORDER_BUTTON))
+            expected_conditions.visibility_of_element_located(ButtonsLocators.ORDER_SHUTTLE_BUTTON))
 
         assert make_order_button.is_displayed()
