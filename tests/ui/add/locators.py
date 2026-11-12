@@ -23,17 +23,17 @@ class SigningLocators:
     WRONG_PASSWORD = By.CSS_SELECTOR, "[data-testid='register-password-error']"
 
 
-class ConstructorPageLocators:
-    BULKI_TAB = By.XPATH, "//span[text()='Булки']/parent::div" # Путь ко вкладке "Булки" на главной странице
-    SOUSY_TAB = By.XPATH, "//span[text()='Соусы']/parent::div" # Путь ко вкладке "Соусы" на главной странице
-    NACHINKI_TAB = By.XPATH, "//span[text()='Начинки']/parent::div" # Путь ко вкладке "Начинки" на главной странице
-    SOUSY_SELECTED = By.XPATH, "//span[text()='Соусы']/parent::div[contains(@class, 'tab_tab_type_current')]" # Путь к выбранной вкладке "Булки" на главной странице
-    BULKI_SELECTED = By.XPATH, "//span[text()='Булки']/parent::div[contains(@class, 'tab_tab_type_current')]" # Путь к выбранной вкладке "Соусы" на главной странице
-    NACHINKI_SELECTED = By.XPATH, "//span[text()='Начинки']/parent::div[contains(@class, 'tab_tab_type_current')]" # Путь к выбранной вкладке "Начинки" на главной странице
-    BULKI_SECTION = By.XPATH, "//h2[text()='Булки']" # Путь к названию секции "Булки"
-    SOUSY_SECTION = By.XPATH, "//h2[text()='Соусы']" # Путь к названию секции "Соусы"
-    NACHINKI_SECTION = By.XPATH, "//h2[text()='Начинки']" # Путь к названию секции "Начинки"
-    CONSTRUCTOR_PAGE = By.XPATH, "//h1[text()='Соберите бургер']" # Путь к тексту "Соберите бургер" на странице конструктора
+class ShipyardPageLocators:
+    HULLS_TAB = By.CSS_SELECTOR, "[data-testid='shipyard-tab-hulls']"  # "Hulls" tab
+    ENGINES_TAB = By.CSS_SELECTOR, "[data-testid='shipyard-tab-engines']"  # "Engines" tab
+    MODULES_TAB = By.CSS_SELECTOR, "[data-testid='shipyard-tab-modules']"  # "Modules" tab
+    HULLS_SELECTED = By.CSS_SELECTOR, "[data-testid='shipyard-tab-hulls'][data-active='true']"  # active "Hulls" tab
+    ENGINES_SELECTED = By.CSS_SELECTOR, "[data-testid='shipyard-tab-engines'][data-active='true']"  # active "Engines" tab
+    MODULES_SELECTED = By.CSS_SELECTOR, "[data-testid='shipyard-tab-modules'][data-active='true']"  # active "Modules" tab
+    HULLS_SECTION = By.CSS_SELECTOR, "[data-testid='shipyard-section-hulls-title']"  # "Hulls" section heading
+    ENGINES_SECTION = By.CSS_SELECTOR, "[data-testid='shipyard-section-engines-title']"  # "Engines" section heading
+    MODULES_SECTION = By.CSS_SELECTOR, "[data-testid='shipyard-section-modules-title']"  # "Modules" section heading
+    SHIPYARD_PAGE = By.CSS_SELECTOR, "[data-testid='shipyard-title']"  # "Build your shuttle" page title
 
 
 
