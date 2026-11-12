@@ -16,12 +16,16 @@ permissions:
 env:
   PYTHON_VERSION: "3.12"
   ALLURE_VERSION: "2.46.1"
+  # Where the Allure report of the latest main run is published (GitHub Pages).
+  PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
 jobs:
   stand-and-tests:
     name: Stand + tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      publish: ${{ steps.publish.outputs.publish }}
 
     steps:
       - name: Check out
@@ -75,6 +79,44 @@ jobs:
           fi
           exit "$code"
 
+      # Only runs on main are published. A PR run, or a main run that produced
+      # no test results (the stand never started), must not replace the report.
+      - name: Decide whether to publish the report
+        id: publish
+        if: ${{ !cancelled() }}
+        run: |
+          publish=false
+          if [ "$GITHUB_REF" = "refs/heads/main" ] && [ "$GITHUB_EVENT_NAME" != "pull_request" ] \
+            && ls allure-results/*-result.json >/dev/null 2>&1; then
+            publish=true
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish"
+
+      # Allure draws the trend from the history of the previous report, so take
+      # it from the published site. No site yet (first run) means no trend yet.
+      - name: Restore Allure history from the published report
+        if: ${{ !cancelled() && steps.publish.outputs.publish == 'true' }}
+        run: |
+          mkdir -p allure-results/history
+          for f in history.json history-trend.json duration-trend.json categories-trend.json retry-trend.json; do
+            if ! curl -fsSL --retry 2 -o "allure-results/history/$f" "$PAGES_URL/history/$f"; then
+              rm -f "allure-results/history/$f"
+              echo "::notice title=Allure history::$f is not published yet, the trend starts from this run"
+            fi
+          done
+          cat > allure-results/executor.json <<EOF
+          {
+            "name": "GitHub Actions",
+            "type": "github",
+            "buildOrder": ${GITHUB_RUN_NUMBER},
+            "buildName": "CI #${GITHUB_RUN_NUMBER}",
+            "buildUrl": "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}",
+            "reportUrl": "${PAGES_URL}/",
+            "reportName": "Allure report"
+          }
+          EOF
+
       - name: Generate Allure report
         if: ${{ !cancelled() }}
         run: |
@@ -93,6 +135,12 @@ jobs:
           path: allure-report
           if-no-files-found: error
 
+      - name: Upload the report for GitHub Pages
+        if: ${{ !cancelled() && steps.publish.outputs.publish == 'true' }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: allure-report
+
       - name: Stand logs
         if: failure()
         run: docker compose logs
@@ -100,3 +148,22 @@ jobs:
       - name: Stop the stand
         if: always()
         run: docker compose down -v
+
+  # Published even when tests failed: that is when the report is needed most.
+  publish-report:
+    name: Publish Allure report
+    needs: stand-and-tests
+    if: ${{ !cancelled() && needs.stand-and-tests.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5
