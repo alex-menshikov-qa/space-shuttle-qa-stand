@@ -34,7 +34,7 @@ def driver():
 
 @pytest.fixture
 def register_page(driver):
-    driver.get(Config.URL)
+    driver.get(Config.SHIPYARD_URL)
     driver.find_element(*ButtonsLocators.ENTER_ACCOUNT_BUTTON).click()
     WebDriverWait(driver, 15).until(
         expected_conditions.visibility_of_element_located(ButtonsLocators.ENTER_BUTTON))
