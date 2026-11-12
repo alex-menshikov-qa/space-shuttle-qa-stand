@@ -465,6 +465,29 @@ a {
   background-size: 18px 18px;
 }
 
+/* #if FORM_ERROR_LAYOUT_SHIFT */
+/* #else */
+/* The order form keeps a line under every field for its error text, so a
+   message that appears or goes away never moves the fields below it. The
+   empty line is invisible: tests still see the error as not displayed. */
+#order-form .field__error {
+  min-height: 21px;
+}
+
+#order-form .field__error[hidden] {
+  display: block !important;
+  visibility: hidden;
+}
+
+#order-form .form {
+  gap: 4px;
+}
+
+#order-form .checks {
+  margin-bottom: 12px;
+}
+/* #endif */
+
 /* Drops down under the date field, flush with its right edge, a small gap
    below it. It covers what is underneath, so closing it moves nothing. */
 .field {

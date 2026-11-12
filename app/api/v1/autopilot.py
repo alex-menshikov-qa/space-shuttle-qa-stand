@@ -46,6 +46,8 @@ def create(
         raise ApiError(400, strings.AUTOPILOT_CREATE_INSUFFICIENT) from None
     except autopilots.LoginTaken:
         raise ApiError(409, strings.AUTOPILOT_LOGIN_TAKEN) from None
+    except autopilots.Crashed:
+        raise ApiError(500, strings.INTERNAL_ERROR) from None
     return OkResponse()
 
 

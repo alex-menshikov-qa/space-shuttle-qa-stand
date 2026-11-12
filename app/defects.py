@@ -51,6 +51,7 @@ KNOWN_DEFECTS: dict[str, str] = {
     "FORM_COMMENT_CHARSET": "the order Comment accepts any characters",
     "FORM_COMMENT_LENGTH": "the order Comment has no length limit",
     "FORM_DATE_TODAY": "today is accepted as the delivery date",
+    "FORM_ERROR_LAYOUT_SHIFT": "an error text under an order field pushes the form down",
     "ADD_BUTTON_STALE_TOTAL": "the shipyard Add button does not update the total",
 }
 
