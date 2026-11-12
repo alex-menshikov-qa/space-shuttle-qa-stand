@@ -384,21 +384,57 @@ tests/
 pytest.ini          test paths, markers, Allure results directory
 ```
 
-Run them against a running stand:
+### Running the tests locally
 
-```bash
-python3.12 -m venv .venv && . .venv/bin/activate
-pip install -r tests/requirements.txt
-pytest                 # everything
-pytest -m api          # API only
-pytest -m ui           # UI only
-allure serve allure-results   # needs the Allure CLI locally
+Requires Docker with Compose v2, Python 3.12+ and Chrome. All commands run from the repo root.
+
+1. Start the stand in Docker (see [Quick start](#quick-start) for `.env`):
+
+   ```bash
+   docker compose up -d --build --wait
+   ```
+
+2. Create and activate a virtual environment in the repo root (`.venv` is in `.gitignore`).
+
+   Linux / macOS:
+
+   ```bash
+   python3 -m venv .venv
+   . .venv/bin/activate
+   ```
+
+   Windows (PowerShell):
+
+   ```powershell
+   py -m venv .venv
+   .venv\Scripts\Activate.ps1
+   ```
+
+3. Install the dependencies and run the tests:
+
+   ```bash
+   pip install -r tests/requirements.txt
+   pytest                 # everything
+   pytest tests/ui        # UI only
+   allure serve allure-results   # optional, needs the Allure CLI locally
+   ```
+
+`tests/ui/add/config.py` reads the stand's `.env` by itself (`BASE_URL`, `TEST_EMAIL`,
+`TEST_PASSWORD`), so there is nothing to export. To test another stand, change `BASE_URL`.
+If the stand is not reachable, the UI tests are skipped.
+
+Locally Chrome opens a window; in CI it runs headless, switched on by the `CI` environment variable.
+
+On Windows, if `app` exits with `exec app/entrypoint.sh: no such file or directory`, the clone
+predates `.gitattributes` and the script has CRLF line endings. Restore it and rebuild:
+
+```powershell
+git rm --cached app/entrypoint.sh
+git reset --hard
+docker compose up -d --build --wait
 ```
 
-`BASE_URL`, the test user and the database settings come only from the environment
-(`python-dotenv` can load them from `.env`). To test another stand, change `BASE_URL`.
-
-**Browsers.** UI tests run headless Chrome (`--headless=new`) or Firefox (`-headless`).
+**Browsers.** In CI the UI tests run headless Chrome (`--headless=new`).
 Selenium ≥ 4.6 includes Selenium Manager: it finds the installed browser and a matching
 driver, downloading the driver on first use if needed, so there is nothing to install by hand.
 How a run picks a browser (for example a `BROWSER` env var) is up to the test suite.
