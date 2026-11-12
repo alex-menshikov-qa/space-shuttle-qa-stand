@@ -19,7 +19,7 @@ class TestEnteringAccountPage:
         driver.find_element(*ButtonsLocators.ENTER_BUTTON).click()
 
         WebDriverWait(driver, 3).until(
-            expected_conditions.visibility_of_element_located(ButtonsLocators.MAKE_ORDER_BUTTON))
+            expected_conditions.visibility_of_element_located(ButtonsLocators.ORDER_SHUTTLE_BUTTON))
 
         driver.find_element(*ButtonsLocators.PERSONAL_ACCOUNT_BUTTON).click()
 
