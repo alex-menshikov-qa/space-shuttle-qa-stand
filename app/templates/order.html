@@ -4,9 +4,9 @@
 {% block page %}order{% endblock %}
 
 {# A text input with its placeholder as the field name and an error slot below. #}
-{% macro text_field(name, label, required=True, autocomplete="off", inputmode="") -%}
+{% macro text_field(name, label, required=True, autocomplete="off", inputmode="", extra_class="") -%}
 <div class="field">
-  <input class="field__input" type="text" name="{{ name }}" autocomplete="{{ autocomplete }}"
+  <input class="field__input{{ extra_class }}" type="text" name="{{ name }}" autocomplete="{{ autocomplete }}"
          {%- if inputmode %} inputmode="{{ inputmode }}"{% endif %}
          placeholder="{{ (t.ORDER_REQUIRED_MARK ~ ' ') if required }}{{ label }}" aria-label="{{ label }}"
          aria-describedby="order-{{ name }}-error"
@@ -35,12 +35,12 @@
   </section>
 
   <section class="form" hidden id="order-step-2" data-testid="order-step-2">
-    {% call text_field("date", t.ORDER_FIELD_DATE, inputmode="numeric") %}
+    {% call text_field("date", t.ORDER_FIELD_DATE, inputmode="numeric", extra_class=" field__input--date") %}
     <div class="datepicker" hidden id="order-datepicker" data-testid="order-datepicker">
       <div class="datepicker__header">
+        <span class="datepicker__month" id="order-datepicker-month" data-testid="order-datepicker-month"></span>
         <button class="datepicker__nav" type="button" aria-label="{{ t.ORDER_DATE_PREV_MONTH }}"
                 id="order-datepicker-prev-button" data-testid="order-datepicker-prev-button">&lsaquo;</button>
-        <span class="datepicker__month" id="order-datepicker-month" data-testid="order-datepicker-month"></span>
         <button class="datepicker__nav" type="button" aria-label="{{ t.ORDER_DATE_NEXT_MONTH }}"
                 id="order-datepicker-next-button" data-testid="order-datepicker-next-button">&rsaquo;</button>
       </div>
@@ -95,8 +95,10 @@
 {% endcall %}
 
 {% call modal("order-success") %}
-<p class="modal__text" id="order-success-text" data-testid="order-success-text"
-   data-template="{{ t.ORDER_SUCCESS_TEXT }}"></p>
+<p class="modal__text" id="order-success-text" data-testid="order-success-text">
+  <span id="order-success-title" data-testid="order-success-title" data-template="{{ t.ORDER_SUCCESS_TITLE }}"></span>
+  <span class="modal__note" data-testid="order-success-note">{{ t.ORDER_SUCCESS_NOTE }}</span>
+</p>
 <div class="actions actions--center-tight">
   <a class="button" href="/track" id="order-view-status-button" data-testid="order-view-status-button">{{ t.ORDER_VIEW_STATUS }}</a>
 </div>

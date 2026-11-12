@@ -1,8 +1,9 @@
 /* Space Shuttle Inc. Plain CSS, system fonts, no external files. */
 
 :root {
-  --text: #1f2328;
+  --text: #1a1a1a; /* the stand's black: text, primary buttons, active borders */
   --muted: #59636e;
+  --gray: #8c959f; /* inactive field borders, inactive statuses */
   --border: #d1d9e0;
   --surface: #f6f8fa;
   --accent: #0969da;
@@ -103,6 +104,7 @@ a {
   width: 150px;
   padding: 5px 10px;
   font-size: 14px;
+  text-align: left;
 }
 
 .header__link {
@@ -157,12 +159,30 @@ a {
 .field__input {
   padding: 8px 12px;
   font: inherit;
-  border: 1px solid var(--border);
+  color: var(--text);
+  background: #ffffff;
+  border: 1px solid var(--gray);
   border-radius: 6px;
+  outline: none;
+}
+
+.field__input::placeholder {
+  color: var(--gray);
+  opacity: 1;
+}
+
+/* Border: gray while untouched, black once the value is correct, red on an
+   error, blue while the field has the focus. */
+.field__input--valid {
+  border-color: var(--text);
 }
 
 .field__input--invalid {
   border-color: var(--error);
+}
+
+.field__input:focus {
+  border-color: var(--accent);
 }
 
 .field__error,
@@ -186,13 +206,18 @@ a {
   padding: 10px 20px;
   font: inherit;
   font-weight: 600;
-  color: var(--accent-text);
-  background: var(--accent);
-  border: 0;
+  color: #ffffff;
+  background: var(--text);
+  border: 1px solid var(--text);
   border-radius: 6px;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .button--small {
@@ -205,16 +230,30 @@ a {
   font-size: 18px;
 }
 
-/* "Order": header, landing and the order form. */
-.button--order {
-  color: #ffffff;
-  background: #000000;
+/* "Order" lightens a little under the pointer in the header and on the
+   landing, and turns dark gray on the order form. */
+.button--order:hover {
+  background: #333333;
+  border-color: #333333;
 }
 
+.form .button--order:hover {
+  background: #444444;
+  border-color: #444444;
+}
+
+/* White with a black outline. */
 .button--secondary {
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid var(--text);
+}
+
+/* Merges with whatever is behind it; does not react to the pointer. */
+.button--ghost {
+  color: var(--text);
+  background: transparent;
+  border-color: transparent;
 }
 
 .profile {
@@ -303,6 +342,12 @@ a {
   background: #1f2328;
 }
 
+.cookie-banner .button {
+  color: var(--text);
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
 .cookie-banner__text {
   margin: 0;
 }
@@ -327,6 +372,17 @@ a {
   text-align: center;
 }
 
+.actions--center-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.actions--end {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Lists that open under a field (station search, rental period). They are in
    the normal flow: opening one pushes the rest of the form down instead of
    covering it. */
@@ -334,7 +390,8 @@ a {
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  border: 1px solid var(--border);
+  color: var(--text);
+  border: 1px solid var(--gray);
   border-radius: 6px;
 }
 
@@ -374,35 +431,83 @@ a {
   cursor: pointer;
 }
 
+/* The "v" at the right edge of the field. */
 .dropdown::after {
-  content: "\25BE";
-  color: var(--muted);
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 4px 12px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
 }
 
 .dropdown__value--empty {
-  color: #757575;
+  color: var(--gray);
+}
+
+/* Calendar icon at the right edge of the date field. */
+.field__input--date {
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%2359636e' stroke-width='1.6' d='M3 5.5h14v11H3zM3 9h14M6.5 3v4M13.5 3v4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px 18px;
+}
+
+/* Drops down under the date field, flush with its right edge, a small gap
+   below it. It covers what is underneath, so closing it moves nothing. */
+.field {
+  position: relative;
+}
+
+.field:has(.datepicker) {
+  display: block;
+}
+
+.field:has(.datepicker) .field__input {
+  width: 100%;
+}
+
+.field:has(.datepicker) .field__error {
+  margin-top: 4px;
 }
 
 .datepicker {
+  position: absolute;
+  right: 0;
+  z-index: 5;
+  width: 300px;
+  max-width: 100%;
+  margin-top: 4px;
   padding: 12px;
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid var(--muted);
   border-radius: 6px;
 }
 
 .datepicker__header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
+  gap: 6px;
   margin-bottom: 8px;
-  font-weight: 600;
+}
+
+.datepicker__month {
+  margin-right: 6px;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .datepicker__nav {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   font: inherit;
   font-size: 20px;
   line-height: 1;
+  color: var(--muted);
   background: none;
   border: 0;
   border-radius: 6px;
@@ -420,16 +525,24 @@ a {
   text-align: center;
 }
 
+.datepicker__day {
+  color: var(--text);
+}
+
 .datepicker__weekday {
   padding: 4px 0;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--gray);
+}
+
+.datepicker__weekday--weekend,
+.datepicker__day--weekend {
+  color: var(--error);
 }
 
 .datepicker__day {
   padding: 6px 0;
   font: inherit;
-  color: var(--text);
   background: none;
   border: 0;
   border-radius: 6px;
@@ -441,7 +554,7 @@ a {
 }
 
 .datepicker__day:disabled {
-  color: #b6bdc5;
+  opacity: 0.35;
   cursor: default;
 }
 
@@ -449,9 +562,10 @@ a {
   font-weight: 700;
 }
 
-.datepicker__day--selected {
-  color: var(--accent-text);
-  background: var(--accent);
+.datepicker__day--selected,
+.datepicker__day--selected:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--text);
 }
 
 .checks {
@@ -469,11 +583,21 @@ a {
   font-weight: 600;
 }
 
+/* A colour that is not ticked stays gray, name and box alike. */
 .checks__item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  color: var(--gray);
   cursor: pointer;
+}
+
+.checks__item input {
+  accent-color: var(--text);
+}
+
+.checks__item:has(input:checked) {
+  color: var(--text);
 }
 
 /* --- Modal --- */
@@ -500,11 +624,41 @@ a {
   border-radius: 10px;
 }
 
+/* The two cancel windows are exactly the same size. */
+.modal__dialog--compact {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  min-height: 220px;
+}
+
+.modal__dialog--compact .actions {
+  margin-top: auto;
+}
+
 .modal__text {
   margin: 0 0 20px;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
   text-align: center;
+}
+
+.modal__text > span {
+  display: block;
+}
+
+/* Second line of a message: smaller than the title, larger than a button label. */
+.modal__note {
+  margin: -12px 0 20px;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text);
+  text-align: center;
+}
+
+.modal__text > .modal__note {
+  margin: 8px 0 0;
 }
 
 /* --- Order status --- */
@@ -518,6 +672,7 @@ a {
 .track-search__input {
   flex: 1;
   min-width: 0;
+  border-color: var(--text);
 }
 
 .track {
@@ -533,13 +688,18 @@ a {
   }
 }
 
+/* A little to the right of the search field's left edge. */
+.track__data {
+  padding-left: 8px;
+}
+
 .track__group {
   display: grid;
   grid-template-columns: minmax(110px, 2fr) 3fr;
   gap: 8px 16px;
   margin: 0;
   padding: 16px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--gray);
 }
 
 .track__group:first-child {
@@ -547,20 +707,60 @@ a {
 }
 
 .track__group dt {
-  color: var(--muted);
+  color: var(--gray);
+  text-align: left;
 }
 
 .track__group dd {
   margin: 0;
+  min-width: 0;
   min-height: 1.5em;
+  color: var(--text);
+  text-align: right;
   overflow-wrap: anywhere;
 }
 
-.track__data .actions {
-  margin-top: 16px;
+/* The dot sits level with the station name, two spaces before it. */
+.track__group dd .station-dot {
+  margin-right: 0.5em;
+  vertical-align: baseline;
 }
 
-.track__not-found {
+.track__data .actions {
+  margin-top: 24px;
+}
+
+/* "Order not found": the picture in a black frame, the message over its top. */
+.not-found {
+  display: grid;
+}
+
+.not-found > * {
+  grid-area: 1 / 1;
+}
+
+.not-found__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2px solid #000000;
+}
+
+.not-found__text {
+  align-self: start;
+  padding: 24px 16px 0;
+  color: var(--text);
+  text-align: center;
+}
+
+.not-found__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.not-found__hint {
+  margin: 4px 0 0;
   font-size: 18px;
 }
 
@@ -572,71 +772,64 @@ a {
 
 .status {
   position: relative;
-  padding: 0 0 24px 28px;
-  color: var(--muted);
+  min-height: 28px;
+  padding: 0 0 24px 40px;
+  color: var(--gray);
 }
 
-/* The dot and the line that links the statuses into a chain. */
-.status::before {
-  content: "";
+/* The numbered circle; a passed status shows a checkmark instead. */
+.status__marker {
   position: absolute;
-  top: 5px;
+  top: 0;
   left: 0;
-  width: 12px;
-  height: 12px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
   background: #ffffff;
-  border: 2px solid var(--border);
+  border: 1px solid currentColor;
   border-radius: 50%;
 }
 
+/* The line that links the circles into a chain. */
 .status::after {
   content: "";
   position: absolute;
-  top: 21px;
+  top: 28px;
   bottom: 0;
-  left: 7px;
+  left: 13px;
   width: 2px;
-  background: var(--border);
+  background: var(--gray);
 }
 
 .status:last-child::after {
   display: none;
 }
 
-.status--done::before {
-  background: var(--border);
-}
-
 .status--current {
   color: var(--text);
 }
 
-.status--current::before {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
 .status__title {
   margin: 0;
-  font-weight: 600;
-}
-
-.status--current .status__title {
   font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
 }
 
 .status__caption {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
+  font-size: 16px;
 }
 
 .status--delayed,
 .status--delayed .status__caption {
   color: var(--error);
-}
-
-.status--delayed::before {
-  background: var(--error);
-  border-color: var(--error);
 }
 
 /* --- Shipyard --- */

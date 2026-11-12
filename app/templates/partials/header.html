@@ -22,7 +22,7 @@
     {% endfor %}
     <div class="header__actions">
       <a class="button button--small button--order" href="/order" id="header-order-button" data-testid="header-order-button">{{ t.NAV_ORDER }}</a>
-      <button class="button button--small button--secondary" type="button" aria-expanded="false" aria-controls="header-status-form"
+      <button class="button button--small button--ghost" type="button" aria-expanded="false" aria-controls="header-status-form"
               id="header-status-button" data-testid="header-status-button">{{ t.NAV_ORDER_STATUS }}</button>
       <form class="header__status" method="get" action="/track" novalidate hidden
             id="header-status-form" data-testid="header-status-form">

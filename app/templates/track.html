@@ -40,11 +40,10 @@
       <dt>{{ t.ORDER_FIELD_COMMENT }}</dt>
       <dd id="track-comment-value" data-testid="track-comment-value">{{ order.comment }}</dd>
     </dl>
-    {% if can_cancel %}
+    {# Offered until an autopilot accepts the order; after that it stays, disabled. #}
     <div class="actions">
-      <button class="button button--secondary" type="button" id="track-cancel-button" data-testid="track-cancel-button">{{ t.TRACK_CANCEL }}</button>
+      <button class="button button--secondary" type="button"{% if not can_cancel %} disabled{% endif %} id="track-cancel-button" data-testid="track-cancel-button">{{ t.TRACK_CANCEL }}</button>
     </div>
-    {% endif %}
   </div>
 
   <ol class="statuses" data-testid="track-statuses">
@@ -52,6 +51,7 @@
     <li class="status status--{{ step.state }}{% if step.delayed %} status--delayed{% endif %}"
         data-state="{{ step.state }}" data-current="{{ 'true' if step.state == 'current' else 'false' }}"
         id="track-status-{{ step.key }}" data-testid="track-status-{{ step.key }}">
+      <span class="status__marker" data-testid="track-status-{{ step.key }}-marker">{{ t.TRACK_STATUS_DONE_MARK if step.state == "done" else loop.index }}</span>
       <p class="status__title" data-testid="track-status-{{ step.key }}-title">{{ step.title }}</p>
       {% if step.caption %}
       <p class="status__caption" data-testid="track-status-{{ step.key }}-caption">{{ step.caption }}</p>
@@ -62,24 +62,33 @@
 </div>
 
 {% if can_cancel %}
-{% call modal("track-cancel") %}
+{% call modal("track-cancel", compact=True) %}
 <p class="modal__text" data-testid="track-cancel-text">{{ t.TRACK_CANCEL_CONFIRM }}</p>
 <p class="form__error" id="track-cancel-error" data-testid="track-cancel-error" hidden></p>
-<div class="actions actions--split">
-  <button class="button button--secondary" type="button" id="track-cancel-back-button" data-testid="track-cancel-back-button">{{ t.TRACK_CANCEL_BACK }}</button>
-  <button class="button" type="button" id="track-cancel-confirm-button" data-testid="track-cancel-confirm-button">{{ t.TRACK_CANCEL_CONFIRM_BUTTON }}</button>
+<div class="actions actions--center-row">
+  <button class="button" type="button" id="track-cancel-back-button" data-testid="track-cancel-back-button">{{ t.TRACK_CANCEL_BACK }}</button>
+  <button class="button button--secondary" type="button" id="track-cancel-confirm-button" data-testid="track-cancel-confirm-button">{{ t.TRACK_CANCEL_CONFIRM_BUTTON }}</button>
 </div>
 {% endcall %}
-{% call modal("track-canceled") %}
-<p class="modal__text" data-testid="track-canceled-text">{{ t.TRACK_CANCELED }}</p>
-<div class="actions actions--center-tight">
+{% call modal("track-canceled", compact=True) %}
+<div data-testid="track-canceled-text">
+  <p class="modal__text" data-testid="track-canceled-title">{{ t.TRACK_CANCELED_TITLE }}</p>
+  <p class="modal__note" data-testid="track-canceled-note">{{ t.TRACK_CANCELED_NOTE }}</p>
+</div>
+<div class="actions actions--end">
   <a class="button" href="/" id="track-canceled-ok-button" data-testid="track-canceled-ok-button">{{ t.TRACK_CANCELED_OK }}</a>
 </div>
 {% endcall %}
 <script id="track-config" type="application/json">{{ {"track": order.track, "cancelFailed": t.TRACK_CANCEL_FAILED} | tojson }}</script>
 {% endif %}
 {% elif number %}
-<p class="track__not-found" id="track-not-found-message" data-testid="track-not-found-message">{{ t.TRACK_NOT_FOUND }}</p>
+<div class="not-found" id="track-not-found-message" data-testid="track-not-found-message">
+  {% include "partials/crashed_shuttle.svg" %}
+  <div class="not-found__text">
+    <p class="not-found__title" data-testid="track-not-found-title">{{ t.TRACK_NOT_FOUND_TITLE }}</p>
+    <p class="not-found__hint" data-testid="track-not-found-hint">{{ t.TRACK_NOT_FOUND_HINT }}</p>
+  </div>
+</div>
 {% endif %}
 {% endblock %}
 {% block scripts %}<script src="/static/js/track.js" defer></script>{% endblock %}

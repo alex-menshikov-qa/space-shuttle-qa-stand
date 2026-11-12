@@ -1,0 +1,38 @@
+{# "Order not found" picture: a shuttle lying on the runway, both wings off. Own drawing. #}
+<svg class="not-found__image" viewBox="0 0 720 400" role="img" aria-label="{{ t.TRACK_NOT_FOUND_IMAGE }}"
+     id="track-not-found-image" data-testid="track-not-found-image">
+  <rect width="720" height="400" fill="#f6f8fa"/>
+  <rect y="270" width="720" height="130" fill="#59636e"/>
+  <path d="M0 270h720" stroke="#1a1a1a" stroke-width="2"/>
+  <path d="M30 336h90M170 336h90M310 336h90M450 336h90M590 336h90" stroke="#ffffff" stroke-width="6"/>
+  <!-- skid marks -->
+  <path d="M60 300c90 4 170 6 250 8M80 318c80 2 150 3 220 4" stroke="#1a1a1a" stroke-width="3" opacity=".45" fill="none"/>
+  <!-- left wing, torn off, behind the hull -->
+  <g transform="rotate(-14 190 300)">
+    <path d="M130 312l110-34 26 8-6 22z" fill="#d1d9e0" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M236 280l-8 28" stroke="#1a1a1a" stroke-width="2" stroke-dasharray="3 4"/>
+  </g>
+  <!-- right wing, flat on the runway in front -->
+  <g transform="rotate(9 560 356)">
+    <path d="M486 362l126-22 40 10-18 20z" fill="#d1d9e0" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M500 359l-10-9M508 357l-6-12" stroke="#1a1a1a" stroke-width="2"/>
+  </g>
+  <!-- hull, lying on its belly, nose down -->
+  <g transform="rotate(7 380 290)">
+    <path d="M250 300c0-22 30-36 90-38h110c44 2 78 16 92 40-14 16-48 24-92 24H300c-34-2-50-10-50-26z"
+          fill="#ffffff" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M250 300l-34-40 44 6 24 14z" fill="#d1d9e0" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M470 276c22 2 40 8 52 18h-58z" fill="#1a1a1a"/>
+    <circle cx="330" cy="292" r="9" fill="#f6f8fa" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="366" cy="292" r="9" fill="#f6f8fa" stroke="#1a1a1a" stroke-width="2"/>
+    <circle cx="402" cy="292" r="9" fill="#f6f8fa" stroke="#1a1a1a" stroke-width="2"/>
+    <!-- stubs where the wings were -->
+    <path d="M318 318l-8 12 24-2 6-9zM430 322l10 11 22-4-6-8z" fill="#8c959f" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M250 296h-16M250 306h-12" stroke="#e8590c" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- smoke -->
+  <g fill="none" stroke="#8c959f" stroke-width="3" stroke-linecap="round">
+    <path d="M214 232c-10-12 8-18 0-30s10-16 2-28"/>
+    <path d="M236 240c-8-10 8-14 2-24"/>
+  </g>
+</svg>

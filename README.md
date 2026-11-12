@@ -235,7 +235,8 @@ Forms have `novalidate` and no `maxlength`: every error is our own DOM element u
 One page, two steps; the page posts to `POST /api/v1/orders`, so the form and the API share the
 field rules and messages listed under [Order fields](#autopilot-station-and-order-api).
 Placeholders are the field names; required fields start with `*`. An invalid field gets its
-message under it and a red border.
+message under it and a red border. Field borders: gray `#8c959f` untouched, blue `#0969da` in
+focus, black `#1a1a1a` once the value has passed its check, red `#cf222e` on an error.
 
 **Step 1, "For Whom is the Shuttle":** Name, Last Name, Address, Shuttle Station, Phone, **Next**.
 Fields are checked when they lose focus and on **Next**; with errors the form stays on step 1.
@@ -248,23 +249,31 @@ dot in its line color; a station counts only when picked from the list by click.
 - **When to Bring the Shuttle** — a date picker that opens on the current month with days before
   tomorrow disabled. The date can also be typed, as `DD.MM.YYYY`; a malformed, non-existent or too
   early date gives "Enter a valid date". "Today" is the stand's (`STAND_TZ`), not the browser's.
+  The calendar drops down under the field, flush with its right edge: month and year in bold with
+  the month arrows to their right, weekdays as `MO` … `SU`, Saturdays and Sundays in red. Picking
+  a day puts it into the field at once and the field keeps the focus (blue border).
 - **Rental Period** — a custom dropdown (a `<button>` and a list, not a `<select>`): "one day" … "seven days".
-- **Shuttle Color** — checkboxes "pinky swear" and "gray rainbow": both, one or none.
+- **Shuttle Color** — checkboxes "pinky swear" and "gray rainbow": both, one or none. A colour that
+  is not ticked stays gray.
 - **Comment for Autopilot** — optional.
 - **Back** returns to step 1 with all data kept; **Order** validates step 2.
 
 With no errors **Order** opens the modal "Do you want to place the order?" (**Yes** / **No**).
-**Yes** places the order and shows "Order number NNNNN. Write it down: it will come in handy to
-track the status" with **View Status** → `/track?t=NNNNN`.
+**Yes** places the order and shows "Order number NNNNN." (large) and, below it, "Write it down: it
+will come in handy to track the status" (smaller) with **View Status** → `/track?t=NNNNN`.
 
-The station list, the date picker and the period list open in the page flow: they push the rest
-of the form down and never cover another field.
+The station list and the period list open in the page flow: they push the rest of the form down
+and never cover another field. The calendar is a drop-down over the form: opening or closing it
+moves nothing.
 
 ### Order status
 
-`/track?t=<number>` has three variants: no number (search row only), found, not found (HTTP 404 with
-"There is no such order. Are you sure you entered the correct number?"). The search row — the
-**Order Number** field and **View**, by click or Enter — is present in all of them.
+`/track?t=<number>` has three variants: no number (search row only), found, not found. The search
+row — the **Order Number** field and **View**, by click or Enter — is present in all of them.
+
+Not found (HTTP 404): under the search row a picture in a black frame — a shuttle lying on the
+runway, both wings off — and, centred over its top, "There is no such order" (large) with "Are you
+sure you entered the correct number?" (smaller) below.
 
 A found order shows its data in three groups (Name, Last Name, Address, Shuttle Station with its
 colored dot, Phone · When to Bring the Shuttle, Rental Period · Shuttle Color, Comment for
@@ -280,11 +289,21 @@ Autopilot; an empty comment or color keeps its caption with an empty value) and 
 | — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 | — |
 
 Every status is an element with `data-state` = `done` / `current` / `upcoming` and
-`data-current` = `true` / `false`. The page is rendered on the server: reload it to see a new status.
+`data-current` = `true` / `false`. Its circle (`-marker`) holds the status number, or `✓` once the
+status is behind. The current status is black, the others gray, "Autopilot delayed" red. The page
+is rendered on the server: reload it to see a new status.
 
-**Cancel order** is shown until an autopilot accepts the order: modal "Do you want to cancel the
-order?" with **Back** (closes the modal, the order stays) and **Cancel** → "Order canceled. Come
-back, we are always waiting for you :)" with **Okay** → `/`. A canceled order is no longer found.
+**Cancel order** works until an autopilot accepts the order; after that the button stays on the
+page, disabled. It opens the modal "Do you want to cancel the order?" with **Back** (closes the
+modal, the order stays) and **Cancel** → a modal of the same size: "Order canceled" (large), "Come
+back, we are always waiting for you :)" (smaller) and **Okay** → `/`. A canceled order is no
+longer found.
+
+**Colours.** Black is `#1a1a1a`. Primary buttons (Order, Next, View, View Status, Okay, Back in the
+cancel modal, …) are black with white text; Back on step 2, Cancel order and Cancel in the modal
+are white with a black border and black text; Order Status in the header is transparent and does
+not react to the pointer. Under the pointer **Order** becomes `#333333` in the header and on the
+landing, and `#444444` on step 2 of the form.
 
 ### Shipyard
 
@@ -335,9 +354,9 @@ Pattern: `<page>-<element>-<kind>`.
 | `/shipyard` order modal | `shipyard-order-modal` (also `data-number`), `shipyard-order-modal-text`, `shipyard-order-modal-total`, `shipyard-order-modal-close-button` |
 | `/order` step 1 | `order-form`, `order-step-1`, `order-name-input`, `order-last-name-input`, `order-address-input`, `order-station-input`, `order-station-list`, `order-station-option-<number>`, `order-phone-input`, `order-next-button`; errors `order-name-error`, `order-last-name-error`, `order-address-error`, `order-station-error`, `order-phone-error` |
 | `/order` step 2 | `order-step-2`, `order-date-input`, `order-datepicker`, `order-datepicker-prev-button`, `order-datepicker-month`, `order-datepicker-next-button`, `order-datepicker-days`, `order-datepicker-day-<YYYY-MM-DD>`, `order-period-dropdown`, `order-period-value`, `order-period-list`, `order-period-option-<1…7>`, `order-color-group`, `order-color-pinky-swear-checkbox`, `order-color-gray-rainbow-checkbox`, `order-comment-input`, `order-back-button`, `order-submit-button`; errors `order-date-error`, `order-period-error`, `order-comment-error`, `order-form-error` |
-| `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`), `order-view-status-button` |
-| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message`, `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-title` and `-caption` (status 5 has a caption only while current) |
-| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-back-button`, `track-cancel-confirm-button`, `track-canceled-modal`, `track-canceled-text`, `track-canceled-ok-button` |
+| `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`; wraps `order-success-title`, `order-success-note`), `order-view-status-button` |
+| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message` (wraps `track-not-found-image`, `track-not-found-title`, `track-not-found-hint`), `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-marker`, `-title` and `-caption` (status 5 has a caption only while current) |
+| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-back-button`, `track-cancel-confirm-button`, `track-canceled-modal`, `track-canceled-text` (wraps `track-canceled-title`, `track-canceled-note`), `track-canceled-ok-button` |
 | 404 | `not-found-message`, `not-found-home-link` |
 | `/register` | `register-form`, `register-name-input`, `register-name-error`, `register-email-input`, `register-email-error`, `register-password-input`, `register-password-error`, `register-submit-button`, `register-login-link` |
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |
@@ -438,7 +457,7 @@ silently switch a defect off.
 | `BUG_MISSING_NAME_409` | API | `POST /autopilot` without `firstName` → `409` "This login is already in use. Please try another one" | `400` "Insufficient data to create an account" |
 | `BUG_LOGIN_NO_PASSWORD_504` | API | `POST /autopilot/login` without `password` → `504` "Service unavailable" | `400` "Insufficient data to log in" |
 | `BUG_TRACK_DELETED_AUTOPILOT` | API, UI | an order accepted by a since-deleted autopilot is still found by track: `GET /orders/track` → `200`, `/track` shows it | `404` "Order not found"; "There is no such order…" |
-| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order. Are you sure you entered the correct number?"; `404` |
+| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order" / "Are you sure you entered the correct number?"; `404` |
 | `BUG_STATUS_SEARCH_ENTER` | UI | Enter in the header **Order Number** field does nothing (the **Go!** button still works) | Enter opens `/track?t=<number>` |
 | `BUG_ADD_BUTTON_STALE_TOTAL` | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
 

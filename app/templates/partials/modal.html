@@ -1,11 +1,12 @@
 {#
   Modal window: hidden until modal.js opens it. The caller block is the body.
   testid/id is `<name>-modal`; the backdrop only closes it when `dismissible`.
+  `compact` gives the window a fixed size with its buttons at the bottom.
 #}
-{% macro modal(name, dismissible=False) -%}
+{% macro modal(name, dismissible=False, compact=False) -%}
 <div class="modal" hidden id="{{ name }}-modal" data-testid="{{ name }}-modal"
      {%- if dismissible %} data-dismissible{% endif %}>
-  <div class="modal__dialog" role="dialog" aria-modal="true">
+  <div class="modal__dialog{% if compact %} modal__dialog--compact{% endif %}" role="dialog" aria-modal="true">
     {{ caller() }}
   </div>
 </div>
