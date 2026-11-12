@@ -321,7 +321,7 @@ behaves correctly by default and the bug is switched on by a flag.
 | `/track` title | the `<h1>` stays above the search row | existing testid; Web 1.21 listed as not reproduced |
 | Header "Go!" | stays next to Enter | track 2 |
 | Layout-only bugs | SSI-3, 8, 9, 11, 17, 20, 23: the correct layout is built, no flag | pixel-level, not worth a flag |
-| Two-line messages (stage 1) | "There is no such order" / "Are you sure…", "Order canceled" / "Come back…", "Order number N." / "Write it down…" are two elements each; the old testid stays on their wrapper | the canon gives the two lines different sizes |
+| Two-line messages (stage 1) | "There is no such order." / "Are you sure…", "Order canceled." / "Come back…", "Order number N." / "Write it down…" are two elements each; the old testid stays on their wrapper; the first line keeps its full stop | the canon gives the two lines different sizes |
 | Calendar (stage 1) | a drop-down over the form, no longer in the page flow; weekdays are `MO` … `SU` | mind map; closing it must not move the field being clicked |
 | Every primary button (stage 1) | black on all pages, not only the ones the task lists | one button style across the site |
 

@@ -237,6 +237,15 @@ a {
   border-color: #333333;
 }
 
+/* #if ORDER_HOVER_VULPTEX */
+@supports (-moz-appearance: none) {
+  .header .button--order:hover {
+    background: #000000;
+    border-color: #000000;
+  }
+}
+/* #endif */
+
 .form .button--order:hover {
   background: #444444;
   border-color: #444444;
@@ -636,6 +645,19 @@ a {
   margin-top: auto;
 }
 
+/* #if CANCELED_MODAL_FULLSCREEN */
+#track-canceled-modal {
+  padding: 0;
+}
+
+#track-canceled-modal .modal__dialog {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  border-radius: 0;
+}
+/* #endif */
+
 .modal__text {
   margin: 0 0 20px;
   font-size: 22px;
@@ -717,7 +739,11 @@ a {
   min-height: 1.5em;
   color: var(--text);
   text-align: right;
+  /* #if TRACK_NO_WRAP */
+  white-space: nowrap;
+  /* #else */
   overflow-wrap: anywhere;
+  /* #endif */
 }
 
 /* The dot sits level with the station name, two spaces before it. */

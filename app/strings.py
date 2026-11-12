@@ -81,6 +81,8 @@ NAV_SHIPYARD = "Shipyard"
 NAV_ORDER = "Order"
 NAV_ORDER_STATUS = "Order Status"
 NAV_ORDER_NUMBER = "Order Number"
+# Only with the seeded defect HEADER_SEARCH_PLACEHOLDER.
+NAV_ORDER_NUMBER_WRONG = "Enter order number"
 NAV_ORDER_STATUS_GO = "Go!"
 NAV_ACCOUNT = "Account"
 
@@ -182,7 +184,7 @@ SUPPORT_PHONE = "0101"
 TRACK_TITLE = "Order status"
 TRACK_NUMBER = "Order Number"
 TRACK_VIEW = "View"
-TRACK_NOT_FOUND_TITLE = "There is no such order"
+TRACK_NOT_FOUND_TITLE = "There is no such order."
 TRACK_NOT_FOUND_HINT = "Are you sure you entered the correct number?"
 TRACK_NOT_FOUND_IMAGE = "A shuttle lying on the runway, both wings detached"
 # Shown in the circle of a status that is already behind.
@@ -207,11 +209,14 @@ TRACK_STATUS_DELAYED_CAPTION = (
     "We won't be able to deliver the shuttle on time. "
     "To check the status of your order, please call support at: {phone}"
 )
+# Only with the seeded defects TRACK_EMPTY_COLOR / TRACK_EMPTY_COMMENT.
+TRACK_EMPTY_COLOR_WRONG = "null"
+TRACK_EMPTY_COMMENT_WRONG = "undefined"
 TRACK_CANCEL = "Cancel order"
 TRACK_CANCEL_CONFIRM = "Do you want to cancel the order?"
 TRACK_CANCEL_BACK = "Back"
 TRACK_CANCEL_CONFIRM_BUTTON = "Cancel"
-TRACK_CANCELED_TITLE = "Order canceled"
+TRACK_CANCELED_TITLE = "Order canceled."
 TRACK_CANCELED_NOTE = "Come back, we are always waiting for you :)"
 TRACK_CANCELED_OK = "Okay"
 TRACK_CANCEL_FAILED = "The order was not canceled. Please try again."

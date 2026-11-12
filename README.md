@@ -272,7 +272,7 @@ moves nothing.
 row — the **Order Number** field and **View**, by click or Enter — is present in all of them.
 
 Not found (HTTP 404): under the search row a picture in a black frame — a shuttle lying on the
-runway, both wings off — and, centred over its top, "There is no such order" (large) with "Are you
+runway, both wings off — and, centred over its top, "There is no such order." (large) with "Are you
 sure you entered the correct number?" (smaller) below.
 
 A found order shows its data in three groups (Name, Last Name, Address, Shuttle Station with its
@@ -295,7 +295,7 @@ is rendered on the server: reload it to see a new status.
 
 **Cancel order** works until an autopilot accepts the order; after that the button stays on the
 page, disabled. It opens the modal "Do you want to cancel the order?" with **Back** (closes the
-modal, the order stays) and **Cancel** → a modal of the same size: "Order canceled" (large), "Come
+modal, the order stays) and **Cancel** → a modal of the same size: "Order canceled." (large), "Come
 back, we are always waiting for you :)" (smaller) and **Okay** → `/`. A canceled order is no
 longer found.
 
@@ -457,8 +457,21 @@ silently switch a defect off.
 | `BUG_MISSING_NAME_409` | API | `POST /autopilot` without `firstName` → `409` "This login is already in use. Please try another one" | `400` "Insufficient data to create an account" |
 | `BUG_LOGIN_NO_PASSWORD_504` | API | `POST /autopilot/login` without `password` → `504` "Service unavailable" | `400` "Insufficient data to log in" |
 | `BUG_TRACK_DELETED_AUTOPILOT` | API, UI | an order accepted by a since-deleted autopilot is still found by track: `GET /orders/track` → `200`, `/track` shows it | `404` "Order not found"; "There is no such order…" |
-| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order" / "Are you sure you entered the correct number?"; `404` |
+| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order." / "Are you sure you entered the correct number?"; `404` |
 | `BUG_STATUS_SEARCH_ENTER` | UI | Enter in the header **Order Number** field does nothing (the **Go!** button still works) | Enter opens `/track?t=<number>` |
+| `BUG_HEADER_SEARCH_PLACEHOLDER` | UI | the header order search has the placeholder "Enter order number" | "Order Number" |
+| `BUG_TRACK_NO_IMAGE` | UI | "order not found" has no picture (`track-not-found-image` is absent); the two text lines stay | the picture in a black frame under the search row |
+| `BUG_ORDER_HOVER_VULPTEX` | UI | **in Firefox only**, the header **Order** button darkens under the pointer: `#1a1a1a` → `#000000` | it lightens to `#333333` in every browser |
+| `BUG_TRACK_WRONG_STATION` | UI | `/track` shows the next station by number instead of the ordered one (the first station after the last), name and dot colour; the API is right | the ordered station |
+| `BUG_TRACK_PERIOD_GROUP` | UI | on `/track` **Rental Period** is the first row of the third group | the second row of the second group |
+| `BUG_TRACK_DATE_MINUS_DAY` | UI | `/track` shows the delivery date one day early; the API is right | the ordered date |
+| `BUG_TRACK_EMPTY_COLOR` | UI | an order without a colour shows `null` as its **Shuttle Color** | an empty value |
+| `BUG_TRACK_EMPTY_COMMENT` | UI | an order without a comment shows `undefined` as its **Comment for Autopilot** | an empty value |
+| `BUG_TRACK_NO_WRAP` | UI | values on `/track` never wrap: a 50-character address stays on one line and runs out of the data block | long values wrap inside the block |
+| `BUG_STATUS_ON_SITE_SKIPPED` | API, UI | after finish the order stays `heading` (status 2) until `PICKUP_MINUTES` pass, then goes straight to `flying` (status 4) | `on_site` (status 3) right after finish |
+| `BUG_CANCELED_MODAL_FULLSCREEN` | UI | the "Order canceled." window fills the whole screen | the same small centred window as "Do you want to cancel the order?" |
+| `BUG_DELAYED_ONE_DAY_LATE` | API, UI | an undelivered order becomes `delayed` only after the end of the day **after** the delivery day | after 23:59 of the delivery day |
+| `BUG_ENDED_STATUS_4_ACTIVE` | UI | after the rental has ended status 4 stays highlighted together with status 5 and keeps "Rental ends on…"; the API says `ended` | only status 5 is current; status 4 is gray with "Until the rental is over" |
 | `BUG_ADD_BUTTON_STALE_TOTAL` | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
 
 Notes:
@@ -472,5 +485,6 @@ Notes:
   listed by `GET /orders` and cannot be accepted or finished.
 - The enabled flags are logged when the stand starts: `Seeded defects enabled: ...`.
 - An enabled UI defect leaves no marker in the page — no attribute, flag or comment. Page scripts
-  are served through a small preprocessor (`app/web/scripts.py`) that sends a different variant
-  of the fragment, so only the behaviour differs.
+  and the stylesheet are served through a small preprocessor (`app/web/scripts.py`) that sends a
+  different variant of the fragment, and page values are chosen on the server, so only the
+  behaviour or the look differs.
