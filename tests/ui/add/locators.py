@@ -21,6 +21,8 @@ class SigningLocators:
     EMAIL_FIELD = By.CSS_SELECTOR, "[data-testid$='-email-input']"
     PASSWORD_FIELD = By.CSS_SELECTOR, "[data-testid$='-password-input']"
     WRONG_PASSWORD = By.CSS_SELECTOR, "[data-testid='register-password-error']"
+    NAME_ERROR = By.CSS_SELECTOR, "[data-testid='register-name-error']"
+    EMAIL_ERROR = By.CSS_SELECTOR, "[data-testid='register-email-error']"
 
 
 class ShipyardPageLocators:
