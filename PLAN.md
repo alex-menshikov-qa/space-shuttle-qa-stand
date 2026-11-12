@@ -275,3 +275,139 @@ README: Known defects table (flag, what breaks, expected behaviour), site map, a
 
 ## Out of scope
 Autopilot mobile app, payment, real emails, hosting, Playwright, Allure on Pages, linking a build to a rental.
+
+---
+
+# Track 3 — the 2023 canon and seeded defects from the manual checklists
+
+## Goal
+In 2023 Sasha tested Space Shuttle Inc by hand and filed bugs SSI-3…SSI-62. This stand is that
+product, rebuilt. Track 3 does two things:
+1. brings the stand to the **canon** — the product as the 2023 checklists and the order-form mind
+   map describe it;
+2. turns the 2023 bugs into switchable seeded defects (`BUG_*`, as in track 2).
+
+Sources (never committed): Check List Web (115 checks in two environments, SSI-3…SSI-28),
+Check List API (SSI-29…SSI-62), Field Validation (86 checks, 13 failed), the order-form mind map.
+A check that PASSED is how the product must behave. A check that FAILED was a bug: the stand
+behaves correctly by default and the bug is switched on by a flag.
+
+## Ground rules (as in track 2)
+- Branch `feat/canon-defects`, draft PR into `main`, merge only by Sasha. After each stage: report
+  (done / how to check by hand / deviations from PLAN.md as a separate list / CI result on the PR).
+- PR events are only reported; nothing is fixed or pushed without Sasha's OK.
+- No tests from me; verification scripts live outside the repo. The UI is checked with Selenium:
+  Chrome always, Firefox where stated.
+- Defects leave no marker in the markup or the scripts.
+- English everywhere; texts in `strings.py` and templates.
+
+## What the canon does not undo
+- The date can be typed, format `DD.MM.YYYY`.
+- Shuttle colour is two checkboxes, both may be ticked.
+- Status captions stay as they are on the stand (the 2023 texts are outdated).
+- Field names follow the mind map ("When to Bring the Shuttle"), not the checklist.
+- Five statuses (Web 6.1), not four (Web 3.8).
+- Everything decided in track 2 and written above.
+
+## Decisions (track 3)
+| Topic | Decision | Why |
+|---|---|---|
+| Autopilot `firstName` | stays required, Latin 2–10 | track 2; API checks 3.5–3.7 ("Котя", empty, missing → 201) are listed as not reproduced |
+| SSI-39, `login: true` | with `BUG_AUTOPILOT_LOGIN_RULES` → 500, autopilot not registered | as in 2023; `password: true` and `firstName: true` → 201 under their own flags |
+| Comment charset | Latin letters, **digits**, space, hyphen, dot, comma; up to 24 | Field Validation "Wanna 5" is a PASSED positive check |
+| Black | primary buttons are `#1a1a1a` | pure black cannot get darker, and SSI-7 needs it to |
+| Hover | header "Order" → `#333333`; step-2 "Order" → `#444444` | Web 1.17, mind map |
+| "Cancel order" after accept | visible but disabled | Web 4.21 |
+| `/track` title | the `<h1>` stays above the search row | existing testid; Web 1.21 listed as not reproduced |
+| Header "Go!" | stays next to Enter | track 2 |
+| Layout-only bugs | SSI-3, 8, 9, 11, 17, 20, 23: the correct layout is built, no flag | pixel-level, not worth a flag |
+| Two-line messages (stage 1) | "There is no such order." / "Are you sure…", "Order canceled." / "Come back…", "Order number N." / "Write it down…" are two elements each; the old testid stays on their wrapper; the first line keeps its full stop | the canon gives the two lines different sizes |
+| Calendar (stage 1) | a drop-down over the form, no longer in the page flow; weekdays are `MO` … `SU` | mind map; closing it must not move the field being clicked |
+| Calendar closes on a typed date (stage 3) | once a complete date is typed the calendar closes | as a drop-down it would cover "Rental Period" |
+| Error line (stage 4) | every order-form field keeps an empty line for its error; `BUG_FORM_ERROR_LAYOUT_SHIFT` (origin: new) brings the jump back | a click that left an invalid field for "Rental Period" missed |
+| Booleans under `*_RULES` (stage 4) | `password: true` / `firstName: true` are stored as "true"; a whitespace-only value stays 400 | SSI-49, SSI-60; API 4.12, 5.8, 6.10 |
+| Every primary button (stage 1) | black on all pages, not only the ones the task lists | one button style across the site |
+
+## Mechanism
+- `main.css` is served through the same `#if / #else / #endif` preprocessor as the page scripts
+  (`/* #if NAME */` in CSS), so CSS-only defects change the styles and nothing else. The
+  Firefox-only defect uses an `@supports` test only Gecko passes: no User-Agent sniffing.
+- Template defects: values and structure are chosen in Python; templates receive plain data.
+- Field defects: the patterns in `validation.py` consult the flags and feed both
+  `order_errors()` and `client_rules()`: API, server and JS stay one implementation.
+
+## Stage 1 — Canon: look and small behaviour
+- **Buttons.** Primary (black, white centred text): "Order" (header, landing, step 2), "Next",
+  "View", "View Status", "Okay", "Back" in the cancel modal. White with a black border and black
+  text: "Back" on step 2, "Cancel order", "Cancel" in the cancel modal. "Order Status" merges with
+  the background, black text, no hover change. Hovers as decided above.
+- **Header "Order Number":** gray border, gray left-aligned placeholder.
+- **`/track`:** long search input with a black border and black "View" to its right; order data
+  with gray left-aligned captions and black right-aligned values in three groups; coloured dot
+  level with the station name; status chain with numbered circles joined by a vertical line, a
+  checkmark instead of the number once a status is passed, inactive gray, active black.
+- **Not found:** under the search row a black-framed picture (own inline SVG: a shuttle lying on
+  the runway, both wings detached); centred at its top "There is no such order" in large black,
+  below it, smaller, "Are you sure you entered the correct number?". Testids:
+  `track-not-found-image`, `track-not-found-title`, `track-not-found-hint`;
+  `track-not-found-message` stays as their wrapper.
+- **Cancel modals (Web section 4):** small centred window; large bold centred text at the top;
+  "Back" (black) and "Cancel" (white, black border) centred at the bottom. "Order canceled" is the
+  same size: large title, smaller second line, "Okay" at the bottom right, leading to the landing.
+- **Order form (mind map):** placeholders with an asterisk on required fields; borders gray
+  (inactive) / blue (focus) / black (valid) / red (error); calendar icon at the right edge, the
+  calendar window with month and year, month arrows, two-letter weekdays, red weekends; rental
+  period with a "v" icon and a list as wide as the field.
+- The report carries a table of PASSED checks deliberately not reproduced, with reasons.
+
+## Stage 2 — Defects from Check List Web
+Each is its own flag, off by default; the API answers correctly unless stated.
+
+| Flag | Bug | What breaks |
+|---|---|---|
+| BUG_HEADER_SEARCH_PLACEHOLDER | SSI-4 | header "Order Number" placeholder reads "Enter order number" |
+| BUG_STATUS_SEARCH_ENTER (exists) | SSI-5 | unchanged |
+| BUG_TRACK_NO_IMAGE | SSI-6 | no picture on "order not found" (the text stays) |
+| BUG_ORDER_HOVER_VULPTEX | SSI-7 | header "Order" darkens on hover (`#000000`) instead of lightening — Firefox only |
+| BUG_TRACK_WRONG_STATION | SSI-10 | `/track` shows the next station by number (the first after the last), with its colour |
+| BUG_TRACK_PERIOD_GROUP | SSI-12 | "Rental Period" sits in the third group |
+| BUG_TRACK_DATE_MINUS_DAY | SSI-13 | delivery date on `/track` is one day early |
+| BUG_TRACK_EMPTY_COLOR | SSI-14 | no colour → the value reads `null` |
+| BUG_TRACK_EMPTY_COMMENT | SSI-15 | no comment → the value reads `undefined` |
+| BUG_TRACK_NO_WRAP | SSI-16 | long values do not wrap and stick out of the block |
+| BUG_STATUS_ON_SITE_SKIPPED | SSI-19 | after finish status 2 holds until `PICKUP_MINUTES`, then 4 (API and page) |
+| BUG_CANCELED_MODAL_FULLSCREEN | SSI-21, SSI-22 | the "Order canceled…" modal is full-screen |
+| BUG_DELAYED_ONE_DAY_LATE | SSI-27 | "Autopilot delayed" comes a day late (API and page) |
+| BUG_ENDED_STATUS_4_ACTIVE | SSI-28 | after the rental ends status 4 stays highlighted with 5, with "Rental ends on…" |
+
+Not seeded: SSI-3, 8, 9, 11, 17, 18, 20, 23, 24 (pixel-level layout, or the check was SKIPPED).
+
+## Stage 3 — Defects from Field Validation
+One implementation of the field rules, so each defect acts in the form and in `POST /api/v1/orders`.
+
+| Flag | What breaks |
+|---|---|
+| BUG_FORM_NAME_DASH | Name with a hyphen is rejected ("Meetra-Koth") |
+| BUG_FORM_LAST_NAME_16 | Last Name accepts 16 characters ("Grandmoffftarkin"); 17 still rejected |
+| BUG_FORM_ADDRESS_REQUIRED | an empty Address is accepted (1–4 characters still rejected) |
+| BUG_FORM_ADDRESS_50 | Address of exactly 50 characters is rejected |
+| BUG_FORM_PHONE_12 | Phone of 12 characters is rejected ("+38160123456"); 10 and 11 pass |
+| BUG_FORM_COMMENT_CHARSET | Comment accepts Cyrillic, other scripts and quotes |
+| BUG_FORM_COMMENT_LENGTH | Comment has no upper limit |
+| BUG_FORM_DATE_TODAY | today can be picked, typed and sent to the API; yesterday cannot |
+
+The checklist's 90-character comment contains apostrophes, so verbatim it passes only with both
+COMMENT flags; the length flag alone is checked with the 25-character string and a 90-character
+string of allowed characters.
+
+## Stage 4 — API reconciliation, README, finish
+- Every failed item SSI-29…SSI-61 verbatim: with the flag 201 (SSI-39: 500), without 400.
+  A whitespace-only login, password or firstName stays 400 even with the flag (API 4.12, 5.8,
+  6.10 passed in 2023).
+- README: **Origin** column in Known defects (`SSI-n`, `Field Validation 2023`, `training stand`,
+  `new`), a "not seeded" table with reasons, an "Environments" paragraph ("Beskar, 1920×1080" =
+  Chrome, "Vulptex Browser, 1280×720" = Firefox), updated rules and testids.
+- Regression with every flag off, then every new flag on its own. CI green → PR ready.
+
+## Out of scope
+Tests, Allure on Pages, the autopilot mobile app, new pages.

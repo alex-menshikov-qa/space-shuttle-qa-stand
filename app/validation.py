@@ -8,7 +8,7 @@ import re
 from datetime import date
 from typing import Any
 
-from app import strings
+from app import defects, strings
 
 # "something@something.something" without spaces. Deliberately simple: the same
 # pattern runs in the browser, so API and UI accept exactly the same emails.
@@ -95,6 +95,7 @@ def email_only_errors(email: str) -> dict[str, str]:
 
 def client_rules() -> dict:
     """Everything forms.js needs to run the same checks in the browser."""
+    patterns = order_patterns()
     return {
         "emailPattern": EMAIL_PATTERN,
         "nameMax": NAME_MAX_LENGTH,
@@ -102,11 +103,11 @@ def client_rules() -> dict:
         "passwordMin": PASSWORD_MIN_LENGTH,
         "passwordMax": PASSWORD_MAX_LENGTH,
         "order": {
-            "namePattern": ORDER_NAME_PATTERN,
-            "lastNamePattern": ORDER_LAST_NAME_PATTERN,
-            "addressPattern": ORDER_ADDRESS_PATTERN,
-            "phonePattern": ORDER_PHONE_PATTERN,
-            "commentPattern": ORDER_COMMENT_PATTERN,
+            "namePattern": patterns["firstName"],
+            "lastNamePattern": patterns["lastName"],
+            "addressPattern": patterns["address"],
+            "phonePattern": patterns["phone"],
+            "commentPattern": patterns["comment"],
             "messages": {
                 "firstName": strings.ORDER_NAME_INVALID,
                 "lastName": strings.ORDER_LAST_NAME_INVALID,
@@ -159,14 +160,34 @@ def autopilot_name_valid(value: Any) -> bool:
 
 # --- Orders (API and the order form) ------------------------------------------
 
+# The rules as they must be. order_patterns() is what is actually applied.
 ORDER_NAME_PATTERN = r"^[A-Za-z -]{2,15}$"
 ORDER_LAST_NAME_PATTERN = r"^[A-Za-z]{2,15}$"
 ORDER_ADDRESS_PATTERN = r"^[A-Za-z0-9 .,-]{5,50}$"
 ORDER_PHONE_PATTERN = r"^[0-9+]{10,12}$"
-ORDER_COMMENT_PATTERN = r"^[A-Za-z .,-]{0,24}$"
+ORDER_COMMENT_PATTERN = r"^[A-Za-z0-9 .,-]{0,24}$"
 RENT_TIME_MIN = 1
 RENT_TIME_MAX = 7
 ORDER_COLORS = ("PINKY_SWEAR", "GRAY_RAINBOW")
+
+
+def order_patterns() -> dict[str, str]:
+    """The text-field patterns in force: the canon, bent by the seeded
+    BUG_FORM_* defects. One source for the API, the server and the browser,
+    so a defect acts in the form and in POST /orders alike. Every pattern
+    works unchanged in Python and in JavaScript."""
+    on = defects.is_enabled
+    address_max = 49 if on("FORM_ADDRESS_50") else 50
+    address = rf"[A-Za-z0-9 .,-]{{5,{address_max}}}"
+    comment_chars = r"[\s\S]" if on("FORM_COMMENT_CHARSET") else "[A-Za-z0-9 .,-]"
+    comment_length = "*" if on("FORM_COMMENT_LENGTH") else "{0,24}"
+    return {
+        "firstName": r"^[A-Za-z ]{2,15}$" if on("FORM_NAME_DASH") else ORDER_NAME_PATTERN,
+        "lastName": r"^[A-Za-z]{2,16}$" if on("FORM_LAST_NAME_16") else ORDER_LAST_NAME_PATTERN,
+        "address": f"^(?:{address})?$" if on("FORM_ADDRESS_REQUIRED") else f"^{address}$",
+        "phone": r"^[0-9+]{10,11}$" if on("FORM_PHONE_12") else ORDER_PHONE_PATTERN,
+        "comment": f"^{comment_chars}{comment_length}$",
+    }
 
 
 def _is_int(value: Any) -> bool:
@@ -183,33 +204,37 @@ def parse_delivery_date(value: Any) -> date | None:
         return None
 
 
-def order_errors(data: dict[str, Any], station_numbers: set[int], tomorrow: date) -> dict[str, str]:
+def order_errors(
+    data: dict[str, Any], station_numbers: set[int], earliest_date: date
+) -> dict[str, str]:
     """Return {field: message} for every invalid order field, in form order.
 
     Expects the address already trimmed. `comment` and `color` are optional
-    (missing, null, "" / [] all mean "none").
+    (missing, null, "" / [] all mean "none"). `earliest_date` is the first
+    delivery date that may be ordered.
     """
+    patterns = order_patterns()
     delivery_date = parse_delivery_date(data.get("deliveryDate"))
     comment = data.get("comment")
     color = data.get("color")
     return _collect(
         firstName=None
-        if _matches(ORDER_NAME_PATTERN, data.get("firstName"))
+        if _matches(patterns["firstName"], data.get("firstName"))
         else strings.ORDER_NAME_INVALID,
         lastName=None
-        if _matches(ORDER_LAST_NAME_PATTERN, data.get("lastName"))
+        if _matches(patterns["lastName"], data.get("lastName"))
         else strings.ORDER_LAST_NAME_INVALID,
         address=None
-        if _matches(ORDER_ADDRESS_PATTERN, data.get("address"))
+        if _matches(patterns["address"], data.get("address"))
         else strings.ORDER_ADDRESS_INVALID,
         station=None
         if _is_int(data.get("station")) and data["station"] in station_numbers
         else strings.ORDER_STATION_INVALID,
         phone=None
-        if _matches(ORDER_PHONE_PATTERN, data.get("phone"))
+        if _matches(patterns["phone"], data.get("phone"))
         else strings.ORDER_PHONE_INVALID,
         deliveryDate=None
-        if delivery_date is not None and delivery_date >= tomorrow
+        if delivery_date is not None and delivery_date >= earliest_date
         else strings.ORDER_DATE_INVALID,
         rentTime=None
         if _is_int(data.get("rentTime")) and RENT_TIME_MIN <= data["rentTime"] <= RENT_TIME_MAX
@@ -223,6 +248,6 @@ def order_errors(data: dict[str, Any], station_numbers: set[int], tomorrow: date
         )
         else strings.ORDER_COLOR_INVALID,
         comment=None
-        if comment is None or _matches(ORDER_COMMENT_PATTERN, comment)
+        if comment is None or _matches(patterns["comment"], comment)
         else strings.ORDER_COMMENT_INVALID,
     )

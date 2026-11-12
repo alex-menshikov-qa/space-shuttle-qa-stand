@@ -118,7 +118,7 @@ longer found by track or listed.
 | `deliveryDate` | `YYYY-MM-DD`, not earlier than tomorrow (in `STAND_TZ`) | Enter a valid date |
 | `rentTime` | integer 1–7 (days) | Enter a valid rental period |
 | `color` | optional; `[]`, `["PINKY_SWEAR"]`, `["GRAY_RAINBOW"]` or both | Enter a valid color |
-| `comment` | optional; Latin letters, space, hyphen, dot, comma; up to 24 | Enter a valid comment |
+| `comment` | optional; Latin letters, digits, space, hyphen, dot, comma; up to 24 | Enter a valid comment |
 
 `track` is a random unique 5-digit number. A canceled order is no longer found or listed.
 
@@ -235,7 +235,9 @@ Forms have `novalidate` and no `maxlength`: every error is our own DOM element u
 One page, two steps; the page posts to `POST /api/v1/orders`, so the form and the API share the
 field rules and messages listed under [Order fields](#autopilot-station-and-order-api).
 Placeholders are the field names; required fields start with `*`. An invalid field gets its
-message under it and a red border.
+message under it and a red border. Every field keeps an empty line for that message, so the form
+does not move when one appears. Field borders: gray `#8c959f` untouched, blue `#0969da` in
+focus, black `#1a1a1a` once the value has passed its check, red `#cf222e` on an error.
 
 **Step 1, "For Whom is the Shuttle":** Name, Last Name, Address, Shuttle Station, Phone, **Next**.
 Fields are checked when they lose focus and on **Next**; with errors the form stays on step 1.
@@ -248,23 +250,32 @@ dot in its line color; a station counts only when picked from the list by click.
 - **When to Bring the Shuttle** — a date picker that opens on the current month with days before
   tomorrow disabled. The date can also be typed, as `DD.MM.YYYY`; a malformed, non-existent or too
   early date gives "Enter a valid date". "Today" is the stand's (`STAND_TZ`), not the browser's.
+  Once a complete date is typed the calendar closes (a click on the field opens it again).
+  The calendar drops down under the field, flush with its right edge: month and year in bold with
+  the month arrows to their right, weekdays as `MO` … `SU`, Saturdays and Sundays in red. Picking
+  a day puts it into the field at once and the field keeps the focus (blue border).
 - **Rental Period** — a custom dropdown (a `<button>` and a list, not a `<select>`): "one day" … "seven days".
-- **Shuttle Color** — checkboxes "pinky swear" and "gray rainbow": both, one or none.
+- **Shuttle Color** — checkboxes "pinky swear" and "gray rainbow": both, one or none. A colour that
+  is not ticked stays gray.
 - **Comment for Autopilot** — optional.
 - **Back** returns to step 1 with all data kept; **Order** validates step 2.
 
 With no errors **Order** opens the modal "Do you want to place the order?" (**Yes** / **No**).
-**Yes** places the order and shows "Order number NNNNN. Write it down: it will come in handy to
-track the status" with **View Status** → `/track?t=NNNNN`.
+**Yes** places the order and shows "Order number NNNNN." (large) and, below it, "Write it down: it
+will come in handy to track the status" (smaller) with **View Status** → `/track?t=NNNNN`.
 
-The station list, the date picker and the period list open in the page flow: they push the rest
-of the form down and never cover another field.
+The station list and the period list open in the page flow: they push the rest of the form down
+and never cover another field. The calendar is a drop-down over the form: opening or closing it
+moves nothing.
 
 ### Order status
 
-`/track?t=<number>` has three variants: no number (search row only), found, not found (HTTP 404 with
-"There is no such order. Are you sure you entered the correct number?"). The search row — the
-**Order Number** field and **View**, by click or Enter — is present in all of them.
+`/track?t=<number>` has three variants: no number (search row only), found, not found. The search
+row — the **Order Number** field and **View**, by click or Enter — is present in all of them.
+
+Not found (HTTP 404): under the search row a picture in a black frame — a shuttle lying on the
+runway, both wings off — and, centred over its top, "There is no such order." (large) with "Are you
+sure you entered the correct number?" (smaller) below.
 
 A found order shows its data in three groups (Name, Last Name, Address, Shuttle Station with its
 colored dot, Phone · When to Bring the Shuttle, Rental Period · Shuttle Color, Comment for
@@ -280,11 +291,21 @@ Autopilot; an empty comment or color keeps its caption with an empty value) and 
 | — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 | — |
 
 Every status is an element with `data-state` = `done` / `current` / `upcoming` and
-`data-current` = `true` / `false`. The page is rendered on the server: reload it to see a new status.
+`data-current` = `true` / `false`. Its circle (`-marker`) holds the status number, or `✓` once the
+status is behind. The current status is black, the others gray, "Autopilot delayed" red. The page
+is rendered on the server: reload it to see a new status.
 
-**Cancel order** is shown until an autopilot accepts the order: modal "Do you want to cancel the
-order?" with **Back** (closes the modal, the order stays) and **Cancel** → "Order canceled. Come
-back, we are always waiting for you :)" with **Okay** → `/`. A canceled order is no longer found.
+**Cancel order** works until an autopilot accepts the order; after that the button stays on the
+page, disabled. It opens the modal "Do you want to cancel the order?" with **Back** (closes the
+modal, the order stays) and **Cancel** → a modal of the same size: "Order canceled." (large), "Come
+back, we are always waiting for you :)" (smaller) and **Okay** → `/`. A canceled order is no
+longer found.
+
+**Colours.** Black is `#1a1a1a`. Primary buttons (Order, Next, View, View Status, Okay, Back in the
+cancel modal, …) are black with white text; Back on step 2, Cancel order and Cancel in the modal
+are white with a black border and black text; Order Status in the header is transparent and does
+not react to the pointer. Under the pointer **Order** becomes `#333333` in the header and on the
+landing, and `#444444` on step 2 of the form.
 
 ### Shipyard
 
@@ -335,9 +356,9 @@ Pattern: `<page>-<element>-<kind>`.
 | `/shipyard` order modal | `shipyard-order-modal` (also `data-number`), `shipyard-order-modal-text`, `shipyard-order-modal-total`, `shipyard-order-modal-close-button` |
 | `/order` step 1 | `order-form`, `order-step-1`, `order-name-input`, `order-last-name-input`, `order-address-input`, `order-station-input`, `order-station-list`, `order-station-option-<number>`, `order-phone-input`, `order-next-button`; errors `order-name-error`, `order-last-name-error`, `order-address-error`, `order-station-error`, `order-phone-error` |
 | `/order` step 2 | `order-step-2`, `order-date-input`, `order-datepicker`, `order-datepicker-prev-button`, `order-datepicker-month`, `order-datepicker-next-button`, `order-datepicker-days`, `order-datepicker-day-<YYYY-MM-DD>`, `order-period-dropdown`, `order-period-value`, `order-period-list`, `order-period-option-<1…7>`, `order-color-group`, `order-color-pinky-swear-checkbox`, `order-color-gray-rainbow-checkbox`, `order-comment-input`, `order-back-button`, `order-submit-button`; errors `order-date-error`, `order-period-error`, `order-comment-error`, `order-form-error` |
-| `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`), `order-view-status-button` |
-| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message`, `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-title` and `-caption` (status 5 has a caption only while current) |
-| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-back-button`, `track-cancel-confirm-button`, `track-canceled-modal`, `track-canceled-text`, `track-canceled-ok-button` |
+| `/order` modals | `order-confirm-modal`, `order-confirm-text`, `order-confirm-yes-button`, `order-confirm-no-button`, `order-success-modal`, `order-success-text` (also `data-track`; wraps `order-success-title`, `order-success-note`), `order-view-status-button` |
+| `/track` | `track-search-form`, `track-number-input`, `track-view-button`, `track-not-found-message` (wraps `track-not-found-image`, `track-not-found-title`, `track-not-found-hint`), `track-order` (also `data-track`), `track-group-1`, `track-group-2`, `track-group-3`, `track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-dot` (also `data-color`), `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`, `track-statuses`, `track-status-<1…5>`, `track-status-delayed`, each with `-marker`, `-title` and `-caption` (status 5 has a caption only while current) |
+| `/track` cancel | `track-cancel-button`, `track-cancel-modal`, `track-cancel-text`, `track-cancel-error`, `track-cancel-back-button`, `track-cancel-confirm-button`, `track-canceled-modal`, `track-canceled-text` (wraps `track-canceled-title`, `track-canceled-note`), `track-canceled-ok-button` |
 | 404 | `not-found-message`, `not-found-home-link` |
 | `/register` | `register-form`, `register-name-input`, `register-name-error`, `register-email-input`, `register-email-error`, `register-password-input`, `register-password-error`, `register-submit-button`, `register-login-link` |
 | `/login` | `login-form`, `login-form-error`, `login-email-input`, `login-email-error`, `login-password-input`, `login-password-error`, `login-submit-button`, `login-register-link`, `login-forgot-password-link` |
@@ -424,34 +445,94 @@ docker-compose.yml  db + app
 
 ## Known defects
 
-The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them.
+The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them. Most of them
+are the bugs found by hand in this product in 2023; **Origin** says where each comes from:
+`SSI-n` — a bug report from the 2023 checklists (Web: SSI-3…SSI-28, API: SSI-29…SSI-62);
+`Field Validation 2023` — a failed check of the order-form field table (those had no SSI numbers);
+`training stand` — a bug of the training stand the first tests were written against;
+`new` — a defect that first appeared on this stand.
+
 Each defect is off by default and is switched on with `BUG_<NAME>=1` in `.env`
 (registry: `app/defects.py`). A misspelled `BUG_*` name or a value other than
 `1/true/yes/on` or `0/false/no/off` stops the stand from starting, so a typo can never
 silently switch a defect off.
 
-| Flag | Area | What it breaks (with the flag) | Expected behaviour (without) |
-|---|---|---|---|
-| `BUG_AUTOPILOT_LOGIN_RULES` | API | `POST /autopilot` creates an autopilot whose `login` breaks the rules: Cyrillic, 1 or 11 characters, spaces, digits, a JSON number | `400` "Insufficient data to create an account" |
-| `BUG_AUTOPILOT_PASSWORD_RULES` | API | `POST /autopilot` accepts the passwords `"123"`, `"12345"`, `"lttr"` and a JSON number (`1234`) | `400` |
-| `BUG_AUTOPILOT_NAME_RULES` | API | `POST /autopilot` accepts the first names `"K"`, 11 characters, `"1234"`, names with spaces | `400` |
-| `BUG_MISSING_NAME_409` | API | `POST /autopilot` without `firstName` → `409` "This login is already in use. Please try another one" | `400` "Insufficient data to create an account" |
-| `BUG_LOGIN_NO_PASSWORD_504` | API | `POST /autopilot/login` without `password` → `504` "Service unavailable" | `400` "Insufficient data to log in" |
-| `BUG_TRACK_DELETED_AUTOPILOT` | API, UI | an order accepted by a since-deleted autopilot is still found by track: `GET /orders/track` → `200`, `/track` shows it | `404` "Order not found"; "There is no such order…" |
-| `BUG_CANCELED_ORDER_VISIBLE` | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order. Are you sure you entered the correct number?"; `404` |
-| `BUG_STATUS_SEARCH_ENTER` | UI | Enter in the header **Order Number** field does nothing (the **Go!** button still works) | Enter opens `/track?t=<number>` |
-| `BUG_ADD_BUTTON_STALE_TOTAL` | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
+| Flag | Origin | Area | What it breaks (with the flag) | Expected behaviour (without) |
+|---|---|---|---|---|
+| `BUG_AUTOPILOT_LOGIN_RULES` | SSI-29…SSI-40 | API | `POST /autopilot` creates an autopilot whose `login` breaks the rules: Cyrillic or Chinese, 1 or 11+ characters, spaces at the edges or inside, `"***"`, a JSON number (`1234`). `login: true` answers `500` and registers nobody (SSI-39) | `400` "Insufficient data to create an account" |
+| `BUG_AUTOPILOT_PASSWORD_RULES` | SSI-41…SSI-50 | API | `POST /autopilot` accepts the passwords `"123"`, `"12345"`, 41 digits, `"lttr"`, `"****"`, passwords with a space (`" 111"`, `"111 "`, `"11 1"`), a JSON number (`1111`) and `true` | `400` |
+| `BUG_AUTOPILOT_NAME_RULES` | SSI-51…SSI-61 | API | `POST /autopilot` accepts the first names `"K"`, 11+ characters, Chinese, `"1234"`, `"***"`, names with a space at the edges or inside, and `true` | `400` |
+| `BUG_MISSING_NAME_409` | training stand | API | `POST /autopilot` without `firstName` → `409` "This login is already in use. Please try another one" | `400` "Insufficient data to create an account" |
+| `BUG_LOGIN_NO_PASSWORD_504` | training stand | API | `POST /autopilot/login` without `password` → `504` "Service unavailable" | `400` "Insufficient data to log in" |
+| `BUG_TRACK_DELETED_AUTOPILOT` | SSI-62 | API, UI | an order accepted by a since-deleted autopilot is still found by track: `GET /orders/track` → `200`, `/track` shows it | `404` "Order not found"; "There is no such order…" |
+| `BUG_CANCELED_ORDER_VISIBLE` | SSI-25, SSI-26 | UI, API | a canceled order is still shown on `/track` (as "Shuttle in the hangar") and returned by `GET /orders/track` | "There is no such order." / "Are you sure you entered the correct number?"; `404` |
+| `BUG_STATUS_SEARCH_ENTER` | SSI-5 | UI | Enter in the header **Order Number** field does nothing (the **Go!** button still works) | Enter opens `/track?t=<number>` |
+| `BUG_HEADER_SEARCH_PLACEHOLDER` | SSI-4 | UI | the header order search has the placeholder "Enter order number" | "Order Number" |
+| `BUG_TRACK_NO_IMAGE` | SSI-6 | UI | "order not found" has no picture (`track-not-found-image` is absent); the two text lines stay | the picture in a black frame under the search row |
+| `BUG_ORDER_HOVER_VULPTEX` | SSI-7 | UI | **in Firefox only**, the header **Order** button darkens under the pointer: `#1a1a1a` → `#000000` | it lightens to `#333333` in every browser |
+| `BUG_TRACK_WRONG_STATION` | SSI-10 | UI | `/track` shows the next station by number instead of the ordered one (the first station after the last), name and dot colour; the API is right | the ordered station |
+| `BUG_TRACK_PERIOD_GROUP` | SSI-12 | UI | on `/track` **Rental Period** is the first row of the third group | the second row of the second group |
+| `BUG_TRACK_DATE_MINUS_DAY` | SSI-13 | UI | `/track` shows the delivery date one day early; the API is right | the ordered date |
+| `BUG_TRACK_EMPTY_COLOR` | SSI-14 | UI | an order without a colour shows `null` as its **Shuttle Color** | an empty value |
+| `BUG_TRACK_EMPTY_COMMENT` | SSI-15 | UI | an order without a comment shows `undefined` as its **Comment for Autopilot** | an empty value |
+| `BUG_TRACK_NO_WRAP` | SSI-16 | UI | values on `/track` never wrap: a 50-character address stays on one line and runs out of the data block | long values wrap inside the block |
+| `BUG_STATUS_ON_SITE_SKIPPED` | SSI-19 | API, UI | after finish the order stays `heading` (status 2) until `PICKUP_MINUTES` pass, then goes straight to `flying` (status 4) | `on_site` (status 3) right after finish |
+| `BUG_CANCELED_MODAL_FULLSCREEN` | SSI-21, SSI-22 | UI | the "Order canceled." window fills the whole screen | the same small centred window as "Do you want to cancel the order?" |
+| `BUG_DELAYED_ONE_DAY_LATE` | SSI-27 | API, UI | an undelivered order becomes `delayed` only after the end of the day **after** the delivery day | after 23:59 of the delivery day |
+| `BUG_ENDED_STATUS_4_ACTIVE` | SSI-28 | UI | after the rental has ended status 4 stays highlighted together with status 5 and keeps "Rental ends on…"; the API says `ended` | only status 5 is current; status 4 is gray with "Until the rental is over" |
+| `BUG_FORM_NAME_DASH` | Field Validation 2023 | UI, API | the order **Name** rejects a hyphen: "Meetra-Koth" → "Enter the correct name" | accepted |
+| `BUG_FORM_LAST_NAME_16` | Field Validation 2023 | UI, API | **Last Name** accepts 16 characters ("Grandmoffftarkin"); 17 are still rejected | "Enter the correct last name" from 16 characters |
+| `BUG_FORM_ADDRESS_REQUIRED` | Field Validation 2023 | UI, API | an empty **Address** is accepted (1–4 characters are still rejected) | "Enter the correct address" |
+| `BUG_FORM_ADDRESS_50` | Field Validation 2023 | UI, API | an **Address** of exactly 50 characters is rejected | accepted; 51 is rejected |
+| `BUG_FORM_PHONE_12` | Field Validation 2023 | UI, API | a **Phone** of 12 characters is rejected ("+38160123456"); 10 and 11 pass | accepted; 13 is rejected |
+| `BUG_FORM_COMMENT_CHARSET` | Field Validation 2023 | UI, API | **Comment** accepts any characters: Cyrillic ("Хочу"), other scripts ("我要"), quotes; still up to 24 | "Enter a valid comment" |
+| `BUG_FORM_COMMENT_LENGTH` | Field Validation 2023 | UI, API | **Comment** has no upper limit: 25 and 90 allowed characters pass | "Enter a valid comment" from 25 characters |
+| `BUG_FORM_DATE_TODAY` | Field Validation 2023 | UI, API | today can be picked in the calendar, typed and sent as `deliveryDate`; yesterday cannot | the earliest date is tomorrow |
+| `BUG_FORM_ERROR_LAYOUT_SHIFT` | new | UI | on `/order` an error text that appears under a field pushes the rest of the form down by a line, so a click that leaves an invalid field for **Rental Period** misses and the list does not open | every field keeps an empty line for its error; nothing moves |
+| `BUG_ADD_BUTTON_STALE_TOTAL` | new | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
+
+### Not seeded
+
+These 2023 bug reports are not reproduced. Where the check describes a layout, the stand simply
+has the correct one.
+
+| Bug | Check (Check List Web) | Why not |
+|---|---|---|
+| SSI-3 | 1.2 — gray border of the header **Order Number** field | pixel-level styling of the same field as SSI-4, which is seeded |
+| SSI-8 | 1.24 — a blank line between **View** and the header buttons | pixel-level spacing |
+| SSI-9 | 2.2 — the data block starts slightly to the right of the search field | pixel-level offset |
+| SSI-11 | 2.12 — the dot is level with the station name, two spaces before it | pixel-level spacing |
+| SSI-17 | 3.1 — the status chain is aligned to the right (failed at 1280×720 only) | pixel-level alignment |
+| SSI-18 | 3.20 — a long autopilot name wraps to a second line | the check was SKIPPED in 2023: nothing to reproduce |
+| SSI-20 | 4.8 — the modal buttons are centred (failed at 1920×1080 only) | pixel-level alignment |
+| SSI-23 | 4.17 — **Okay** is at the bottom right of the window | pixel-level alignment |
+| SSI-24 | 4.21 — **Cancel order** is unclickable once an autopilot has the order | the check was SKIPPED in 2023; the stand has the correct behaviour |
+
+### Environments
+
+The 2023 checklists were run in two environments. On this stand they map onto the browsers the
+tests use: **"Beskar, 1920×1080" is Chrome** and **"Vulptex Browser, 1280×720" is Firefox**, each at
+that window size. A bug that showed up in only one of them is seeded for that browser only:
+`BUG_ORDER_HOVER_VULPTEX` (SSI-7) acts in Firefox and never in Chrome.
 
 Notes:
 
-- With a `*_RULES` flag the field accepts any non-empty string or a number; a missing, `null` or
-  empty value is still `400`. A number is stored as its text, so an autopilot created with the
-  password `1234` logs in with `"1234"`. Each flag relaxes its own field only.
+- With a `*_RULES` flag the field accepts any string that is not blank, a number or a boolean; a
+  missing, `null`, empty or whitespace-only value is still `400` (those checks passed in 2023).
+  A number or boolean is stored as its JSON text, so an autopilot created with the password `1111`
+  logs in with `"1111"` and one created with `true` logs in with `"true"`. Each flag relaxes its
+  own field only. The one exception is `login: true` with `BUG_AUTOPILOT_LOGIN_RULES`: `500`
+  "Internal server error" and no autopilot, exactly as SSI-39 was filed.
 - `BUG_MISSING_NAME_409` answers `409` whenever `firstName` is absent or `null`, whatever the other fields are.
 - `BUG_LOGIN_NO_PASSWORD_504` covers a missing, `null` or empty `password`; a missing `login` is still `400`.
 - The two "still found" flags affect the search by track number only: such orders are not
   listed by `GET /orders` and cannot be accepted or finished.
+- The `BUG_FORM_*` flags bend the one set of field rules the form, the server and
+  `POST /api/v1/orders` share, so each acts in the browser and in the API alike. Each changes its
+  own rule only: with `BUG_FORM_COMMENT_LENGTH` alone a long comment must still consist of allowed
+  characters.
 - The enabled flags are logged when the stand starts: `Seeded defects enabled: ...`.
 - An enabled UI defect leaves no marker in the page — no attribute, flag or comment. Page scripts
-  are served through a small preprocessor (`app/web/scripts.py`) that sends a different variant
-  of the fragment, so only the behaviour differs.
+  and the stylesheet are served through a small preprocessor (`app/web/scripts.py`) that sends a
+  different variant of the fragment, and page values are chosen on the server, so only the
+  behaviour or the look differs.

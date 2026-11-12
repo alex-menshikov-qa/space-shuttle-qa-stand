@@ -21,6 +21,10 @@ class LoginTaken(Exception):
     pass
 
 
+class Crashed(Exception):
+    """Seeded defect AUTOPILOT_LOGIN_RULES: a boolean login breaks the service."""
+
+
 class Unavailable(Exception):
     """Seeded defect LOGIN_NO_PASSWORD_504: the service "times out"."""
 
@@ -34,13 +38,15 @@ def get(session: Session, autopilot_id: int) -> Autopilot | None:
 
 
 def _loose(value: Any) -> str | None:
-    """What a "rules are not checked" defect lets through: any non-empty
-    string, or a number (stored as its text). Missing and empty stay invalid."""
+    """What a "rules are not checked" defect lets through: any string with
+    something in it besides whitespace, a number or a boolean (stored as its
+    JSON text: 1234 -> "1234", true -> "true"). Missing, null, empty and
+    whitespace-only values stay invalid, as they were in 2023."""
     if isinstance(value, bool):
-        return None
+        return "true" if value else "false"
     if isinstance(value, int | float):
         return str(value)
-    return value if isinstance(value, str) and value else None
+    return value if isinstance(value, str) and value.strip() else None
 
 
 def _field(value: Any, valid: bool, defect: str) -> str | None:
@@ -51,9 +57,11 @@ def _field(value: Any, valid: bool, defect: str) -> str | None:
 
 
 def create(session: Session, login: Any, password: Any, first_name: Any) -> Autopilot:
-    """Raises InsufficientData or LoginTaken."""
+    """Raises InsufficientData or LoginTaken (and Crashed, with a seeded defect)."""
     if first_name is None and defects.is_enabled("MISSING_NAME_409"):
         raise LoginTaken  # seeded defect: the wrong error for a missing firstName
+    if isinstance(login, bool) and defects.is_enabled("AUTOPILOT_LOGIN_RULES"):
+        raise Crashed  # seeded defect, SSI-39: no 400, and nobody is registered
     login = _field(login, validation.autopilot_login_valid(login), "AUTOPILOT_LOGIN_RULES")
     password = _field(
         password, validation.autopilot_password_valid(password), "AUTOPILOT_PASSWORD_RULES"

@@ -31,7 +31,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     errors.register_handlers(app)
-    # Before the static mount: scripts go through the defect preprocessor.
+    # Before the static mount: scripts and the stylesheet go through the defect preprocessor.
     app.include_router(scripts.router)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(health.router)

@@ -39,9 +39,11 @@
 
   // --- errors ---------------------------------------------------------------
 
-  function showError(control, message) {
+  // Border: red with an error, black for a checked non-empty value, gray otherwise.
+  function showError(control, message, checked) {
     var errorNode = $(control.getAttribute("aria-describedby"));
     control.classList.toggle("field__input--invalid", Boolean(message));
+    control.classList.toggle("field__input--valid", !message && Boolean(checked));
     if (message) control.setAttribute("aria-invalid", "true");
     else control.removeAttribute("aria-invalid");
     errorNode.textContent = message || "";
@@ -121,11 +123,15 @@
     return field === "rentTime" ? periodButton : inputs[field];
   }
 
+  function filled(field) {
+    return field === "rentTime" ? state.rentTime !== null : inputs[field].value !== "";
+  }
+
   function validate(fields) {
     var valid = true;
     fields.forEach(function (field) {
       var message = checks[field]();
-      showError(control(field), message);
+      showError(control(field), message, filled(field));
       if (message) valid = false;
     });
     return valid;
@@ -233,7 +239,7 @@
     if (!item) return;
     state.station = Number(item.getAttribute("data-number"));
     inputs.station.value = item.textContent;
-    showError(inputs.station, null);
+    showError(inputs.station, null, true);
     hideStations();
   });
 
@@ -242,7 +248,7 @@
   var picker = $("order-datepicker");
   var pickerDays = $("order-datepicker-days");
   var pickerMonth = $("order-datepicker-month");
-  var WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  var WEEKDAYS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]; // Monday first; the last two are the weekend
   var MONTHS = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
@@ -253,9 +259,9 @@
     var selected = parseTyped(inputs.deliveryDate.value);
     pickerMonth.textContent = MONTHS[shown.month - 1] + " " + shown.year;
     pickerDays.textContent = "";
-    WEEKDAYS.forEach(function (name) {
+    WEEKDAYS.forEach(function (name, index) {
       var cell = document.createElement("span");
-      cell.className = "datepicker__weekday";
+      cell.className = "datepicker__weekday" + (index > 4 ? " datepicker__weekday--weekend" : "");
       cell.textContent = name;
       pickerDays.appendChild(cell);
     });
@@ -270,6 +276,7 @@
       var button = document.createElement("button");
       button.type = "button";
       button.className = "datepicker__day";
+      if ((offset + day - 1) % 7 > 4) button.classList.add("datepicker__day--weekend");
       button.textContent = day;
       button.id = "order-datepicker-day-" + date;
       button.setAttribute("data-testid", button.id);
@@ -317,7 +324,10 @@
     showError(inputs.deliveryDate, null);
     var typed = parseTyped(inputs.deliveryDate.value);
     if (typed) {
-      shown = { year: Number(typed.slice(0, 4)), month: Number(typed.slice(5, 7)) };
+      // A complete date leaves the calendar nothing to offer: close it, so it
+      // does not cover the fields below. A click on the field opens it again.
+      closePicker();
+      return;
     }
     if (!picker.hidden) renderPicker();
   });
@@ -342,7 +352,7 @@
     var button = event.target.closest(".datepicker__day");
     if (!button || button.disabled) return;
     inputs.deliveryDate.value = display(button.getAttribute("data-date"));
-    showError(inputs.deliveryDate, null);
+    showError(inputs.deliveryDate, null, true);
     closePicker();
   });
 
@@ -365,7 +375,7 @@
     periodList.querySelectorAll(".options__item").forEach(function (other) {
       other.setAttribute("aria-selected", String(other === item));
     });
-    showError(periodButton, null);
+    showError(periodButton, null, true);
     setPeriodOpen(false);
   });
   document.addEventListener("click", function (event) {
@@ -376,6 +386,7 @@
 
   var yesButton = $("order-confirm-yes-button");
   var successText = $("order-success-text");
+  var successTitle = $("order-success-title");
 
   $("order-submit-button").addEventListener("click", function () {
     showFormError(null);
@@ -419,7 +430,7 @@
       })
       .then(function (track) {
         window.Modal.close("order-confirm-modal");
-        successText.textContent = successText.getAttribute("data-template").replace("{track}", track);
+        successTitle.textContent = successTitle.getAttribute("data-template").replace("{track}", track);
         successText.setAttribute("data-track", track);
         $("order-view-status-button").href = "/track?t=" + track;
         window.Modal.open("order-success-modal");
