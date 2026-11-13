@@ -3,19 +3,43 @@
 [![CI](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml/badge.svg)](https://github.com/alex-menshikov-qa/space-shuttle-qa-stand/actions/workflows/ci.yml)
 [![Allure report](https://img.shields.io/badge/Allure-report-blue)](https://alex-menshikov-qa.github.io/space-shuttle-qa-stand/)
 
-**A portfolio test stand, not a production service.** It is a small web app with a JSON API,
-built to be tested: the API and UI automation suites (pytest + Requests / Selenium / Allure)
-run against it instead of third-party training stands. It has stable locators, a documented
-contract, a seeded test user and switchable "known defects" for the tests to catch.
+**A portfolio test stand, not a production service.** It is a small web app with a JSON API and a
+PostgreSQL database, built to be tested: my automation suites in `tests/` (pytest, Selenium,
+Requests, Allure) run against it in CI instead of third-party training stands. It has stable
+locators, a documented contract, a seeded test user, and 31 switchable
+[known defects](#known-defects) for the tests to catch.
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
-itself, steered by its autopilot — a droid employee who takes orders through the API. At the
-Shipyard a customer builds a shuttle from parts. The stand has a rental landing, an order form,
-order tracking, a shuttle builder, a JSON API for all of it, and nine switchable
-[known defects](#known-defects). How it was planned: `PLAN.md`.
+itself, steered by its autopilot, a droid employee who takes orders through the API. At the Shipyard
+a customer builds a shuttle from parts. The stand has a rental landing, an order form, order
+tracking, a shuttle builder, and a JSON API for all of it.
 
 **Stack:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 + Alembic, PostgreSQL 16, argon2,
 JWT, server-rendered Jinja2 + vanilla JS, Docker Compose, GitHub Actions.
+
+## How this stand was built
+
+The stand is my design and Claude Code's implementation.
+
+**Where the requirements come from.** From my own work: the behavior my existing test suites
+expected, and the manual test documentation I wrote in 2023 for Space Shuttle Inc, a fictional
+product I built my QA portfolio around (a mind map of the order form, UI and API checklists, a
+field-validation table). Most of the seeded defects reproduce bugs recorded in that documentation; I
+had found them by hand in the training applications it grew out of.
+
+**What Claude Code did.** It wrote the application, the database schema and migrations, the Docker
+setup, and the CI workflow, stage by stage, to those requirements. Its commits are authored as
+Claude. The plans it worked from, with the decisions made along the way, are in
+[`PLAN.md`](PLAN.md).
+
+**What I did.** I made the product decisions: the storyline, what the stand keeps from the 2023
+documentation, and which bugs become seeded defects. Every stage was reviewed before merge (the
+stage report, an independent AI review of the diff, and checks on the running stand), and I merged
+each pull request myself. Two bugs I later found on the stand as a user are in the backlog as new
+bug reports.
+
+**What is only mine.** Everything in `tests/`. I moved the suites here from my earlier repos myself,
+with Claude as a reviewer; Claude Code does not write tests in this repository.
 
 ## Quick start
 
@@ -492,7 +516,7 @@ docker-compose.yml  db + app
 ## Known defects
 
 The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them. Most of them
-are the bugs found by hand in this product in 2023; **Origin** says where each comes from:
+are bugs recorded in my 2023 manual test documentation; **Origin** says where each comes from:
 `SSI-n` — a bug report from the 2023 checklists (Web: SSI-3…SSI-28, API: SSI-29…SSI-62);
 `Field Validation 2023` — a failed check of the order-form field table (those had no SSI numbers);
 `training stand` — a bug of the training stand the first tests were written against;
