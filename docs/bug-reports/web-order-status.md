@@ -55,7 +55,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** Placeholder text: "Order Number".
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-3: the header order search with the placeholder "Enter order number"](img/ssi-3.png)
 
 ---
 
@@ -80,7 +82,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The order number field has no buttons.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-4: a "Go!" button to the right of the header order number field](img/ssi-4.png)
 
 ---
 
@@ -109,7 +113,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The search starts.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-5: the order number is typed into the header search and Enter is pressed; the home page stays open](img/ssi-5.gif)
 
 ---
 
@@ -138,7 +144,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The image shows the shuttle on a runway, as in the mockup.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-6: the "There is no such order" picture without a runway](img/ssi-6.png)
 
 ---
 
@@ -255,7 +263,11 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The page shows the station "Alderaanian".
 
-**Attachments.** Two screenshots (order form, order status page).
+**Attachments.**
+
+![SSI-10: order form, step 1: the station "Alderaanian" is selected](img/ssi-10-1.png)
+
+![SSI-10: order status page of the same order: the station "Senate District" is shown](img/ssi-10-2.png)
 
 ---
 
@@ -313,7 +325,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The field is called "When to Bring the Shuttle".
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-12: the date row on the order status page is captioned "Delivery Date"](img/ssi-12.png)
 
 ---
 
@@ -342,7 +356,11 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The "When to Bring the Shuttle" field shows August 7.
 
-**Attachments.** Two screenshots (order form, order status page).
+**Attachments.**
+
+![SSI-13: order form, step 2: the delivery date 15.11.2026 is selected](img/ssi-13-1.png)
+
+![SSI-13: order status page of the same order: the date 16.11.2026 is shown](img/ssi-13-2.png)
 
 ---
 
@@ -371,7 +389,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The "Shuttle Color" field is empty.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-14: "Shuttle Color" shows "any" for an order placed without a color](img/ssi-14.png)
 
 ---
 
@@ -400,7 +420,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The "Comment for Autopilot" field is shown and has no content.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-15: no "Comment for Autopilot" row under "Shuttle Color" for an order placed without a comment](img/ssi-15.png)
 
 ---
 
@@ -429,7 +451,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** Long values are wrapped onto a second line.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-16: a 50-character address stays on one line and runs out of the order data block](img/ssi-16.png)
 
 ---
 
@@ -491,7 +515,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The autopilot name is shown in full.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-18: the status reads "Autopilot Av… is heading towards you" for the autopilot Averyveryl](img/ssi-18.png)
 
 ---
 
@@ -524,7 +550,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The "Autopilot is on site" status becomes active.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-19: after the autopilot has finished the order the active status is still "Autopilot is heading towards you", not "Autopilot is on site"](img/ssi-19.png)
 
 ---
 
@@ -585,7 +613,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The window does not take up the whole width of the screen and is the same size as the "Do you want to cancel the order?" window.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-21: the "Order canceled." window fills the whole 1280×720 screen](img/ssi-21.png)
 
 ---
 
@@ -679,7 +709,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The "Cancel order" button is still shown after the autopilot has accepted the order.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-24: an accepted order: the place of the "Cancel order" button under the order data is empty](img/ssi-24.png)
 
 ---
 
@@ -710,7 +742,11 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The canceled order is removed from the system.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-25: the "Order canceled." window after the order has been canceled](img/ssi-25-1.png)
+
+![SSI-25: the canceled order is found by its number again](img/ssi-25-2.png)
 
 ---
 
@@ -741,7 +777,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The canceled order cannot be opened.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-26: the order is canceled, found by its number again, and "Cancel order" opens the confirmation window once more](img/ssi-26.gif)
 
 ---
 
@@ -774,7 +812,11 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The order is shown as overdue only if the autopilot has not completed it by 07.08.2025 23:59.
 
-**Attachments.** Two screenshots (order form, order status page).
+**Attachments.**
+
+![SSI-27: order form, step 2: the delivery date 15.11.2026 is selected](img/ssi-27-1.png)
+
+![SSI-27: order status page on the delivery day: the delivery date is today and the status is already "Autopilot delayed"](img/ssi-27-2.png)
 
 ---
 
@@ -808,7 +850,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The caption stays the same: "Rental ends on <day and month> at <time>".
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-28: after the rental has ended the caption of "Okay, let's fly now" reads "Rental time has ended"](img/ssi-28.png)
 
 ---
 

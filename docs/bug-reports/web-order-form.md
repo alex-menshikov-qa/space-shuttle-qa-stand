@@ -64,7 +64,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The order is placed.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-65: "Yes" is clicked three times in "Do you want to place the order?"; the window stays open and no order is placed](img/ssi-65.gif)
 
 ---
 
@@ -95,7 +97,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The name is accepted and step 2 opens.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-66: the name "Meetra-Koth" is rejected with "Enter the correct name"](img/ssi-66.png)
 
 ---
 
@@ -126,7 +130,11 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept more than 15 characters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-67: step 1: the 16-character last name "Grandmoffftarkin" is accepted without an error](img/ssi-67-1.png)
+
+![SSI-67: "Next" opens step 2, "About Rent"](img/ssi-67-2.png)
 
 ---
 
@@ -157,7 +165,11 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** An empty "Address" field is not accepted; step 2 does not open.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-68: step 1 before "Next": "Address" is left empty](img/ssi-68-1.png)
+
+![SSI-68: "Next" opens step 2, "About Rent"](img/ssi-68-2.png)
 
 ---
 
@@ -188,7 +200,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The address is accepted and step 2 opens.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-69: a 50-character address is rejected with "Enter the correct address"](img/ssi-69.png)
 
 ---
 
@@ -219,7 +233,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The phone number is accepted and step 2 opens.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-70: the 10-character phone "1234567891" is rejected with "Enter the correct phone number"](img/ssi-70.png)
 
 ---
 
@@ -250,7 +266,11 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept more than 12 characters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-71: step 1: the 13-character phone "1234567891011" is accepted without an error](img/ssi-71-1.png)
+
+![SSI-71: "Next" opens step 2, "About Rent"](img/ssi-71-2.png)
 
 ---
 
@@ -281,7 +301,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept a string of Cyrillic letters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-72: order status page of the placed order: the comment is the Cyrillic "Хочу"](img/ssi-72.png)
 
 ---
 
@@ -312,7 +334,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept a string of Chinese characters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-73: order status page of the placed order: the comment is the Chinese "我要"](img/ssi-73.png)
 
 ---
 
@@ -343,7 +367,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept a string of special characters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-74: order status page of the placed order: the comment is two quotation marks](img/ssi-74.png)
 
 ---
 
@@ -374,7 +400,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field does not accept more than 24 characters.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-75: order status page of the placed order: the comment is the 25-character "I want to share this info"](img/ssi-75.png)
 
 ---
 
@@ -406,7 +434,11 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The earliest date that can be selected is tomorrow.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-76: today, 14.11.2026, is picked in the calendar as the delivery date](img/ssi-76-1.png)
+
+![SSI-76: the order with today's delivery date is placed: the "Order number" window](img/ssi-76-2.png)
 
 ---
 
@@ -524,7 +556,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field is highlighted in blue after a date is selected.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-80: a date is picked twice in the calendar; each time "When to Bring the Shuttle" loses its blue border](img/ssi-80.gif)
 
 ---
 
@@ -550,7 +584,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The field is highlighted in blue only when it is in focus, not on hover.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-81: "Shuttle Station" gets a blue border whenever the pointer is over it](img/ssi-81.gif)
 
 ---
 
@@ -576,7 +612,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The border stays blue while typing and turns black only when the value is valid (for example, `Meetra`).
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-82: the border of "Name" turns from blue to black as soon as "1" is typed](img/ssi-82.gif)
 
 ---
 
@@ -602,7 +640,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The border stays blue while typing and turns black only when the value is valid (for example, `Skywalkers`).
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-83: the border of "Last Name" turns from blue to black as soon as "1" is typed](img/ssi-83.gif)
 
 ---
 
@@ -628,7 +668,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The border stays blue while typing and turns black only when the value is valid (for example, `The Royal Promenade Theed`).
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-84: the border of "Address" turns from blue to black as soon as "1" is typed](img/ssi-84.gif)
 
 ---
 
@@ -654,7 +696,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The border stays blue while typing and turns black only when the value is valid (for example, `12345678910`).
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-85: the border of "Phone" turns from blue to black as soon as "1" is typed](img/ssi-85.gif)
 
 ---
 
@@ -679,7 +723,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** Button text: "Next".
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-86: the step 1 button is labeled "Continue"](img/ssi-86.png)
 
 ---
 
@@ -731,7 +777,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The "Shuttle Station" placeholder is light gray, like the other placeholders on the page.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-88: the "Shuttle Station" placeholder is darker than the other placeholders](img/ssi-88.png)
 
 ---
 
@@ -759,7 +807,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The text of the unticked option is gray.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-89: "pinky swear" is ticked; the text of the unticked "gray rainbow" is black](img/ssi-89.png)
 
 ---
 
@@ -815,7 +865,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** Month names start with a capital letter, weekday names are in capitals (for example, "August", "MO").
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-91: the calendar shows the month and weekday names in lowercase](img/ssi-91.png)
 
 ---
 
@@ -843,7 +895,9 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** Weekday names are gray; weekend names and numbers are red.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-92: all text in the calendar is black, weekday names and weekends included](img/ssi-92.png)
 
 ---
 
@@ -899,4 +953,6 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Expected result.** The drop-down list is as wide as the field.
 
-**Attachments.** Screenshot.
+**Attachments.**
+
+![SSI-94: the "Rental Period" list is narrower than the field, at its right edge](img/ssi-94.png)
