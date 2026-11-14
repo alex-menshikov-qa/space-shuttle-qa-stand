@@ -177,6 +177,6 @@ def track(
     if order is not None:
         context.update(_order_view(session, order))
     else:
-        context["runway_lines"] = not defects.is_enabled("TRACK_IMAGE_NO_RUNWAY")
+        context["runway"] = not defects.is_enabled("TRACK_IMAGE_NO_RUNWAY")
     status_code = 404 if number and order is None else 200
     return render(request, "track.html", user, status_code, **context)

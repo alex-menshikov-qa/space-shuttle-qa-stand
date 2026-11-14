@@ -2,15 +2,15 @@
 <svg class="not-found__image" viewBox="0 0 720 400" role="img" aria-label="{{ t.TRACK_NOT_FOUND_IMAGE }}"
      id="track-not-found-image" data-testid="track-not-found-image">
   <rect width="720" height="400" fill="#f6f8fa"/>
-  <rect y="270" width="720" height="130" fill="#59636e"/>
-  {% if runway_lines %}
+  {% if runway %}
+  <!-- the runway: tarmac, its edge, the centre marking, skid marks -->
   <g id="track-not-found-runway" data-testid="track-not-found-runway">
+    <rect y="270" width="720" height="130" fill="#59636e"/>
     <path d="M0 270h720" stroke="#1a1a1a" stroke-width="2"/>
     <path d="M30 336h90M170 336h90M310 336h90M450 336h90M590 336h90" stroke="#ffffff" stroke-width="6"/>
+    <path d="M60 300c90 4 170 6 250 8M80 318c80 2 150 3 220 4" stroke="#1a1a1a" stroke-width="3" opacity=".45" fill="none"/>
   </g>
   {% endif %}
-  <!-- skid marks -->
-  <path d="M60 300c90 4 170 6 250 8M80 318c80 2 150 3 220 4" stroke="#1a1a1a" stroke-width="3" opacity=".45" fill="none"/>
   <!-- left wing, torn off, behind the hull -->
   <g transform="rotate(-14 190 300)">
     <path d="M130 312l110-34 26 8-6 22z" fill="#d1d9e0" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>

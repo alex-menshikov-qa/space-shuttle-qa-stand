@@ -32,7 +32,7 @@ KNOWN_DEFECTS: dict[str, str] = {
     "STATUS_SEARCH_ENTER": "Enter does not start the order search in the header",
     "HEADER_SEARCH_PLACEHOLDER": "the header order search has the wrong placeholder",
     "HEADER_SEARCH_EXTRA_BUTTON": "the header order search has an extra 'Go!' button",
-    "TRACK_IMAGE_NO_RUNWAY": "the 'order not found' picture has no runway lines",
+    "TRACK_IMAGE_NO_RUNWAY": "the 'order not found' picture has no runway",
     "ORDER_HOVER_VULPTEX": "in Firefox the header Order button does not react to hover",
     "TRACK_WRONG_STATION": "the status page shows the next station instead of the ordered one",
     "TRACK_DATE_LABEL": "the status page captions the delivery date 'Delivery Date'",
