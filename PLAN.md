@@ -612,3 +612,11 @@ links to its first one), and the index says that 78 of the 98 are seeded by flag
 
 Out of scope: screenshots and recordings attached to the reports, the checklists and the mind
 map, any change to the application or the tests.
+
+---
+
+# SSI-22 moved to "Not seeded"
+
+`BUG_CANCELED_MODAL_FULLSCREEN` reproduces SSI-21 only: it makes the "Order canceled" window fill
+the screen, while SSI-22 reports a window smaller than the previous one. SSI-22 is now listed
+under Not seeded, so 77 of the 98 reports are seeded by flags and 21 are not.
