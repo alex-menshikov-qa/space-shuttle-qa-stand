@@ -416,7 +416,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Description.** If a value does not fit on one line, it is not wrapped: it runs past the border of the field and covers the field names.
 
-**Precondition.** An order has been placed in which "Name", "Last Name", "Address", "Phone" and "Comment for Autopilot" hold the value `1111111111111111111111111111111111111111111111111111111`.
+**Precondition.** An order has been placed with a 50-character address: `Pharmaceuticals Company Royal Promenade Avenue, 56`.
 
 **Steps to reproduce**
 
@@ -425,7 +425,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 3. Enter the order number in the search field: `252240`.
 4. Submit the number.
 
-**Actual result.** Long values are not wrapped onto a second line.
+**Actual result.** The address is not wrapped onto a second line and runs past the border of the block.
 
 **Expected result.** Long values are wrapped onto a second line.
 
@@ -477,7 +477,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 **Preconditions**
 
 1. An order has been placed.
-2. An autopilot named `Averyverylongnameindeed` is registered.
+2. An autopilot with a 10-character name, `Averyveryl`, is registered.
 3. The autopilot has accepted the order.
 
 **Steps to reproduce**
@@ -755,7 +755,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 | **Area** | Web, order status page |
 | **Environment** | Beskar (1920×1080), Vulptex Browser (1280×720) |
 
-**Description.** An order is treated as overdue a day ahead of time. For example, if the autopilot accepts an order due on August 7 on August 7, the order is already shown as overdue.
+**Description.** An order is shown as overdue a day too early: already on its delivery date, while the autopilot still has time until 23:59.
 
 **Preconditions**
 

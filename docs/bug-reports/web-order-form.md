@@ -813,7 +813,7 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Actual result.** Month and weekday names are in lowercase (for example, "august", "mo").
 
-**Expected result.** Month and weekday names are capitalized (for example, "August", "Mo").
+**Expected result.** Month names start with a capital letter, weekday names are in capitals (for example, "August", "MO").
 
 **Attachments.** Screenshot.
 
