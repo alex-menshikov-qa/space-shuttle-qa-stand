@@ -70,6 +70,8 @@ TIME_SHIFT_INVALID = "Provide days, hours or minutes as numbers"
 
 # --- Generic errors ---
 INTERNAL_ERROR = "Internal server error"
+# Only with the seeded defect AUTOPILOT_LOGIN_RULES (login sent as a boolean).
+AUTOPILOT_CRASH_MESSAGE = "operator does not exist: character varying = boolean"
 
 # --- UI: header ---
 # Logo "Space Shuttle Inc": only "Shuttle" is bold; "Inc" is not part of the link.

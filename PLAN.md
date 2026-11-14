@@ -539,5 +539,62 @@ after stage 0: nine flags, three bugs not seeded.
 - Regression with every flag off, then every changed and new flag on its own. CI green → PR
   ready → report and stop.
 
+## Result: flag → SSI
+45 flags; 41 reproduce bug reports (78 of the 98 reports), 4 have another origin.
+
+| Flag | Origin |
+|---|---|
+| `BUG_AUTOPILOT_LOGIN_RULES` | SSI-29…SSI-40 |
+| `BUG_AUTOPILOT_PASSWORD_RULES` | SSI-41…SSI-50 |
+| `BUG_AUTOPILOT_NAME_RULES` | SSI-51…SSI-61 |
+| `BUG_TRACK_DELETED_AUTOPILOT` | SSI-62 |
+| `BUG_HEADER_SEARCH_PLACEHOLDER` | SSI-3 |
+| `BUG_HEADER_SEARCH_EXTRA_BUTTON` | SSI-4 |
+| `BUG_STATUS_SEARCH_ENTER` | SSI-5 |
+| `BUG_TRACK_IMAGE_NO_RUNWAY` | SSI-6 |
+| `BUG_ORDER_HOVER_VULPTEX` | SSI-7 |
+| `BUG_TRACK_WRONG_STATION` | SSI-10 |
+| `BUG_TRACK_DATE_LABEL` | SSI-12 |
+| `BUG_TRACK_DATE_PLUS_DAY` | SSI-13 |
+| `BUG_TRACK_EMPTY_COLOR` | SSI-14 |
+| `BUG_TRACK_EMPTY_COMMENT` | SSI-15 |
+| `BUG_TRACK_NO_WRAP` | SSI-16 |
+| `BUG_TRACK_AUTOPILOT_NAME_TRUNCATED` | SSI-18 |
+| `BUG_STATUS_ON_SITE_SKIPPED` | SSI-19 |
+| `BUG_CANCELED_MODAL_FULLSCREEN` | SSI-21, SSI-22 |
+| `BUG_TRACK_CANCEL_HIDDEN_ON_ACCEPT` | SSI-24 |
+| `BUG_CANCELED_ORDER_VISIBLE` | SSI-25, SSI-26 |
+| `BUG_DELAYED_ONE_DAY_EARLY` | SSI-27 |
+| `BUG_ENDED_STATUS_4_CAPTION` | SSI-28 |
+| `BUG_FORM_CONFIRM_YES_DEAD` | SSI-65 |
+| `BUG_FORM_NAME_DASH` | SSI-66 |
+| `BUG_FORM_LAST_NAME_16` | SSI-67 |
+| `BUG_FORM_ADDRESS_REQUIRED` | SSI-68 |
+| `BUG_FORM_ADDRESS_50` | SSI-69 |
+| `BUG_FORM_PHONE_10` | SSI-70 |
+| `BUG_FORM_PHONE_13` | SSI-71 |
+| `BUG_FORM_COMMENT_CHARSET` | SSI-72, SSI-73, SSI-74 |
+| `BUG_FORM_COMMENT_LENGTH` | SSI-75 |
+| `BUG_FORM_DATE_PAST` | SSI-76 |
+| `BUG_FORM_DATE_PICK_NO_HIGHLIGHT` | SSI-80 |
+| `BUG_FORM_STATION_HOVER` | SSI-81 |
+| `BUG_FORM_TYPING_BORDER` | SSI-82…SSI-85 |
+| `BUG_FORM_NEXT_LABEL` | SSI-86 |
+| `BUG_FORM_STATION_PLACEHOLDER_DARK` | SSI-88 |
+| `BUG_FORM_COLOR_UNTICKED_BLACK` | SSI-89 |
+| `BUG_FORM_CALENDAR_LOWERCASE` | SSI-91 |
+| `BUG_FORM_CALENDAR_BLACK` | SSI-92 |
+| `BUG_FORM_PERIOD_LIST_NARROW` | SSI-94 |
+| `BUG_MISSING_NAME_409` | training stand |
+| `BUG_LOGIN_NO_PASSWORD_504` | training stand |
+| `BUG_FORM_ERROR_LAYOUT_SHIFT` | new |
+| `BUG_ADD_BUTTON_STALE_TOTAL` | new |
+
+Not seeded (20 reports): SSI-8, 9, 11, 17, 20, 23, 87, 90, 93 (pixel-level layout) · SSI-95 (a
+race) · SSI-77, 78, 79 (by design on the stand) · SSI-96…SSI-102 (no mobile app).
+
+Deviations accepted along the way: `BUG_FORM_DATE_PAST` goes back to 01.01.1000 (the form takes a
+four-digit year); with `BUG_FORM_STATION_HOVER` the hover colour also covers an error border.
+
 ## Out of scope
 Tests; SSI-63 and SSI-64; the mobile app; publishing the bug reports in the repository.
