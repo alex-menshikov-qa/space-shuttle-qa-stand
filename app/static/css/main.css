@@ -100,9 +100,11 @@ a {
   gap: 6px;
 }
 
-.header__status-input {
+/* Compact, as tall as the small header buttons. The selector carries
+   .field__input so it outranks the general field rule declared further down. */
+.field__input.header__status-input {
   width: 150px;
-  padding: 5px 10px;
+  padding: 6px 10px;
   font-size: 14px;
   text-align: left;
 }
