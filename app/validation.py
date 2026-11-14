@@ -181,11 +181,13 @@ def order_patterns() -> dict[str, str]:
     address = rf"[A-Za-z0-9 .,-]{{5,{address_max}}}"
     comment_chars = r"[\s\S]" if on("FORM_COMMENT_CHARSET") else "[A-Za-z0-9 .,-]"
     comment_length = "*" if on("FORM_COMMENT_LENGTH") else "{0,24}"
+    phone_min = 11 if on("FORM_PHONE_10") else 10
+    phone_max = 13 if on("FORM_PHONE_13") else 12
     return {
         "firstName": r"^[A-Za-z ]{2,15}$" if on("FORM_NAME_DASH") else ORDER_NAME_PATTERN,
         "lastName": r"^[A-Za-z]{2,16}$" if on("FORM_LAST_NAME_16") else ORDER_LAST_NAME_PATTERN,
         "address": f"^(?:{address})?$" if on("FORM_ADDRESS_REQUIRED") else f"^{address}$",
-        "phone": r"^[0-9+]{10,11}$" if on("FORM_PHONE_12") else ORDER_PHONE_PATTERN,
+        "phone": rf"^[0-9+]{{{phone_min},{phone_max}}}$",
         "comment": f"^{comment_chars}{comment_length}$",
     }
 

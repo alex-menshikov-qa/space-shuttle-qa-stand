@@ -22,6 +22,7 @@ from app.web.templating import render
 router = APIRouter()
 
 DATE_FORMAT = "%d.%m.%Y"  # the format the order form shows and accepts
+LONG_NAME = 10  # autopilot names from this length on are "long" (the rule allows 2-10)
 
 
 @router.get("/order")
@@ -32,7 +33,10 @@ def order_form(request: Request, user: User | None = Depends(optional_user)) -> 
         "today": clock.today().isoformat(),
         "minDate": orders.earliest_delivery_date().isoformat(),
     }
-    return render(request, "order.html", user, order_config=config)
+    next_label = strings.ORDER_NEXT
+    if defects.is_enabled("FORM_NEXT_LABEL"):
+        next_label = strings.ORDER_NEXT_WRONG
+    return render(request, "order.html", user, order_config=config, next_label=next_label)
 
 
 @dataclass(frozen=True)
@@ -52,36 +56,47 @@ def _format_moment(order: Order) -> tuple[str, str]:
 def status_steps(order: Order) -> list[StatusStep]:
     """The chain of five statuses with the current one marked.
 
-    Every status has a caption; statuses 4 and 5 have a different one (or
-    none) while they are not current. "Delayed" takes the place of step 2
-    (the autopilot should be on its way and is not on site).
+    Every status has a caption. Status 4 says "Until the rental is over"
+    before the flight and "Rental ends on ..." from then on, also once it is
+    passed; status 5 has a caption only while current. "Delayed" takes the
+    place of step 2 (the autopilot should be on its way and is not on site).
     """
     status = orders.status(order)
     name = order.autopilot_first_name
+    shown_name = name
+    if (
+        name
+        and len(name) >= LONG_NAME
+        and defects.is_enabled("TRACK_AUTOPILOT_NAME_TRUNCATED")
+    ):
+        # Seeded defect: a long name is cut to its first two characters.
+        shown_name = name[:2] + strings.TRACK_NAME_ELLIPSIS
     heading = (
-        strings.TRACK_STATUS_HEADING.format(first_name=name)
+        strings.TRACK_STATUS_HEADING.format(first_name=shown_name)
         if name
         else strings.TRACK_STATUS_HEADING_UNASSIGNED
     )
     phone = strings.SUPPORT_PHONE
-    flying_caption = ended_caption = None
+    flying_caption = flown_caption = ended_caption = None
     if order.finished_at is not None:
         day, time = _format_moment(order)
         flying_caption = strings.TRACK_STATUS_FLYING_CAPTION.format(day=day, time=time)
+        flown_caption = flying_caption
+        if defects.is_enabled("ENDED_STATUS_4_CAPTION"):
+            # Seeded defect: a passed status 4 takes the next status's text.
+            flown_caption = strings.TRACK_STATUS_ENDED
         ended_caption = strings.TRACK_STATUS_ENDED_CAPTION.format(first_name=name)
     contact = strings.TRACK_STATUS_HEADING_CAPTION.format(phone=phone)
-    # (key, title, caption while current, caption while not current)
+    hangar = strings.TRACK_STATUS_HANGAR_CAPTION
+    on_site = strings.TRACK_STATUS_ON_SITE_CAPTION
+    upcoming_flight = strings.TRACK_STATUS_FLYING_CAPTION_UPCOMING
+    # (key, title, caption while current, once passed, while still ahead)
     chain = [
-        ("1", strings.TRACK_STATUS_HANGAR, *[strings.TRACK_STATUS_HANGAR_CAPTION] * 2),
-        ("2", heading, contact, contact),
-        ("3", strings.TRACK_STATUS_ON_SITE, *[strings.TRACK_STATUS_ON_SITE_CAPTION] * 2),
-        (
-            "4",
-            strings.TRACK_STATUS_FLYING,
-            flying_caption,
-            strings.TRACK_STATUS_FLYING_CAPTION_INACTIVE,
-        ),
-        ("5", strings.TRACK_STATUS_ENDED, ended_caption, None),
+        ("1", strings.TRACK_STATUS_HANGAR, hangar, hangar, hangar),
+        ("2", heading, contact, contact, contact),
+        ("3", strings.TRACK_STATUS_ON_SITE, on_site, on_site, on_site),
+        ("4", strings.TRACK_STATUS_FLYING, flying_caption, flown_caption, upcoming_flight),
+        ("5", strings.TRACK_STATUS_ENDED, ended_caption, None, None),
     ]
     position = {
         orders.HANGAR: 0,
@@ -92,20 +107,16 @@ def status_steps(order: Order) -> list[StatusStep]:
         orders.ENDED: 4,
     }[status]
     steps = []
-    for index, (key, title, active_caption, inactive_caption) in enumerate(chain):
+    for index, (key, title, current, passed, ahead) in enumerate(chain):
         if index == position and status == orders.DELAYED:
             caption = strings.TRACK_STATUS_DELAYED_CAPTION.format(phone=phone)
             step = StatusStep("delayed", strings.TRACK_STATUS_DELAYED, caption, "current", True)
         elif index == position:
-            step = StatusStep(key, title, active_caption, "current")
-        elif (
-            key == "4" and status == orders.ENDED and defects.is_enabled("ENDED_STATUS_4_ACTIVE")
-        ):
-            # Seeded defect: status 4 stays highlighted next to status 5.
-            step = StatusStep(key, title, active_caption, "current")
+            step = StatusStep(key, title, current, "current")
+        elif index < position:
+            step = StatusStep(key, title, passed, "done")
         else:
-            state = "done" if index < position else "upcoming"
-            step = StatusStep(key, title, inactive_caption, state)
+            step = StatusStep(key, title, ahead, "upcoming")
         steps.append(step)
     return steps
 
@@ -126,28 +137,32 @@ def _order_view(session: Session, order: Order) -> dict:
     """What the status page shows for a found order (seeded defects included)."""
     station_name, station_color = _shown_station(session, order)
     delivery_date = order.delivery_date
-    if defects.is_enabled("TRACK_DATE_MINUS_DAY"):
-        delivery_date -= timedelta(days=1)
+    if defects.is_enabled("TRACK_DATE_PLUS_DAY"):
+        delivery_date += timedelta(days=1)  # seeded defect: one day late
     colors = ", ".join(
         label for value, label in strings.SHUTTLE_COLORS.items() if value in order.color
     )
     if not colors and defects.is_enabled("TRACK_EMPTY_COLOR"):
         colors = strings.TRACK_EMPTY_COLOR_WRONG
-    comment = order.comment
-    if not comment and defects.is_enabled("TRACK_EMPTY_COMMENT"):
-        comment = strings.TRACK_EMPTY_COMMENT_WRONG
+    date_label = strings.ORDER_FIELD_DATE
+    if defects.is_enabled("TRACK_DATE_LABEL"):
+        date_label = strings.TRACK_DATE_LABEL_WRONG
+    accepted = order.accepted_at is not None
     return {
         "steps": status_steps(order),
         "station_name": station_name,
         "station_color": station_color,
         "delivery_date": delivery_date.strftime(DATE_FORMAT),
         "rental_period": strings.RENTAL_PERIODS[order.rent_time - 1],
-        # Canon: Rental Period closes the second group. Seeded defect: it opens the third.
-        "period_group": 3 if defects.is_enabled("TRACK_PERIOD_GROUP") else 2,
+        "date_label": date_label,
         "colors": colors,
-        "comment": comment,
-        # Cancel works until an autopilot accepts the order.
-        "can_cancel": order.accepted_at is None,
+        # Canon: the comment row is always there, empty without a comment.
+        # Seeded defect: without a comment there is no row at all.
+        "comment_row": bool(order.comment) or not defects.is_enabled("TRACK_EMPTY_COMMENT"),
+        # Cancel works until an autopilot accepts the order; after that the
+        # button stays, disabled. Seeded defect: it disappears.
+        "can_cancel": not accepted,
+        "cancel_button": not (accepted and defects.is_enabled("TRACK_CANCEL_HIDDEN_ON_ACCEPT")),
     }
 
 
@@ -165,6 +180,6 @@ def track(
     if order is not None:
         context.update(_order_view(session, order))
     else:
-        context["not_found_image"] = not defects.is_enabled("TRACK_NO_IMAGE")
+        context["runway"] = not defects.is_enabled("TRACK_IMAGE_NO_RUNWAY")
     status_code = 404 if number and order is None else 200
     return render(request, "track.html", user, status_code, **context)

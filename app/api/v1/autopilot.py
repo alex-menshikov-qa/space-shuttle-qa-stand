@@ -7,6 +7,7 @@ field, null or a number all get the documented 400 message.
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app import strings
@@ -29,6 +30,7 @@ def as_object(body: Any) -> dict:
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
+    response_model=OkResponse,
     responses={
         400: {"model": ErrorResponse, "description": "A field is missing or breaks its rule"},
         409: {"model": ErrorResponse, "description": "Login already in use"},
@@ -36,7 +38,7 @@ def as_object(body: Any) -> dict:
 )
 def create(
     body: Any = Body(None, examples=[_CREATE_EXAMPLE]), session: Session = Depends(get_session)
-) -> OkResponse:
+) -> Any:
     """login: 2-10 Latin letters; password: exactly 4 digits (as a string);
     firstName: 2-10 Latin letters. All three are required strings."""
     data = as_object(body)
@@ -47,7 +49,11 @@ def create(
     except autopilots.LoginTaken:
         raise ApiError(409, strings.AUTOPILOT_LOGIN_TAKEN) from None
     except autopilots.Crashed:
-        raise ApiError(500, strings.INTERNAL_ERROR) from None
+        # Seeded defect, SSI-39: the raw database error in a body of its own
+        # shape, not the stand's {"ok": false, "message": ...}.
+        return JSONResponse(
+            status_code=500, content={"code": 500, "message": strings.AUTOPILOT_CRASH_MESSAGE}
+        )
     return OkResponse()
 
 

@@ -25,10 +25,16 @@ NAV_ITEMS = [
     NavItem(label=strings.NAV_SHIPYARD, href="/shipyard", testid="header-shipyard-link"),
 ]
 
+
 def header_search_placeholder() -> str:
     if defects.is_enabled("HEADER_SEARCH_PLACEHOLDER"):
         return strings.NAV_ORDER_NUMBER_WRONG
     return strings.NAV_ORDER_NUMBER
+
+
+def header_search_button() -> bool:
+    """Canon: the header search has no button, Enter starts it. Seeded defect: "Go!"."""
+    return defects.is_enabled("HEADER_SEARCH_EXTRA_BUTTON")
 
 
 templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
@@ -36,6 +42,7 @@ templates.env.globals.update(
     t=strings,
     nav_items=NAV_ITEMS,
     header_search_placeholder=header_search_placeholder,
+    header_search_button=header_search_button,
     validation_rules=validation.client_rules(),
 )
 

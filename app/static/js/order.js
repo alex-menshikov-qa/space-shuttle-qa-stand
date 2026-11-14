@@ -248,11 +248,20 @@
   var picker = $("order-datepicker");
   var pickerDays = $("order-datepicker-days");
   var pickerMonth = $("order-datepicker-month");
-  var WEEKDAYS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]; // Monday first; the last two are the weekend
+  // Monday first; the last two are the weekend.
+  // #if FORM_CALENDAR_LOWERCASE
+  var WEEKDAYS = ["mo", "tu", "we", "th", "fr", "sa", "su"];
+  var MONTHS = [
+    "january", "february", "march", "april", "may", "june",
+    "july", "august", "september", "october", "november", "december",
+  ];
+  // #else
+  var WEEKDAYS = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
   var MONTHS = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
+  // #endif
   var shown = { year: Number(config.today.slice(0, 4)), month: Number(config.today.slice(5, 7)) };
 
   function renderPicker() {
@@ -354,6 +363,9 @@
     inputs.deliveryDate.value = display(button.getAttribute("data-date"));
     showError(inputs.deliveryDate, null, true);
     closePicker();
+    // #if FORM_DATE_PICK_NO_HIGHLIGHT
+    inputs.deliveryDate.blur();
+    // #endif
   });
 
   // --- rental period dropdown -----------------------------------------------------
@@ -415,6 +427,8 @@
     };
   }
 
+  // #if FORM_CONFIRM_YES_DEAD
+  // #else
   yesButton.addEventListener("click", function () {
     yesButton.disabled = true;
     fetch("/api/v1/orders", {
@@ -443,4 +457,5 @@
         yesButton.disabled = false;
       });
   });
+  // #endif
 })();

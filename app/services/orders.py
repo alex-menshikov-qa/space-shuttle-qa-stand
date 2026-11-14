@@ -17,6 +17,9 @@ from app import clock, defects, validation
 from app.config import get_settings
 from app.models import Autopilot, Order, Station
 
+# The earliest date the form can express (a four-digit year).
+ANY_DATE = date(1000, 1, 1)
+
 TRACK_MIN = 10000
 TRACK_MAX = 99999
 
@@ -71,8 +74,8 @@ def status(order: Order) -> str:
         # Seeded defect: "on site" never comes, the previous status holds.
         return HEADING if defects.is_enabled("STATUS_ON_SITE_SKIPPED") else ON_SITE
     deadline = order.delivery_date
-    if defects.is_enabled("DELAYED_ONE_DAY_LATE"):
-        deadline += timedelta(days=1)  # seeded defect: a whole extra day of grace
+    if defects.is_enabled("DELAYED_ONE_DAY_EARLY"):
+        deadline -= timedelta(days=1)  # seeded defect: late from 00:00 of the delivery day
     if now >= clock.end_of_day(deadline):
         return DELAYED
     return HEADING if order.accepted_at is not None else HANGAR
@@ -80,8 +83,8 @@ def status(order: Order) -> str:
 
 def earliest_delivery_date() -> date:
     """The first day a shuttle can be ordered for: tomorrow."""
-    if defects.is_enabled("FORM_DATE_TODAY"):
-        return clock.today()  # seeded defect: today is accepted as well
+    if defects.is_enabled("FORM_DATE_PAST"):
+        return ANY_DATE  # seeded defect: today and every past date are accepted
     return clock.tomorrow()
 
 

@@ -100,9 +100,11 @@ a {
   gap: 6px;
 }
 
-.header__status-input {
+/* Compact, as tall as the small header buttons. The selector carries
+   .field__input so it outranks the general field rule declared further down. */
+.field__input.header__status-input {
   width: 150px;
-  padding: 5px 10px;
+  padding: 6px 10px;
   font-size: 14px;
   text-align: left;
 }
@@ -185,6 +187,27 @@ a {
   border-color: var(--accent);
 }
 
+/* #if FORM_TYPING_BORDER */
+#order-name-input:focus:not(:placeholder-shown),
+#order-last-name-input:focus:not(:placeholder-shown),
+#order-address-input:focus:not(:placeholder-shown),
+#order-phone-input:focus:not(:placeholder-shown) {
+  border-color: var(--text);
+}
+/* #endif */
+
+/* #if FORM_STATION_HOVER */
+#order-station-input:hover {
+  border-color: var(--accent);
+}
+/* #endif */
+
+/* #if FORM_STATION_PLACEHOLDER_DARK */
+#order-station-input::placeholder {
+  color: var(--muted);
+}
+/* #endif */
+
 .field__error,
 .form__error {
   margin: 0;
@@ -240,8 +263,8 @@ a {
 /* #if ORDER_HOVER_VULPTEX */
 @supports (-moz-appearance: none) {
   .header .button--order:hover {
-    background: #000000;
-    border-color: #000000;
+    background: var(--text);
+    border-color: var(--text);
   }
 }
 /* #endif */
@@ -404,6 +427,13 @@ a {
   border-radius: 6px;
 }
 
+/* #if FORM_PERIOD_LIST_NARROW */
+#order-period-list {
+  width: 50%;
+  margin-left: auto;
+}
+/* #endif */
+
 .options__item {
   display: flex;
   align-items: center;
@@ -561,6 +591,13 @@ a {
   color: var(--text);
 }
 
+/* #if FORM_CALENDAR_BLACK */
+.datepicker__weekday {
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--text);
+}
+/* #else */
 .datepicker__weekday {
   padding: 4px 0;
   font-size: 13px;
@@ -571,6 +608,7 @@ a {
 .datepicker__day--weekend {
   color: var(--error);
 }
+/* #endif */
 
 .datepicker__day {
   padding: 6px 0;
@@ -631,6 +669,12 @@ a {
 .checks__item:has(input:checked) {
   color: var(--text);
 }
+
+/* #if FORM_COLOR_UNTICKED_BLACK */
+.checks:has(input:checked) .checks__item {
+  color: var(--text);
+}
+/* #endif */
 
 /* --- Modal --- */
 
