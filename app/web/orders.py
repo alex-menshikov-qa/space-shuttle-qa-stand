@@ -82,9 +82,6 @@ def status_steps(order: Order) -> list[StatusStep]:
         day, time = _format_moment(order)
         flying_caption = strings.TRACK_STATUS_FLYING_CAPTION.format(day=day, time=time)
         flown_caption = flying_caption
-        if defects.is_enabled("ENDED_STATUS_4_CAPTION"):
-            # Seeded defect: a passed status 4 takes the next status's text.
-            flown_caption = strings.TRACK_STATUS_ENDED
         ended_caption = strings.TRACK_STATUS_ENDED_CAPTION.format(first_name=name)
     contact = strings.TRACK_STATUS_HEADING_CAPTION.format(phone=phone)
     hangar = strings.TRACK_STATUS_HANGAR_CAPTION
@@ -113,6 +110,9 @@ def status_steps(order: Order) -> list[StatusStep]:
             step = StatusStep("delayed", strings.TRACK_STATUS_DELAYED, caption, "current", True)
         elif index == position:
             step = StatusStep(key, title, current, "current")
+        elif index < position and key == "4" and defects.is_enabled("ENDED_STATUS_4_AS_5"):
+            # Seeded defect: a passed status 4 repeats status 5, title and caption.
+            step = StatusStep(key, strings.TRACK_STATUS_ENDED, ended_caption, "done")
         elif index < position:
             step = StatusStep(key, title, passed, "done")
         else:

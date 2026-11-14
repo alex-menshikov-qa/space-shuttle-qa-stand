@@ -712,16 +712,23 @@ a {
   margin-top: auto;
 }
 
-/* #if CANCELED_MODAL_FULLSCREEN */
-#track-canceled-modal {
-  padding: 0;
+/* #if CANCELED_MODAL_SIZE */
+#track-canceled-modal .modal__dialog {
+  width: 280px;
+  min-height: 146px;
 }
 
-#track-canceled-modal .modal__dialog {
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  border-radius: 0;
+@media (max-width: 1280px) {
+  #track-canceled-modal {
+    padding: 0;
+  }
+
+  #track-canceled-modal .modal__dialog {
+    width: 100%;
+    max-width: none;
+    min-height: 220px;
+    border-radius: 0;
+  }
 }
 /* #endif */
 
@@ -807,6 +814,7 @@ a {
   color: var(--text);
   text-align: right;
   /* #if TRACK_NO_WRAP */
+  justify-self: end;
   white-space: nowrap;
   /* #else */
   overflow-wrap: anywhere;
