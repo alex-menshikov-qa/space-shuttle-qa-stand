@@ -714,8 +714,7 @@ a {
 
 /* #if CANCELED_MODAL_SIZE */
 #track-canceled-modal .modal__dialog {
-  width: 280px;
-  min-height: 146px;
+  transform: scale(0.667);
 }
 
 @media (max-width: 1280px) {
@@ -726,8 +725,8 @@ a {
   #track-canceled-modal .modal__dialog {
     width: 100%;
     max-width: none;
-    min-height: 220px;
     border-radius: 0;
+    transform: none;
   }
 }
 /* #endif */
