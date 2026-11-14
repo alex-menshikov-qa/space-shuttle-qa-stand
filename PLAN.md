@@ -411,3 +411,119 @@ string of allowed characters.
 
 ## Out of scope
 Tests, Allure on Pages, the autopilot mobile app, new pages.
+
+---
+
+# Track 4 — seeded defects aligned with the real bug reports
+
+## Goal
+Track 3 seeded the defects from checklist rows, without the bug reports themselves. The reports
+are now read: 98 of them, SSI-3…SSI-62 and SSI-65…SSI-102 (SSI-63 and SSI-64 are later finds and
+out of this track). Track 4 makes every seeded defect behave as its report describes, gives the
+order-form defects their SSI numbers, and seeds the real bugs that were written off as "skipped".
+Afterwards the README line "seeded defects reproduce bugs from my bug reports" is true as is.
+
+Sources (never committed): `web-order-status.md` (SSI-3…28, SSI-95), `web-order-form.md`
+(SSI-65…94), `api.md` (SSI-29…62), `mobile.md` (SSI-96…102, no mobile app on the stand).
+Reading a report: **Expected result** is the stand's default behaviour, **Actual result** is what
+happens with the flag on.
+
+## Ground rules (as in tracks 2 and 3)
+- Branch `feat/defects-by-reports`, draft PR into `main`, merge only by Sasha. Stage 0 is this
+  section plus questions; then stage by stage, each ending with a report (done / how to check by
+  hand / deviations from PLAN.md as a separate list / CI result on the PR) and a stop.
+- PR events are only reported; nothing is fixed or pushed without Sasha's OK.
+- `tests/` is Sasha's: not edited, not extended.
+- Defects leave no marker in the markup or the scripts (track 2 mechanism). An unknown flag still
+  blocks the start; the old names of renamed flags become unknown.
+- English everywhere; texts in `strings.py` and templates. Verification scripts live outside the
+  repo; the UI is checked with Selenium: Chrome always, Firefox where stated.
+
+## Stage 1 — Order status page and header (SSI-3…SSI-28)
+
+| Was | Becomes | Bug | With the flag |
+|---|---|---|---|
+| `BUG_HEADER_SEARCH_PLACEHOLDER` (origin SSI-4) | same name, origin **SSI-3** | SSI-3 | unchanged: the placeholder reads "Enter order number" |
+| — | `BUG_HEADER_SEARCH_EXTRA_BUTTON` | SSI-4 | a "Go!" button (`header-status-go-button`) appears to the right of the header "Order Number" field. **By default the button no longer exists**; the search starts on Enter |
+| `BUG_STATUS_SEARCH_ENTER` | unchanged | SSI-5 | Enter does nothing; the description loses "Go! still works" |
+| `BUG_TRACK_NO_IMAGE` | `BUG_TRACK_IMAGE_NO_RUNWAY` | SSI-6 | the picture stays (shuttle and two wings); only the runway lines are gone |
+| `BUG_ORDER_HOVER_VULPTEX` | same name | SSI-7 | Firefox only: the header "Order" does **not change colour at all** on hover (checked in Chrome and Firefox) |
+| `BUG_TRACK_PERIOD_GROUP` | `BUG_TRACK_DATE_LABEL` | SSI-12 | on `/track` the date row is captioned "Delivery Date" instead of "When to Bring the Shuttle"; order and groups are right |
+| `BUG_TRACK_DATE_MINUS_DAY` | `BUG_TRACK_DATE_PLUS_DAY` | SSI-13 | the date on `/track` is one day **later** than ordered; the API is right |
+| `BUG_TRACK_EMPTY_COLOR` | same name | SSI-14 | no colour → "Shuttle Color" reads `any` (was `null`) |
+| `BUG_TRACK_EMPTY_COMMENT` | same name | SSI-15 | no comment → the "Comment for Autopilot" row is **absent**, caption and value (was `undefined`) |
+| — | `BUG_TRACK_AUTOPILOT_NAME_TRUNCATED` | SSI-18 | in "Autopilot {name} is heading towards you" a name of 10+ characters is cut to its first two plus an ellipsis; without the flag it is shown in full |
+| — | `BUG_TRACK_CANCEL_HIDDEN_ON_ACCEPT` | SSI-24 | once an autopilot has accepted the order, "Cancel order" is gone from the page; without the flag it stays, disabled (track 3) |
+| `BUG_DELAYED_ONE_DAY_LATE` | `BUG_DELAYED_ONE_DAY_EARLY` | SSI-27 | an undelivered order is `delayed` a day **early**: from 00:00 of the delivery day (API and page) |
+| `BUG_ENDED_STATUS_4_ACTIVE` | `BUG_ENDED_STATUS_4_CAPTION` | SSI-28 | after the rental has ended the caption of status 4 becomes the next status's text, "Rental time has ended"; the highlighting is right |
+
+Unchanged: SSI-5, 10, 16, 19, 21/22, 25, 26.
+
+Not seeded after this stage: SSI-8, 9, 11, 17, 20, 23 (pixel-level layout) and SSI-95 (the
+"There is no such order" flash on refresh is a race; a flag cannot reproduce it honestly). The
+rows for SSI-3, SSI-18 and SSI-24 leave the table: "the check was SKIPPED: nothing to reproduce"
+was a mistake.
+
+Implementation notes:
+- The "Go!" button, the runway lines, the comment row and "Cancel order" are chosen in Python and
+  rendered or not; the header form submits on Enter without a submit button (one text field).
+- The runway lines get their own testid, `track-not-found-runway`, so their absence is checkable
+  the same way a missing element always is on the stand. *(proposal, see stage 0 questions)*
+- SSI-28 needs a decision on the default caption of a passed status 4. *(stage 0, question 3)*
+
+## Stage 2 — Order form (SSI-65…SSI-94)
+
+| Was | Becomes | Bug | With the flag |
+|---|---|---|---|
+| — | `BUG_FORM_CONFIRM_YES_DEAD` | SSI-65 | "Yes" in "Do you want to place the order?" does not respond: no order from the form. `POST /api/v1/orders` works as usual |
+| `BUG_FORM_NAME_DASH` | same | SSI-66 | unchanged |
+| `BUG_FORM_LAST_NAME_16` | same | SSI-67 | unchanged |
+| `BUG_FORM_ADDRESS_REQUIRED` | same | SSI-68 | unchanged |
+| `BUG_FORM_ADDRESS_50` | same | SSI-69 | unchanged |
+| `BUG_FORM_PHONE_12` | `BUG_FORM_PHONE_10` | SSI-70 | a Phone of 10 characters (`1234567891`) is rejected; 11 and 12 pass |
+| — | `BUG_FORM_PHONE_13` | SSI-71 | a Phone of 13 characters (`1234567891011`) is accepted; 14 is not |
+| `BUG_FORM_COMMENT_CHARSET` | same | SSI-72, 73, 74 | unchanged |
+| `BUG_FORM_COMMENT_LENGTH` | same | SSI-75 | unchanged |
+| `BUG_FORM_DATE_TODAY` | `BUG_FORM_DATE_PAST` | SSI-76 | today and any past date can be picked, typed and sent to the API |
+
+The Origin of these flags becomes their SSI numbers instead of "Field Validation 2023".
+
+Not seeded, with reasons:
+
+| Bug | Why not |
+|---|---|
+| SSI-77 confirmation window, SSI-78 typed date, SSI-79 both colours | by design on the stand: bugs in the original product, accepted decisions of tracks 1–2 (SSI-77 was itself resolved as "kept and added to the requirements") |
+
+SSI-80…SSI-94 (highlighting, colours, calendar, alignment), one by one. The last column is my
+proposal; **Sasha decides**, and the final split is written here before stage 2 starts.
+
+| Bug | What the flag would do | Cost | Proposal |
+|---|---|---|---|
+| SSI-80 | after a day is picked in the calendar the date field loses focus, so it is not blue | 1 JS line | seed: `BUG_FORM_DATE_PICK_NO_HIGHLIGHT` |
+| SSI-81 | "Shuttle Station" turns blue under the pointer | 1 CSS rule | seed: `BUG_FORM_STATION_HOVER` |
+| SSI-82…85 | Name, Last Name, Address, Phone: the border turns black as soon as anything is typed, valid or not | 1 CSS rule (`:focus:not(:placeholder-shown)`) | seed as one flag: `BUG_FORM_TYPING_BORDER` |
+| SSI-86 | the step-1 button reads "Continue" | 1 string | seed: `BUG_FORM_NEXT_LABEL` |
+| SSI-87 | colour and comment content shifted left of the fields above | pixel-level alignment | not seeded |
+| SSI-88 | the "Shuttle Station" placeholder is dark gray | 1 CSS rule | seed: `BUG_FORM_STATION_PLACEHOLDER_DARK` |
+| SSI-89 | with one colour ticked, the text of the other turns black | 1 CSS rule | seed: `BUG_FORM_COLOR_UNTICKED_BLACK` |
+| SSI-90 | the calendar opens in the middle of the field | pixel-level position | not seeded |
+| SSI-91 | month and weekday names in lowercase ("august", "mo") | 2 JS lines | seed: `BUG_FORM_CALENDAR_LOWERCASE` |
+| SSI-92 | weekday names and weekends in the calendar are black | 1 CSS rule | seed: `BUG_FORM_CALENDAR_BLACK` |
+| SSI-93 | centred month label, light arrows on both sides, an extra "up" arrow | three layout details in one report; doable in CSS, checkable only by geometry | not seeded |
+| SSI-94 | the "Rental Period" list is narrower than the field | 1 CSS rule, checkable by comparing widths | seed: `BUG_FORM_PERIOD_LIST_NARROW` |
+
+## Stage 3 — API, README, finish
+- API: the autopilot rule flags do not change, with one fix. `login: true` with
+  `BUG_AUTOPILOT_LOGIN_RULES` must answer `500` with the body
+  `{"code": 500, "message": "operator does not exist: character varying = boolean"}` (SSI-39),
+  and `400` without the flag. Today the status is right but the body is the stand's own
+  `{"ok": false, "message": "Internal server error"}`: it is replaced for this one case.
+- README, Known defects: the table, the defect count wherever it is a number, the Origin legend,
+  the "Environments" paragraph, the "Not seeded" tables. Mobile SSI-96…SSI-102 in one line: there
+  is no mobile app on the stand.
+- PLAN.md: the final "flag → SSI" table in this section.
+- Regression with every flag off, then every changed and new flag on its own. CI green → PR
+  ready → report and stop.
+
+## Out of scope
+Tests; SSI-63 and SSI-64; the mobile app; publishing the bug reports in the repository.
