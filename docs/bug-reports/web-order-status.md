@@ -414,7 +414,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 | **Area** | Web, order status page |
 | **Environment** | Beskar (1920×1080), Vulptex Browser (1280×720) |
 
-**Description.** If a value does not fit on one line, it is not wrapped: it runs past the border of the field and covers the field names.
+**Description.** If a value does not fit on one line, it is not wrapped and runs past the border of the order data block.
 
 **Precondition.** An order has been placed with a 50-character address: `Pharmaceuticals Company Royal Promenade Avenue, 56`.
 
