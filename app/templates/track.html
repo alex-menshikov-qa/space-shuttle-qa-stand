@@ -3,10 +3,6 @@
 {% block title %}{{ t.TRACK_TITLE }}{% endblock %}
 {% block page %}track{% endblock %}
 {% block page_class %} page--wide{% endblock %}
-{% macro period_row() -%}
-      <dt>{{ t.ORDER_FIELD_PERIOD }}</dt>
-      <dd id="track-period-value" data-testid="track-period-value">{{ rental_period }}</dd>
-{%- endmacro %}
 {% block content %}
 <h1 class="page__title" data-testid="track-title">{{ t.TRACK_TITLE }}</h1>
 
@@ -33,21 +29,25 @@
       <dd id="track-phone-value" data-testid="track-phone-value">{{ order.phone }}</dd>
     </dl>
     <dl class="track__group" data-testid="track-group-2">
-      <dt>{{ t.ORDER_FIELD_DATE }}</dt>
+      <dt>{{ date_label }}</dt>
       <dd id="track-date-value" data-testid="track-date-value">{{ delivery_date }}</dd>
-      {% if period_group == 2 %}{{ period_row() }}{% endif %}
+      <dt>{{ t.ORDER_FIELD_PERIOD }}</dt>
+      <dd id="track-period-value" data-testid="track-period-value">{{ rental_period }}</dd>
     </dl>
     <dl class="track__group" data-testid="track-group-3">
-      {% if period_group == 3 %}{{ period_row() }}{% endif %}
       <dt>{{ t.ORDER_FIELD_COLOR }}</dt>
       <dd id="track-color-value" data-testid="track-color-value">{{ colors }}</dd>
+      {% if comment_row %}
       <dt>{{ t.ORDER_FIELD_COMMENT }}</dt>
-      <dd id="track-comment-value" data-testid="track-comment-value">{{ comment }}</dd>
+      <dd id="track-comment-value" data-testid="track-comment-value">{{ order.comment }}</dd>
+      {% endif %}
     </dl>
     {# Offered until an autopilot accepts the order; after that it stays, disabled. #}
+    {% if cancel_button %}
     <div class="actions">
       <button class="button button--secondary" type="button"{% if not can_cancel %} disabled{% endif %} id="track-cancel-button" data-testid="track-cancel-button">{{ t.TRACK_CANCEL }}</button>
     </div>
+    {% endif %}
   </div>
 
   <ol class="statuses" data-testid="track-statuses">
@@ -87,7 +87,7 @@
 {% endif %}
 {% elif number %}
 <div class="not-found" id="track-not-found-message" data-testid="track-not-found-message">
-  {% if not_found_image %}{% include "partials/crashed_shuttle.svg" %}{% endif %}
+  {% include "partials/crashed_shuttle.svg" %}
   <div class="not-found__text">
     <p class="not-found__title" data-testid="track-not-found-title">{{ t.TRACK_NOT_FOUND_TITLE }}</p>
     <p class="not-found__hint" data-testid="track-not-found-hint">{{ t.TRACK_NOT_FOUND_HINT }}</p>

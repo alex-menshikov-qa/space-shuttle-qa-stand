@@ -467,9 +467,23 @@ was a mistake.
 Implementation notes:
 - The "Go!" button, the runway lines, the comment row and "Cancel order" are chosen in Python and
   rendered or not; the header form submits on Enter without a submit button (one text field).
-- The runway lines get their own testid, `track-not-found-runway`, so their absence is checkable
-  the same way a missing element always is on the stand. *(proposal, see stage 0 questions)*
-- SSI-28 needs a decision on the default caption of a passed status 4. *(stage 0, question 3)*
+- The runway lines have their own testid, `track-not-found-runway`, so their absence is checkable
+  the same way a missing element always is on the stand.
+- Header "Go!": Sasha's tests do not use it, so it is removed by default.
+
+## Decisions (track 4)
+| Topic | Decision | Why |
+|---|---|---|
+| Header "Go!" | gone by default; only `BUG_HEADER_SEARCH_EXTRA_BUTTON` brings it back | SSI-4: the field has no buttons |
+| Caption of status 4 | "Until the rental is over" before the flight; "Rental ends on <day> at <time>" while current **and** once passed (gray) | SSI-28 and Web 6.2: the caption must not change when the rental ends |
+| "Cancel order" after accept | stays visible and disabled (track 3); the flag removes it | SSI-24: the button must still be shown |
+| Long autopilot name | "long" is 10+ characters; cut to two characters plus "…" (one character), only in the status 2 title | the rule allows 2–10, so one flag is enough to see SSI-18 |
+| Runway testid | `track-not-found-runway` on the runway lines | SSI-6 would otherwise be visible on a screenshot only |
+| SSI-80…SSI-94 | nine flags (table in stage 2); SSI-87, 90, 93 not seeded | Sasha's choice from the stage 0 proposal |
+| Defects not from reports | `BUG_MISSING_NAME_409`, `BUG_LOGIN_NO_PASSWORD_504` (training stand), `BUG_FORM_ERROR_LAYOUT_SHIFT`, `BUG_ADD_BUTTON_STALE_TOTAL` (new) stay with their Origin; the README gives the number of defects that reproduce reports | no "all defects come from bug reports" claim |
+| Year | the README says 2023 everywhere; dates inside the reports are test data | Sasha |
+| SSI-39 body | `{"code": 500, "message": "operator does not exist: character varying = boolean"}` | as the report shows it |
+| `BUG_FORM_DATE_PAST` and `delayed` | an order for a past date is `delayed` from the moment it is created; one README line | follows from the status rule |
 
 ## Stage 2 — Order form (SSI-65…SSI-94)
 
@@ -494,10 +508,10 @@ Not seeded, with reasons:
 |---|---|
 | SSI-77 confirmation window, SSI-78 typed date, SSI-79 both colours | by design on the stand: bugs in the original product, accepted decisions of tracks 1–2 (SSI-77 was itself resolved as "kept and added to the requirements") |
 
-SSI-80…SSI-94 (highlighting, colours, calendar, alignment), one by one. The last column is my
-proposal; **Sasha decides**, and the final split is written here before stage 2 starts.
+SSI-80…SSI-94 (highlighting, colours, calendar, alignment), one by one. Sasha's decision
+after stage 0: nine flags, three bugs not seeded.
 
-| Bug | What the flag would do | Cost | Proposal |
+| Bug | What the flag does | Cost | Decision |
 |---|---|---|---|
 | SSI-80 | after a day is picked in the calendar the date field loses focus, so it is not blue | 1 JS line | seed: `BUG_FORM_DATE_PICK_NO_HIGHLIGHT` |
 | SSI-81 | "Shuttle Station" turns blue under the pointer | 1 CSS rule | seed: `BUG_FORM_STATION_HOVER` |

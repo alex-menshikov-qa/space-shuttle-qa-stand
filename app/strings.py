@@ -197,8 +197,8 @@ TRACK_STATUS_HEADING_CAPTION = "Contact number: {phone}"
 TRACK_STATUS_ON_SITE = "Autopilot is on site"
 TRACK_STATUS_ON_SITE_CAPTION = "Pick up the shuttle and pay the rental fee"
 TRACK_STATUS_FLYING = "Okay, let's fly now"
-TRACK_STATUS_FLYING_CAPTION = "Rental ends on {day} at {time}"  # while current
-TRACK_STATUS_FLYING_CAPTION_INACTIVE = "Until the rental is over"
+TRACK_STATUS_FLYING_CAPTION = "Rental ends on {day} at {time}"  # current and passed
+TRACK_STATUS_FLYING_CAPTION_UPCOMING = "Until the rental is over"
 TRACK_STATUS_ENDED = "Rental time has ended"
 # Shown only while current; the inactive status has no caption.
 TRACK_STATUS_ENDED_CAPTION = (
@@ -209,9 +209,11 @@ TRACK_STATUS_DELAYED_CAPTION = (
     "We won't be able to deliver the shuttle on time. "
     "To check the status of your order, please call support at: {phone}"
 )
-# Only with the seeded defects TRACK_EMPTY_COLOR / TRACK_EMPTY_COMMENT.
-TRACK_EMPTY_COLOR_WRONG = "null"
-TRACK_EMPTY_COMMENT_WRONG = "undefined"
+# Only with seeded defects: TRACK_EMPTY_COLOR, TRACK_DATE_LABEL,
+# TRACK_AUTOPILOT_NAME_TRUNCATED.
+TRACK_EMPTY_COLOR_WRONG = "any"
+TRACK_DATE_LABEL_WRONG = "Delivery Date"
+TRACK_NAME_ELLIPSIS = "\u2026"
 TRACK_CANCEL = "Cancel order"
 TRACK_CANCEL_CONFIRM = "Do you want to cancel the order?"
 TRACK_CANCEL_BACK = "Back"

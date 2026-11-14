@@ -1,6 +1,6 @@
 // Header: the "Order Status" button reveals the order-number search.
-// The search itself is a plain GET form to /track?t=<number>, so both the
-// "Go!" button and Enter submit it.
+// The search itself is a plain GET form to /track?t=<number> with a single
+// text field, so Enter submits it; it has no button.
 (function () {
   "use strict";
 

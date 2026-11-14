@@ -29,7 +29,9 @@
         <input class="field__input header__status-input" name="t" type="text" inputmode="numeric" autocomplete="off"
                placeholder="{{ header_search_placeholder() }}" aria-label="{{ t.NAV_ORDER_NUMBER }}"
                id="header-status-input" data-testid="header-status-input">
+        {% if header_search_button() %}
         <button class="button button--small" type="submit" id="header-status-go-button" data-testid="header-status-go-button">{{ t.NAV_ORDER_STATUS_GO }}</button>
+        {% endif %}
       </form>
       <a class="header__link" href="{{ '/account' if user else '/login' }}" id="header-account-link" data-testid="header-account-link">{{ t.NAV_ACCOUNT }}</a>
     </div>

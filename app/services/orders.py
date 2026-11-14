@@ -71,8 +71,8 @@ def status(order: Order) -> str:
         # Seeded defect: "on site" never comes, the previous status holds.
         return HEADING if defects.is_enabled("STATUS_ON_SITE_SKIPPED") else ON_SITE
     deadline = order.delivery_date
-    if defects.is_enabled("DELAYED_ONE_DAY_LATE"):
-        deadline += timedelta(days=1)  # seeded defect: a whole extra day of grace
+    if defects.is_enabled("DELAYED_ONE_DAY_EARLY"):
+        deadline -= timedelta(days=1)  # seeded defect: late from 00:00 of the delivery day
     if now >= clock.end_of_day(deadline):
         return DELAYED
     return HEADING if order.accepted_at is not None else HANGAR
