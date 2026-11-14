@@ -154,6 +154,7 @@ ORDER_FIELD_COLOR = "Shuttle Color"
 ORDER_FIELD_COMMENT = "Comment for Autopilot"
 ORDER_REQUIRED_MARK = "*"
 ORDER_NEXT = "Next"
+ORDER_NEXT_WRONG = "Continue"  # only with the seeded defect FORM_NEXT_LABEL
 ORDER_BACK = "Back"
 ORDER_SUBMIT = "Order"
 ORDER_DATE_PREV_MONTH = "Previous month"

@@ -33,7 +33,10 @@ def order_form(request: Request, user: User | None = Depends(optional_user)) -> 
         "today": clock.today().isoformat(),
         "minDate": orders.earliest_delivery_date().isoformat(),
     }
-    return render(request, "order.html", user, order_config=config)
+    next_label = strings.ORDER_NEXT
+    if defects.is_enabled("FORM_NEXT_LABEL"):
+        next_label = strings.ORDER_NEXT_WRONG
+    return render(request, "order.html", user, order_config=config, next_label=next_label)
 
 
 @dataclass(frozen=True)
