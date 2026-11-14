@@ -598,3 +598,17 @@ four-digit year); with `BUG_FORM_STATION_HOVER` the hover colour also covers an 
 
 ## Out of scope
 Tests; SSI-63 and SSI-64; the mobile app; publishing the bug reports in the repository.
+
+---
+
+# Bug reports published
+
+The 98 bug reports SSI-3…SSI-102 are in `docs/bug-reports/`: an index and four files by area
+(Web order status, Web order form, API, mobile app). The texts are Sasha's, an adaptation of his
+2023 reports that he proofread; they went in as they were. The only addition is an
+`<a id="ssi-N"></a>` anchor before each report, so `docs/bug-reports/api.md#ssi-39` opens that
+report. In the README every SSI number in the Known defects tables links to its report (a range
+links to its first one), and the index says that 78 of the 98 are seeded by flags.
+
+Out of scope: screenshots and recordings attached to the reports, the checklists and the mind
+map, any change to the application or the tests.
