@@ -1,6 +1,7 @@
 import os
 
 from dotenv import load_dotenv
+from datetime import date, timedelta
 
 load_dotenv()
 
@@ -20,9 +21,9 @@ class OrderData:
             "firstName": "Max",
             "lastName": "Payne",
             "address": "123 Main St",
-            "metroStation": "Metro Station",
+            "station": 1,
             "phone": "+7234567890",
             "rentTime": 5,
-            "deliveryDate": "2024-09-30",
-            "comment": "Please leave at the front door",
+            "deliveryDate": (date.today() + timedelta(days=7)).isoformat(),
+            "comment": "Leave at the front door",
         }
