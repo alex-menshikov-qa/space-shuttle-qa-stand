@@ -78,15 +78,15 @@ One `.env` (copied from `.env.example`, which holds fake values only) feeds both
 
 | Variable | Used by | Meaning |
 |---|---|---|
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | stand, tests | Database credentials (avoid `@ : / #` in the password: it goes into a URL) |
-| `POSTGRES_PORT` | stand, tests | Host port the database is published on |
-| `DB_HOST` | tests | Database host for SQL checks (`localhost`) |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | stand, manual SQL checks | Database credentials (avoid `@ : / #` in the password: it goes into a URL) |
+| `POSTGRES_PORT` | stand, manual SQL checks | Host port the database is published on |
+| `DB_HOST` | manual SQL checks | Database host for SQL checks (`localhost`) |
 | `APP_PORT` | stand | Host port the app is published on |
 | `BASE_URL` | tests | Stand URL; keep it in sync with `APP_PORT` |
 | `JWT_SECRET` | stand | HS256 key for access tokens |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | stand | Token and session lifetime (default 60) |
 | `TEST_NAME`, `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Seeded test user |
-| `FLEET_PASSWORD` | stand, tests | Password of the seeded fleet autopilots, exactly 4 digits (default `0101`) |
+| `FLEET_PASSWORD` | stand | Password of the seeded fleet autopilots, exactly 4 digits (default `0101`) |
 | `STAND_TZ` | stand | Time zone in which the stand counts days (default `UTC`) |
 | `PICKUP_MINUTES` | stand | Minutes from "Autopilot is on site" to "Okay, let's fly now" (default 10) |
 | `TEST_HOOKS` | stand | `1` switches on `/api/v1/testing/*` (default off; CI switches it on) |

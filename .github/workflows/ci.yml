@@ -31,8 +31,9 @@ jobs:
       - name: Check out
         uses: actions/checkout@v7
 
-      # TEST_HOOKS is off in .env.example; the tests need the per-order time
-      # shift to reach time-dependent order statuses, so CI switches it on.
+      # TEST_HOOKS is off in .env.example. CI switches it on so that the stand
+      # under test exposes /api/v1/testing/* (the per-order time shift) for
+      # tests of time-dependent order statuses; no test calls it yet.
       - name: Create .env from .env.example
         run: |
           cp .env.example .env
