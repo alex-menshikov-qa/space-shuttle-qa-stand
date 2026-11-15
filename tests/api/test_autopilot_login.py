@@ -3,6 +3,9 @@ import allure
 from api_data import defect_enabled
 
 
+pytestmark = pytest.mark.api
+
+
 @allure.suite("Autopilot Login Tests")
 @allure.title("Test Autopilot Login")
 class TestAutopilotLogin:

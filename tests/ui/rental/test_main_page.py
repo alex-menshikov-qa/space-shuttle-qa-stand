@@ -3,6 +3,8 @@ import pytest
 from data import Answers
 
 
+pytestmark = pytest.mark.ui
+
 class TestMainPage:
 
     @allure.title('Verify Answers to Questions')

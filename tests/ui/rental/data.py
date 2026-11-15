@@ -2,6 +2,9 @@ import os
 
 from locators.order_page_locators import ButtonsLocators
 from datetime import date, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def future_date(days):
@@ -16,7 +19,8 @@ class Links:
 class Answers:
     ANSWER_1 = 'One day costs 400 credits. You pay the autopilot on arrival, in credits or by card.'
     ANSWER_2 = 'One order, one shuttle. Want a fleet? Place several orders in a row; the autopilots enjoy the company.'
-    ANSWER_3 = 'From the moment the autopilot hands you the shuttle. Rent for one day at 16:30 on the 8th, and the rental ends at 16:30 on the 9th.'
+    ANSWER_3 = ('From the moment the autopilot hands you the shuttle. Rent for one day at 16:30 on the 8th, and the '
+                'rental ends at 16:30 on the 9th.')
     ANSWER_4 = 'Only from tomorrow. Our autopilots like to plan their evenings.'
     ANSWER_5 = 'Not yet. If you need more time, call support at 0101.'
     ANSWER_6 = 'Parsecs measure distance, not time. Our autopilots know that. Mostly.'

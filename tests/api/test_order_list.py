@@ -1,5 +1,9 @@
+import pytest
 import allure
 import requests
+
+
+pytestmark = pytest.mark.api
 
 
 @allure.suite("Order Management")

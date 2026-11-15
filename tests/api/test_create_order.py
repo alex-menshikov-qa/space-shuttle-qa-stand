@@ -4,6 +4,9 @@ import requests
 from api_data import OrderData
 
 
+pytestmark = pytest.mark.api
+
+
 @allure.suite("Order Management")
 @allure.title("Test Order Creation")
 class TestCreateOrder:
