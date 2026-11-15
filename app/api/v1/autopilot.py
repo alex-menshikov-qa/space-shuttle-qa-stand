@@ -10,7 +10,7 @@ from fastapi import APIRouter, Body, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from app import strings
+from app import defects, strings
 from app.db import get_session
 from app.errors import ApiError, ErrorResponse
 from app.schemas import AutopilotIdResponse, OkResponse, OrdersCountResponse
@@ -109,14 +109,13 @@ def orders_count_without_id() -> None:
 
 @router.get(
     "/{autopilot_id}/ordersCount",
+    response_model=OrdersCountResponse,
     responses={
         400: {"model": ErrorResponse, "description": "No id in the path"},
         404: {"model": ErrorResponse, "description": "No autopilot with this id"},
     },
 )
-def orders_count(
-    autopilot_id: str, session: Session = Depends(get_session)
-) -> OrdersCountResponse:
+def orders_count(autopilot_id: str, session: Session = Depends(get_session)) -> Any:
     """How many orders the autopilot has accepted: in progress and finished;
     canceled orders do not count. Equals `pageInfo.total` of
     `GET /orders?autopilotId=<id>`. A non-numeric id is a 404."""
@@ -125,4 +124,7 @@ def orders_count(
     if autopilot is None:
         raise ApiError(404, strings.AUTOPILOT_NO_SUCH_ID)
     count = orders.orders_count(session, autopilot.id)
+    if defects.is_enabled("ORDERS_COUNT_AS_STRING"):
+        # Seeded defect: both numbers as strings, as in the original's docs example.
+        return JSONResponse(content={"id": str(autopilot.id), "ordersCount": str(count)})
     return OrdersCountResponse(id=autopilot.id, ordersCount=count)

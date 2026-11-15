@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app import strings
+from app import defects, strings
 from app.db import get_session
 from app.errors import ApiError, ErrorResponse
 from app.models import Order
@@ -112,12 +112,10 @@ def list_orders(
     `pageInfo.total` counts every matching order, whatever the page; a page past
     the end is empty. Checks run in this order: `limit`, `page`,
     `nearestStation`, `autopilotId`."""
+    # Seeded defect ORDERS_LIMIT_OVER_30: no upper bound for limit.
+    limit_max = None if defects.is_enabled("ORDERS_LIMIT_OVER_30") else orders.PAGE_LIMIT_MAX
     page_limit = _page_number(
-        limit,
-        orders.PAGE_LIMIT_DEFAULT,
-        1,
-        orders.PAGE_LIMIT_MAX,
-        strings.ORDERS_LIMIT_INVALID,
+        limit, orders.PAGE_LIMIT_DEFAULT, 1, limit_max, strings.ORDERS_LIMIT_INVALID
     )
     page_number = _page_number(page, 0, 0, None, strings.ORDERS_PAGE_INVALID)
 
@@ -142,7 +140,10 @@ def list_orders(
             raise ApiError(404, strings.AUTOPILOT_NOT_FOUND.format(autopilot_id=autopilotId))
 
     found = orders.list_orders(session, autopilot_id, station_numbers)
-    start = page_number * page_limit
+    shown_page = page_number
+    if defects.is_enabled("ORDERS_PAGE_FROM_ONE"):
+        shown_page = max(page_number - 1, 0)  # seeded defect: pages counted from one
+    start = shown_page * page_limit
     return OrdersResponse(
         orders=[orders.as_dict(order) for order in found[start : start + page_limit]],
         pageInfo=PageInfo(page=page_number, total=len(found), limit=page_limit),

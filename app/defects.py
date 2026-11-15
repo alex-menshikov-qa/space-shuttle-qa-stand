@@ -67,6 +67,9 @@ KNOWN_DEFECTS: dict[str, str] = {
     "FORM_PERIOD_LIST_NARROW": "the Rental Period list is narrower than the field",
     "FORM_ERROR_LAYOUT_SHIFT": "an error text under an order field pushes the form down",
     "ADD_BUTTON_STALE_TOTAL": "the shipyard Add button does not update the total",
+    "ORDERS_COUNT_AS_STRING": "GET .../ordersCount returns id and ordersCount as strings",
+    "ORDERS_PAGE_FROM_ONE": "GET /orders counts pages from one: page=0 and page=1 are the same",
+    "ORDERS_LIMIT_OVER_30": "GET /orders does not reject a limit above 30",
 }
 
 
