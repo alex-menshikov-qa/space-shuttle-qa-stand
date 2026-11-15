@@ -4,8 +4,8 @@ from locators.order_page_locators import ButtonsLocators
 
 
 class Links:
-    URL = os.getenv("BASE_URL", "https://qa-scooter.praktikum-services.ru/")
-    DZEN_URL = os.getenv("DZEN_URL", "https://dzen.ru/?yredirect=true")
+    URL = os.getenv("BASE_URL", "http://localhost:8000")
+    HOLONET_URL = f"{URL}/holonet"
 
 
 class Answers:

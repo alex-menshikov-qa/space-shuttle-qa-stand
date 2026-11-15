@@ -2,8 +2,8 @@ from selenium.webdriver.common.by import By
 
 
 class OrderPageLocators:
-    FOR_WHOM_WINDOW = By.XPATH, "//div[text()='Для кого самокат']" # Локатор страницы 'Для кого самокат'
-    ABOUT_RENT_WINDOW = By.XPATH, "//div[text()='Про аренду']" # # Локатор страницы 'Про аренду'
+    FOR_WHOM_WINDOW = By.XPATH, "//h1[@data-testid='order-title' and normalize-space()='For Whom is the Shuttle']"
+    ABOUT_RENT_WINDOW = By.XPATH, "//h1[@data-testid='order-title' and normalize-space()='About Rent']"
     CHECKING_WINDOW_TEXT = By.XPATH, "//div[text()='Хотите оформить заказ?']" # Локатор окна 'Хотите оформить заказ?'
     CONFIRMATION_WINDOW = By.XPATH, "//div[contains(@class, 'Order_Modal')]/div[text()='Заказ оформлен']" # Локатор окна 'Заказ оформлен'
 
