@@ -4,31 +4,31 @@ from selenium.webdriver.common.by import By
 class OrderPageLocators:
     FOR_WHOM_WINDOW = By.XPATH, "//h1[@data-testid='order-title' and normalize-space()='For Whom is the Shuttle']"
     ABOUT_RENT_WINDOW = By.XPATH, "//h1[@data-testid='order-title' and normalize-space()='About Rent']"
-    CHECKING_WINDOW_TEXT = By.XPATH, "//div[text()='Хотите оформить заказ?']" # Локатор окна 'Хотите оформить заказ?'
-    CONFIRMATION_WINDOW = By.XPATH, "//div[contains(@class, 'Order_Modal')]/div[text()='Заказ оформлен']" # Локатор окна 'Заказ оформлен'
+    CHECKING_WINDOW_TEXT = By.XPATH, "//p[@data-testid='order-confirm-text']"
+    CONFIRMATION_WINDOW = By.XPATH, "//p[@data-testid='order-success-text']"
 
 
 class ButtonsLocators:
-    UPPER_ORDER_BUTTON = By.XPATH, "//div[contains(@class, 'Header_Nav')]/button[text()='Заказать']" # Локатор верхней кнопки 'Заказать'
-    LOWER_ORDER_BUTTON = By.XPATH, "//div[contains(@class, 'Home_FinishButton__1')]/button[text()='Заказать']" # Локатор нижней кнопки 'Заказать'
-    DALEE_BUTTON = By.XPATH, "//button[text()='Далее']" # Локатор кнопки создания заказа 'Далее'
-    INSIDE_ORDER_BUTTON = By.XPATH, "//div[contains(@class, 'Order_Buttons')]/button[text()='Заказать']" # Локатор кнопки 'Заказать' на странице заказа
-    INSIDE_YES_BUTTON = By.XPATH, "//div[contains(@class, 'Order_Buttons')]/button[text()='Да']" # Локатор кнопки 'Да' в окне подтвержения заказа
+    UPPER_ORDER_BUTTON = By.XPATH, "//a[@data-testid='header-order-button']"
+    LOWER_ORDER_BUTTON = By.XPATH, "//a[@data-testid='home-order-button']"
+    NEXT_BUTTON = By.XPATH, "//button[@data-testid='order-next-button']"
+    INSIDE_ORDER_BUTTON = By.XPATH, "//button[@data-testid='order-submit-button']"
+    INSIDE_YES_BUTTON = By.XPATH, "//button[@data-testid='order-confirm-yes-button']"
 
 
 class FieldsLocators:
-    FIRST_NAME_FIELD = By.XPATH, "//input[contains(@placeholder, '* Имя')]" # Локатор поля ввода имени
-    LAST_NAME_FIELD = By.XPATH, "//input[contains(@placeholder, '* Фамилия')]" # Локатор поля ввода фамилии
-    ADDRESS_FIELD = By.XPATH, "//input[contains(@placeholder, '* Адрес: куда привезти заказ')]" # Локатор поля ввода адреса
-    PHONE_FIELD = By.XPATH, "//input[contains(@placeholder, '* Телефон: на него позвонит курьер')]" # Локатор поля ввода телефона
-    DATE_FIELD = By.XPATH, "//input[contains(@placeholder, '* Когда привезти самокат')]" # Локатор поля выбора даты
-    RENTAL_PERIOD_FIELD = By.XPATH, "//div[text()='* Срок аренды']" # Локатор поля выбора срока аренды
-    RENTAL_PERIOD_CHOICE = By.XPATH, "//div[contains(@class, 'Dropdown-menu')]/div[text()='{}']" # Локатор с вариантами срока аренды
+    FIRST_NAME_FIELD = By.XPATH, "//input[@data-testid='order-name-input']"
+    LAST_NAME_FIELD = By.XPATH, "//input[@data-testid='order-last-name-input']"
+    ADDRESS_FIELD = By.XPATH, "//input[@data-testid='order-address-input']"
+    PHONE_FIELD = By.XPATH, "//input[@data-testid='order-phone-input']"
+    DATE_FIELD = By.XPATH, "//input[@data-testid='order-date-input']"
+    RENTAL_PERIOD_FIELD = By.XPATH, "//button[@data-testid='order-period-dropdown']"
+    RENTAL_PERIOD_CHOICE = By.XPATH, "//ul[@data-testid='order-period-list']/li[normalize-space()='{}']"
 
 
-class MetroLocators:
-    METRO_STATION_FIELD = By.XPATH, "//input[@class='select-search__input']" # Локатор поля выбора станции метро
+class StationLocators:
+    STATION_FIELD = By.XPATH, "//input[@data-testid='order-station-input']"
 
     @staticmethod
-    def get_metro_station_locator(metro_name): # Локатор c названиями станций метро
-        return By.XPATH, f"//*[@class='select-search__select']//*[text()='{metro_name}']"
+    def get_station_locator(station_name):
+        return By.XPATH, f"//ul[@data-testid='order-station-list']/li[normalize-space()='{station_name}']"

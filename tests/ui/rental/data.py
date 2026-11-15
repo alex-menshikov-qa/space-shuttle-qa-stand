@@ -1,6 +1,11 @@
 import os
 
 from locators.order_page_locators import ButtonsLocators
+from datetime import date, timedelta
+
+
+def future_date(days):
+    return (date.today() + timedelta(days=days)).strftime("%d.%m.%Y")
 
 
 class Links:
@@ -21,10 +26,10 @@ class Answers:
 
 class LoginData:
     LOGIN_PAGE_ENTRANCE = [ButtonsLocators.UPPER_ORDER_BUTTON, ButtonsLocators.LOWER_ORDER_BUTTON]
-    FIRST_NAME = ["Василий", "Георгий"]
-    LAST_NAME = ["Веселовский", "Гришин"]
-    ADDRESS = ["Старазагора 11", "Жуковского 7"]
-    METRO_STATION = ["Сокольники", "Лубянка"]
-    PHONE = ["+79314001212", "+79314061212"]
-    RENTAL_DATE = ["16.09.2024", "16.10.2024"]
-    RENTAL_PERIOD = ["двое суток", "сутки"]
+    FIRST_NAME = ["Meetra", "Kissa"]
+    LAST_NAME = ["Skywalkers", "Terve"]
+    ADDRESS = ["The Royal Promenade Theed", "Level 1313 Uscru District"]
+    STATION = ["Alderaanian", "Level 1313"]
+    PHONE = ["+12345678910", "1010001010"]
+    RENTAL_DATE = [future_date(7), future_date(30)]
+    RENTAL_PERIOD = ["two days", "one day"]
