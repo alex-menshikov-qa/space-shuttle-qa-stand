@@ -2,13 +2,15 @@ import allure
 
 from data import Links
 from pages.base_page import BasePage
-from locators.order_page_locators import OrderPageLocators, MetroLocators, FieldsLocators, ButtonsLocators
+from locators.order_page_locators import OrderPageLocators, StationLocators, FieldsLocators, ButtonsLocators
+from locators.main_page_locators import MainPageLocators
 
 
 class OrderPage(BasePage):
 
     def open_order_page(self, locator):
         with allure.step(f"Opening the order page"):
+            self.accept_cookies()
             self.scroll_to_the_area(locator)
             self.click_element(locator)
 
@@ -28,10 +30,10 @@ class OrderPage(BasePage):
         with allure.step(f"Entering the address {address_data}"):
             self.enter_text(FieldsLocators.ADDRESS_FIELD, address_data)
 
-    def enter_station(self, metro_name):
-        with allure.step(f"Choosing the metro station {metro_name}"):
-            self.enter_text(MetroLocators.METRO_STATION_FIELD, metro_name)
-            self.click_element(MetroLocators.get_metro_station_locator(metro_name))
+    def enter_station(self, station_name):
+        with allure.step(f"Choosing the shuttle station {station_name}"):
+            self.enter_text(StationLocators.STATION_FIELD, station_name)
+            self.click_element(StationLocators.get_station_locator(station_name))
 
     def enter_phone(self, phone_data):
         with allure.step(f"Entering the phone {phone_data}"):
@@ -39,7 +41,7 @@ class OrderPage(BasePage):
 
     def proceed_order(self):
         with allure.step(f"Proceeding to the next page"):
-            self.click_element(ButtonsLocators.DALEE_BUTTON)
+            self.click_element(ButtonsLocators.NEXT_BUTTON)
 
     def load_about_rent_page(self):
         with allure.step(f"Loading the second order page"):
@@ -70,5 +72,8 @@ class OrderPage(BasePage):
 
     def get_confirmation_window(self):
         with allure.step(f"Getting the confirmation modal window"):
-            element = self.find_element(OrderPageLocators.CONFIRMATION_WINDOW, 10)
-            return element
+            return self.wait_for_element_visible(OrderPageLocators.CONFIRMATION_WINDOW)
+
+    def accept_cookies(self):
+        with allure.step("Accepting cookies"):
+            self.click_element(MainPageLocators.COOKIE_BUTTON)
