@@ -1,8 +1,13 @@
+import pytest
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from add.locators import SigningLocators, ButtonsLocators
 from add.helpers import get_sign_up_data
 from add.config import Config
+
+
+pytestmark = pytest.mark.ui
+
 
 class TestRegistration:
     def test_sign_up_page(self, driver, register_page):

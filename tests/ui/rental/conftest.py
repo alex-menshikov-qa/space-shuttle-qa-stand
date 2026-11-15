@@ -1,10 +1,19 @@
 import allure
 import pytest
+import requests
 from selenium import webdriver
 from data import Links
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
 from pages.switching_page import SwitchingPage
+
+
+@pytest.fixture(scope="session", autouse=True)
+def stand_is_up():
+    try:
+        requests.get(f"{Links.URL}/health", timeout=5).raise_for_status()
+    except requests.RequestException:
+        pytest.skip(f"Stand is not available: {Links.URL}")
 
 
 @pytest.fixture

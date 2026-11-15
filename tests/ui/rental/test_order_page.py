@@ -1,7 +1,9 @@
-import pytest
 import allure
+import pytest
 from data import LoginData
 
+
+pytestmark = pytest.mark.ui
 
 class TestOrderPage:
 

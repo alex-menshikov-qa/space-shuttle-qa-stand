@@ -1,5 +1,9 @@
 import allure
+import pytest
 from data import Links
+
+
+pytestmark = pytest.mark.ui
 
 
 class TestSwitchingPage:

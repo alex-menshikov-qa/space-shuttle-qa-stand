@@ -416,8 +416,8 @@ tests/
 pytest.ini          test paths, markers, Allure results directory
 ```
 
-`pytest.ini` declares the markers `ui` and `api`, but no test is marked with them yet, so
-`pytest -m ui` or `pytest -m api` selects nothing. Select a suite by its path instead.
+Every test module is marked with its suite's marker from `pytest.ini`: `ui` or `api`. So
+`pytest -m ui` runs both UI suites and `pytest -m api` the API suite; a path selects a single suite.
 
 ### Running the tests locally
 
@@ -458,17 +458,14 @@ Requires Docker with Compose v2, Python 3.12+, Chrome and Firefox. All commands 
    ```
 
 The tests read the stand's `.env` by themselves, so there is nothing to export:
-`tests/ui/add/config.py` (`BASE_URL`, `TEST_EMAIL`, `TEST_PASSWORD`) and `tests/api/api_data.py`
-(`BASE_URL` and the `BUG_*` flags) load it with python-dotenv. `tests/ui/rental/data.py` takes
-`BASE_URL` from the environment only; it gets the value from `.env` because pytest always loads
-`tests/ui/conftest.py`, which imports `config.py`, before the rental suite. A variable already set in
-the environment wins over `.env`. Without `BASE_URL` the suites use `http://localhost:8000`. To test
-another stand, change `BASE_URL`.
+`tests/ui/add/config.py` (`BASE_URL`, `TEST_EMAIL`, `TEST_PASSWORD`), `tests/ui/rental/data.py`
+(`BASE_URL`) and `tests/api/api_data.py` (`BASE_URL` and the `BUG_*` flags) load it with
+python-dotenv. A variable already set in the environment wins over `.env`. Without `BASE_URL` the
+suites use `http://localhost:8000`. To test another stand, change `BASE_URL`.
 
-**If the stand is not reachable**, the shipyard suite (the tests directly in `tests/ui/`) and the API suite are skipped:
-the shipyard `driver` fixture opens `BASE_URL` first, and a session-scoped autouse fixture of the
-API suite calls `GET /health`. The rental suite has no such check (its own `driver` fixture replaces
-the shipyard one): its 12 tests error out with a connection error.
+**If the stand is not reachable**, every suite is skipped with a reason instead of failing: the
+shipyard `driver` fixture opens `BASE_URL` first, and the rental and API suites each have a
+session-scoped autouse fixture that calls `GET /health`.
 
 On Windows, if `app` exits with `exec app/entrypoint.sh: no such file or directory`, the clone
 predates `.gitattributes` and the script has CRLF line endings. Restore it and rebuild:

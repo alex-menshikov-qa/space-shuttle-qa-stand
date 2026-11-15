@@ -1,7 +1,11 @@
+import pytest
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from add.config import Config
 from add.locators import SigningLocators, ButtonsLocators
+
+
+pytestmark = pytest.mark.ui
 
 
 class TestEnteringAccountPage:
