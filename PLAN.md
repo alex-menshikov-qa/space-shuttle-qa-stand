@@ -759,6 +759,35 @@ Without a flag the behaviour is exactly as in stage 1.
 | `nearestStation` items | strings only; `[1]` is a `400` | the original's format |
 | `.env.example` | the new flags are not added | it lists only a few flags as examples |
 
+## Result (track 5)
+Built as planned: `51b33af` (stage 1), `0e35ec2` (stage 2), this commit (stage 3). 48 flags; 41
+reproduce bug reports, 4 have another origin, 3 are `new (2026)`.
+
+| Flag | Origin |
+|---|---|
+| `BUG_ORDERS_COUNT_AS_STRING` | new (2026) |
+| `BUG_ORDERS_PAGE_FROM_ONE` | new (2026) |
+| `BUG_ORDERS_LIMIT_OVER_30` | new (2026) |
+
+Details settled along the way (all in the README):
+- `GET /autopilot/ordersCount` (no id segment at all) stays a `405`: the path is DELETE's
+  `/autopilot/{id}`. Only the empty segment, `//ordersCount`, is the `400`.
+- Numbers in `limit`, `page` and `nearestStation` follow the stand's rule for ids: digits only, up
+  to 9, surrounding spaces and leading zeros allowed (`" 03"` is station 3).
+- `nearestStation` names the unknown station by its number: `["09"]` → "Station 9 not found".
+- With `BUG_ORDERS_COUNT_AS_STRING` Swagger still documents both fields as integers: the defect
+  is a break of the documented contract.
+- With `BUG_ORDERS_LIMIT_OVER_30` only the upper bound goes: `limit=0` and `limit=abc` are still
+  `400` with the same text.
+- Swagger: every new parameter has a description and an example, every error status is listed,
+  `/ping` shows `pong` as `text/plain`; `//ordersCount` is out of the schema.
+
+Deviations from this plan: none beyond the default `limit` (Decisions above).
+
+Verification: a script outside the repo (76 checks of stage 1), one script per flag, each flag on
+its own, the unknown and the malformed flag blocking the start; the 21 API tests locally; all 50
+tests in CI on every stage.
+
 ## Out of scope
 Tests; UI; changes to the existing fields of `GET /orders`; `PUT /orders/cancel` (the original
 takes `?t=`, ours keeps the body).

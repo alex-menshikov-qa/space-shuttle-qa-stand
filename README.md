@@ -6,7 +6,7 @@
 **A portfolio test stand, not a production service.** It is a small web app with a JSON API and a
 PostgreSQL database, built to be tested: my automation suites in `tests/` (pytest, Selenium,
 Requests, Allure) run against it in CI instead of third-party training stands. It has stable
-locators, a documented contract, a seeded test user, and 45 switchable
+locators, a documented contract, a seeded test user, and 48 switchable
 [known defects](#known-defects) for the tests to catch; 41 of them reproduce bugs from my bug reports.
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
@@ -24,7 +24,7 @@ The stand is my design and Claude Code's implementation.
 **Where the requirements come from.** From my own work: the behavior my existing test suites
 expected, and the manual test documentation I wrote in 2023 for Space Shuttle Inc, a fictional
 product I built my QA portfolio around (a mind map of the order form, UI and API checklists, a
-field-validation table, and [the bug reports SSI-3…SSI-102](docs/bug-reports/)). 41 of the 45 seeded defects reproduce
+field-validation table, and [the bug reports SSI-3…SSI-102](docs/bug-reports/)). 41 of the 48 seeded defects reproduce
 bugs from those bug reports; I had found them by hand in the training applications the
 documentation grew out of.
 
@@ -70,6 +70,8 @@ On every start the stand applies migrations and seeds, idempotently:
   `pollo`, `siili`, `orava`, `hirvi`), all with the password `FLEET_PASSWORD`.
 
 If a test deletes the test user or a fleet autopilot, a restart (`docker compose restart app`) brings it back.
+The seed creates no rental orders: a fresh stand (after `docker compose down -v`) has none, so a paging
+test creates the orders it needs.
 
 ## Environment variables
 
@@ -118,15 +120,19 @@ or a number where a string is expected all give the `400` below.
 | `POST /autopilot` `{login, password, firstName}` | `201 {"ok": true}` | `400` "Insufficient data to create an account" (a field is missing or breaks its rule) · `409` "This login is already in use. Please try another one" |
 | `POST /autopilot/login` `{login, password}` | `200 {"id": <int>}` | `400` "Insufficient data to log in" · `404` "Account not found" (wrong pair or unknown login) |
 | `DELETE /autopilot/{id}` | `200 {"ok": true}` | `400` "Insufficient data to delete the autopilot" (no id) · `404` "There is no autopilot with such id" (also for a non-numeric id) |
+| `GET /autopilot/{id}/ordersCount` | `200 {"id": <int>, "ordersCount": <int>}` — orders the autopilot has accepted, in progress and finished; canceled orders do not count | `400` "Insufficient data to perform the search" (empty id: `/autopilot//ordersCount`) · `404` "There is no autopilot with such id" (also for a non-numeric id) |
 | `GET /stations/search?s=` | `200 {"stations": [{number, name, color}]}` — names containing `s`, case-insensitive, from 1 character; without `s` all stations | — |
 | `POST /orders` | `201 {"track": <int>}` | `400` with the message of the first invalid field |
-| `GET /orders[?autopilotId=]` | `200 {"orders": [...]}` — all orders, or those accepted by the autopilot | `404` "Autopilot with identifier {autopilotId} not found" |
+| `GET /orders[?autopilotId=&limit=&page=&nearestStation=]` | `200 {"orders": [...], "pageInfo": {page, total, limit}, "availableStations": [{number, name, color}]}` — one page of orders, see [Order list](#order-list) | `400` "Parameter 'limit' must be a number from 1 to 30" · "Parameter 'page' must be a number, 0 or greater" · "Parameter 'nearestStation' must be a JSON array of station numbers as strings" · "Station {number} not found" · `404` "Autopilot with identifier {autopilotId} not found" |
 | `GET /orders/track?t=` | `200 {"order": {...}}` | `400` "Insufficient data to perform the search" (no `t`) · `404` "Order not found" |
 | `PUT /orders/accept/{id}?autopilotId=` | `200 {"ok": true}` | `400` "Insufficient data to perform the search" · `404` "There is no order with such id" / "There is no autopilot with such id" · `409` "This order is already in progress" |
 | `PUT /orders/finish/{id}` | `200 {"ok": true}` | `404` "There is no order with such id" · `409` "This order cannot be finished" (not accepted yet, or already finished) |
 | `PUT /orders/cancel` `{track}` | `200 {"ok": true}` | `400` "Insufficient data to perform the search" · `404` "Order not found" · `409` "This order is already in progress" |
+| `GET /ping` | `200`, `text/plain`, body `pong` — the API is up; no database involved (that is `/health`) | — |
 
 `{id}` in accept / finish is the order's `id` (from `GET /orders/track`), not its track number.
+`ordersCount` always equals `pageInfo.total` of `GET /orders?autopilotId=<id>`. `GET /autopilot/ordersCount`
+(no id segment at all) is a `405`: that path belongs to `DELETE /autopilot/{id}`.
 
 **Autopilot rules.** `login` — 2–10 Latin ("Aurebesh") letters; `password` — exactly 4 digits, sent as
 a string; `firstName` — 2–10 Latin letters, required. Passwords are stored as argon2id hashes in
@@ -163,6 +169,27 @@ acceptedAt, finishedAt, rentalEndsAt}`.
 | `flying` | `PICKUP_MINUTES` after finish |
 | `ended` | `rentTime` days after finish (`rentalEndsAt`) |
 | `delayed` | the delivery day is over (after 23:59 in `STAND_TZ`) and the order is not finished; finish brings it to `on_site` |
+
+### Order list
+
+`GET /orders` lists orders page by page, **oldest first (by order `id`)**. Canceled orders and orders of
+deleted autopilots are not listed. All parameters are optional and combine:
+
+| Parameter | Meaning |
+|---|---|
+| `autopilotId` | only the orders accepted by this autopilot |
+| `limit` | orders per page, 1–30; default **30** |
+| `page` | page number, **from 0**; default 0 |
+| `nearestStation` | only the orders at these stations: a JSON array of station numbers **as strings**, `?nearestStation=["1","2"]` (URL-encoded: `%5B%221%22%2C%222%22%5D`) |
+
+- `pageInfo.total` counts every order that matches the filters, whatever the page; `pageInfo.page`
+  and `pageInfo.limit` are the page and limit used.
+- A page past the end is `200` with an empty `orders` and the real `total`.
+- `availableStations` lists the stations of `nearestStation` (by number, no duplicates); without the
+  filter, every station. `nearestStation=[]` gives an empty page and no stations.
+- Numbers are plain digits, up to 9 of them; `[1]` (numbers, not strings) is a `400`.
+- Checks run in this order: `limit`, `page`, `nearestStation`, then `autopilotId`; the first problem is reported.
+- Without parameters the response is the first page of 30: with more than 30 orders, the newest are on later pages.
 
 ### Time shift for tests
 
@@ -546,12 +573,14 @@ docker-compose.yml  db + app
 
 ## Known defects
 
-The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them: 45 flags,
+The stand can deliberately reproduce bugs ("seeded defects") so tests can catch them: 48 flags,
 41 of which reproduce bugs from my 2023 bug reports. **Origin** says where each comes from:
 `SSI-n` — a bug report (Web, order status: SSI-3…SSI-28 and SSI-95; API: SSI-29…SSI-62; Web, order
 form: SSI-65…SSI-94; mobile app: SSI-96…SSI-102);
 `training stand` — a bug of the training stand the first tests were written against;
-`new` — a defect that first appeared on this stand.
+`new` — a defect that first appeared on this stand;
+`new (2026)` — a defect added in 2026 with the API features taken from the original training stand
+(order count, paging).
 
 For a seeded report, its **Expected result** is how the stand behaves by default and its **Actual
 result** is what happens with the flag on. 78 of the 98 reports are seeded; the other 20 are
@@ -612,6 +641,9 @@ below links to its report.
 | `BUG_FORM_PERIOD_LIST_NARROW` | [SSI-94](docs/bug-reports/web-order-form.md#ssi-94) | UI | the **Rental Period** list is half as wide as the field, at its right edge | as wide as the field |
 | `BUG_FORM_ERROR_LAYOUT_SHIFT` | new | UI | on `/order` an error text that appears under a field pushes the rest of the form down by a line, so a click that leaves an invalid field for **Rental Period** misses and the list does not open | every field keeps an empty line for its error; nothing moves |
 | `BUG_ADD_BUTTON_STALE_TOTAL` | new | UI | on `/shipyard` the **Add** button adds the part, but the total keeps its old value until the next other change | the total is recalculated at once |
+| `BUG_ORDERS_COUNT_AS_STRING` | new (2026) | API | `GET /autopilot/{id}/ordersCount` returns both numbers as strings: `{"id": "7", "ordersCount": "2"}`, as in the example of the original's documentation | `{"id": 7, "ordersCount": 2}` |
+| `BUG_ORDERS_PAGE_FROM_ONE` | new (2026) | API | `GET /orders` counts pages from one: `page=0` and `page=1` return the same first page, `page=2` the second; `pageInfo.page` is as requested | pages from zero: `page=1` is the second page |
+| `BUG_ORDERS_LIMIT_OVER_30` | new (2026) | API | `GET /orders` accepts a `limit` above 30 and returns as many orders as asked; `pageInfo.limit` is as requested (`limit=0` is still a `400`) | `400` "Parameter 'limit' must be a number from 1 to 30" |
 
 ### Not seeded
 
