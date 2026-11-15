@@ -561,11 +561,11 @@ after stage 0: nine flags, three bugs not seeded.
 | `BUG_TRACK_NO_WRAP` | SSI-16 |
 | `BUG_TRACK_AUTOPILOT_NAME_TRUNCATED` | SSI-18 |
 | `BUG_STATUS_ON_SITE_SKIPPED` | SSI-19 |
-| `BUG_CANCELED_MODAL_FULLSCREEN` | SSI-21, SSI-22 |
+| `BUG_CANCELED_MODAL_SIZE` | SSI-21, SSI-22 |
 | `BUG_TRACK_CANCEL_HIDDEN_ON_ACCEPT` | SSI-24 |
 | `BUG_CANCELED_ORDER_VISIBLE` | SSI-25, SSI-26 |
 | `BUG_DELAYED_ONE_DAY_EARLY` | SSI-27 |
-| `BUG_ENDED_STATUS_4_CAPTION` | SSI-28 |
+| `BUG_ENDED_STATUS_4_AS_5` | SSI-28 |
 | `BUG_FORM_CONFIRM_YES_DEAD` | SSI-65 |
 | `BUG_FORM_NAME_DASH` | SSI-66 |
 | `BUG_FORM_LAST_NAME_16` | SSI-67 |
@@ -620,3 +620,28 @@ map, any change to the application or the tests.
 `BUG_CANCELED_MODAL_FULLSCREEN` reproduces SSI-21 only: it makes the "Order canceled" window fill
 the screen, while SSI-22 reports a window smaller than the previous one. SSI-22 is now listed
 under Not seeded, so 77 of the 98 reports are seeded by flags and 21 are not.
+
+---
+
+# Defects by the original screenshots
+
+Sasha found his original 2022 screenshots of the bug reports (not published). Three defects
+were reproduced differently from them; the stand now follows the originals.
+
+| Was | Becomes | Bug | With the flag |
+|---|---|---|---|
+| `BUG_ENDED_STATUS_4_CAPTION` | `BUG_ENDED_STATUS_4_AS_5` | SSI-28 | after the rental has ended status 4 takes the title and caption of status 5 ("Rental time has ended", "<name> is heading home to recharge. Thanks for flying with us."); the highlighting is as without the flag |
+| `BUG_CANCELED_MODAL_FULLSCREEN` | `BUG_CANCELED_MODAL_SIZE` | SSI-21, SSI-22 | in a window up to 1280 px wide "Order canceled" is full width, as high as the first window (SSI-21); in a wider one it is about a third smaller than "Do you want to cancel the order?" in width and height, centred (SSI-22) |
+| `BUG_TRACK_NO_WRAP` | same name | SSI-16 | a long value is not wrapped and runs to the left, over the field names (it used to run to the right, onto the status chain) |
+
+The old names are unknown flags now: the stand refuses to start with them. SSI-22 is seeded
+again, so 78 of the 98 reports are seeded and 20 are not.
+
+## Decisions (documentation)
+| Topic | Decision | Why |
+|---|---|---|
+| Screenshot frame | **always the whole window, never cropped**: a PNG is exactly the size of the browser window; a GIF is the whole window at its own size, not scaled down (up to 5 MB) | the place of the bug is found at once, in the context of the page |
+| Red frame | as before: 3 px `#d0021b`, rounded, around the place of the bug on PNGs; GIFs have no frame | unchanged |
+| SSI-7 | Sasha's own Firefox recording (1280×720 page in the responsive mode), committed as it is | the defect acts in Firefox only |
+| SSI-21 / SSI-22 | SSI-21 at 1280×720; SSI-22 at 1920×1080, two frames (first window, second window) | the flag depends on the window width |
+
