@@ -63,7 +63,7 @@ curl http://localhost:8000/health   # {"status":"ok"}
 
 On every start the stand applies migrations and seeds, idempotently:
 
-- the test user from `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the same variables the tests read);
+- the test user from `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the tests read `TEST_EMAIL` and `TEST_PASSWORD`);
 - the eight Coruscant stations from `app/data/stations.json`;
 - the shipyard catalog of 16 parts from `app/data/shipyard_parts.json`;
 - the fleet of nine autopilots from `app/data/fleet.json` (`ilves`, `pupu`, `kissa`, `kettu`, `karhu`,
@@ -85,12 +85,13 @@ One `.env` (copied from `.env.example`, which holds fake values only) feeds both
 | `BASE_URL` | tests | Stand URL; keep it in sync with `APP_PORT` |
 | `JWT_SECRET` | stand | HS256 key for access tokens |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | stand | Token and session lifetime (default 60) |
-| `TEST_NAME`, `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Seeded test user |
+| `TEST_NAME` | stand | Name of the seeded test user |
+| `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Email and password of the seeded test user |
 | `FLEET_PASSWORD` | stand | Password of the seeded fleet autopilots, exactly 4 digits (default `0101`) |
 | `STAND_TZ` | stand | Time zone in which the stand counts days (default `UTC`) |
 | `PICKUP_MINUTES` | stand | Minutes from "Autopilot is on site" to "Okay, let's fly now" (default 10) |
 | `TEST_HOOKS` | stand | `1` switches on `/api/v1/testing/*` (default off; CI switches it on) |
-| `BUG_<NAME>` | stand | Switches a seeded defect on (see [Known defects](#known-defects)) |
+| `BUG_<NAME>` | stand, tests | Switches a seeded defect on (see [Known defects](#known-defects)); `tests/api/api_data.py` reads the flags for the conditional `xfail` |
 
 The app gets `DATABASE_URL` from `docker-compose.yml`, assembled from the `POSTGRES_*` variables.
 
