@@ -5,6 +5,7 @@ and the order's own clock, so the testing hook can move one order through
 time without touching anything else.
 """
 
+import json
 import secrets
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -22,6 +23,10 @@ ANY_DATE = date(1000, 1, 1)
 
 TRACK_MIN = 10000
 TRACK_MAX = 99999
+
+# Paging of GET /orders.
+PAGE_LIMIT_DEFAULT = 30
+PAGE_LIMIT_MAX = 30
 
 # Status values, in chain order; DELAYED stands apart.
 HANGAR = "hangar"
@@ -132,11 +137,38 @@ def find_by_id(session: Session, order_id: Any) -> Order | None:
     return order if order is not None and _is_visible(order) else None
 
 
-def list_orders(session: Session, autopilot_id: int | None = None) -> list[Order]:
+def parse_station_numbers(raw: str) -> list[int] | None:
+    """`["1","2"]` -> [1, 2]. None unless `raw` is a JSON array whose items
+    are all strings holding a number (an empty array is fine)."""
+    try:
+        value = json.loads(raw)
+    except (ValueError, RecursionError):
+        return None
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        return None
+    numbers = [parse_number(item) for item in value]
+    return None if None in numbers else numbers
+
+
+def list_orders(
+    session: Session,
+    autopilot_id: int | None = None,
+    station_numbers: list[int] | None = None,
+) -> list[Order]:
+    """Visible orders, oldest first (by id), optionally only those accepted by
+    one autopilot and only those at the given stations."""
     query = select(Order).order_by(Order.id)
     if autopilot_id is not None:
         query = query.where(Order.autopilot_id == autopilot_id)
+    if station_numbers is not None:
+        query = query.where(Order.station_number.in_(station_numbers))
     return [order for order in session.scalars(query) if _is_visible(order)]
+
+
+def orders_count(session: Session, autopilot_id: int) -> int:
+    """Orders the autopilot has accepted, in progress and finished. Canceled
+    ones do not count; the number always equals the length of its list."""
+    return len(list_orders(session, autopilot_id))
 
 
 # --- commands ------------------------------------------------------------------

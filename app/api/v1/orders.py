@@ -2,15 +2,15 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, status
+from fastapi import APIRouter, Body, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app import strings
 from app.db import get_session
 from app.errors import ApiError, ErrorResponse
 from app.models import Order
-from app.schemas import OkResponse, OrderResponse, OrdersResponse, TrackResponse
-from app.services import autopilots, orders
+from app.schemas import OkResponse, OrderResponse, OrdersResponse, PageInfo, TrackResponse
+from app.services import autopilots, orders, stations
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -56,23 +56,98 @@ def create(
     return TrackResponse(track=order.track)
 
 
+_LIST_400 = (
+    "`limit` is not a number from 1 to 30, `page` is not a number from 0, or "
+    "`nearestStation` is not a JSON array of station numbers as strings or names "
+    "a station that does not exist"
+)
+
+
+def _page_number(raw: str | None, default: int, low: int, high: int | None, message: str) -> int:
+    """A paging parameter: absent means the default; anything else must be a
+    plain number within [low, high]."""
+    if raw is None:
+        return default
+    number = orders.parse_number(raw)
+    if number is None or number < low or (high is not None and number > high):
+        raise ApiError(400, message)
+    return number
+
+
 @router.get(
     "",
-    responses={404: {"model": ErrorResponse, "description": "Unknown autopilotId"}},
+    responses={
+        400: {"model": ErrorResponse, "description": _LIST_400},
+        404: {"model": ErrorResponse, "description": "Unknown autopilotId"},
+    },
 )
 def list_orders(
-    autopilotId: str | None = None,  # noqa: N803 - the public parameter name
+    autopilotId: str | None = Query(  # noqa: N803 - the public parameter name
+        None,
+        description="Only the orders accepted by this autopilot",
+        examples=["1"],
+    ),
+    limit: str | None = Query(
+        None,
+        description=(
+            f"Orders per page, 1-{orders.PAGE_LIMIT_MAX}; default {orders.PAGE_LIMIT_DEFAULT}"
+        ),
+        examples=["10"],
+    ),
+    page: str | None = Query(
+        None, description="Page number, from 0; default 0", examples=["0"]
+    ),
+    nearestStation: str | None = Query(  # noqa: N803
+        None,
+        description=(
+            "Only the orders at these stations: a JSON array of station numbers as "
+            'strings, e.g. `["1","2"]`'
+        ),
+        examples=['["1","2"]'],
+    ),
     session: Session = Depends(get_session),
 ) -> OrdersResponse:
-    """All orders, or the ones accepted by `autopilotId`. Canceled orders and
-    orders of deleted autopilots are not listed."""
+    """Orders page by page, oldest first (by id). All filters are optional and
+    combine. Canceled orders and orders of deleted autopilots are not listed.
+    `pageInfo.total` counts every matching order, whatever the page; a page past
+    the end is empty. Checks run in this order: `limit`, `page`,
+    `nearestStation`, `autopilotId`."""
+    page_limit = _page_number(
+        limit,
+        orders.PAGE_LIMIT_DEFAULT,
+        1,
+        orders.PAGE_LIMIT_MAX,
+        strings.ORDERS_LIMIT_INVALID,
+    )
+    page_number = _page_number(page, 0, 0, None, strings.ORDERS_PAGE_INVALID)
+
+    all_stations = stations.search(session)
+    station_numbers = None
+    shown_stations = all_stations
+    if nearestStation is not None:
+        station_numbers = orders.parse_station_numbers(nearestStation)
+        if station_numbers is None:
+            raise ApiError(400, strings.ORDERS_STATIONS_INVALID)
+        known = {station.number for station in all_stations}
+        for number in station_numbers:
+            if number not in known:
+                raise ApiError(400, strings.ORDERS_STATION_UNKNOWN.format(station=number))
+        wanted = set(station_numbers)
+        shown_stations = [station for station in all_stations if station.number in wanted]
+
     autopilot_id = None
     if autopilotId is not None:
         autopilot_id = orders.parse_number(autopilotId)
         if autopilot_id is None or autopilots.get(session, autopilot_id) is None:
             raise ApiError(404, strings.AUTOPILOT_NOT_FOUND.format(autopilot_id=autopilotId))
-    found = orders.list_orders(session, autopilot_id)
-    return OrdersResponse(orders=[orders.as_dict(order) for order in found])
+
+    found = orders.list_orders(session, autopilot_id, station_numbers)
+    start = page_number * page_limit
+    return OrdersResponse(
+        orders=[orders.as_dict(order) for order in found[start : start + page_limit]],
+        pageInfo=PageInfo(page=page_number, total=len(found), limit=page_limit),
+        availableStations=[stations.as_dict(station) for station in shown_stations],
+    )
 
 
 @router.get(

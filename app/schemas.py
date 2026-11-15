@@ -40,6 +40,13 @@ class AutopilotIdResponse(BaseModel):
     id: int
 
 
+class OrdersCountResponse(BaseModel):
+    id: int = Field(examples=[7], description="The autopilot's id")
+    ordersCount: int = Field(
+        examples=[3], description="Orders the autopilot has accepted: in progress and finished"
+    )
+
+
 class StationOut(BaseModel):
     number: int
     name: str
@@ -79,8 +86,20 @@ class OrderResponse(BaseModel):
     order: OrderOut
 
 
+class PageInfo(BaseModel):
+    page: int = Field(examples=[0], description="The page returned, from zero")
+    total: int = Field(
+        examples=[42], description="Orders that match the filters, on every page together"
+    )
+    limit: int = Field(examples=[30], description="Orders per page")
+
+
 class OrdersResponse(BaseModel):
-    orders: list[OrderOut]
+    orders: list[OrderOut] = Field(description="One page of orders, oldest first (by id)")
+    pageInfo: PageInfo
+    availableStations: list[StationOut] = Field(
+        description="The stations of nearestStation, by number; without it, every station"
+    )
 
 
 # --- Shipyard ---
