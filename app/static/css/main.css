@@ -712,16 +712,22 @@ a {
   margin-top: auto;
 }
 
-/* #if CANCELED_MODAL_FULLSCREEN */
-#track-canceled-modal {
-  padding: 0;
+/* #if CANCELED_MODAL_SIZE */
+#track-canceled-modal .modal__dialog {
+  transform: scale(0.667);
 }
 
-#track-canceled-modal .modal__dialog {
-  width: 100%;
-  max-width: none;
-  height: 100%;
-  border-radius: 0;
+@media (max-width: 1280px) {
+  #track-canceled-modal {
+    padding: 0;
+  }
+
+  #track-canceled-modal .modal__dialog {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    transform: none;
+  }
 }
 /* #endif */
 
@@ -807,6 +813,7 @@ a {
   color: var(--text);
   text-align: right;
   /* #if TRACK_NO_WRAP */
+  justify-self: end;
   white-space: nowrap;
   /* #else */
   overflow-wrap: anywhere;

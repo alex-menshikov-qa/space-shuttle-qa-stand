@@ -29,7 +29,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 | SSI-25 | Critical | Canceled order is not removed from the system |
 | SSI-26 | Critical | User can view a canceled order |
 | SSI-27 | Critical | Order is considered overdue too early |
-| SSI-28 | Medium | Caption of the "Okay, let's fly now" status changes after the rental period expires |
+| SSI-28 | Medium | Status "Okay, let's fly now" changes after the rental period expires |
 | SSI-95 | Medium | "There is no such order" window flashes when the order page is refreshed |
 
 ---
@@ -176,7 +176,9 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** The button becomes slightly lighter on hover.
 
-**Attachments.** Screen recording.
+**Attachments.**
+
+![SSI-7: in Firefox, the Order button in the header does not change colour on hover](img/ssi-7.gif)
 
 ---
 
@@ -436,7 +438,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 | **Area** | Web, order status page |
 | **Environment** | Beskar (1920×1080), Vulptex Browser (1280×720) |
 
-**Description.** If a value does not fit on one line, it is not wrapped and runs past the border of the order data block.
+**Description.** If a value does not fit on one line, it is not wrapped: it runs past the border of the field and covers the field names.
 
 **Precondition.** An order has been placed with a 50-character address: `Pharmaceuticals Company Royal Promenade Avenue, 56`.
 
@@ -447,13 +449,13 @@ Found with the Check List Web: finding an order by its number, its details, deli
 3. Enter the order number in the search field: `252240`.
 4. Submit the number.
 
-**Actual result.** The address is not wrapped onto a second line and runs past the border of the block.
+**Actual result.** The address is not wrapped onto a second line and covers the field names.
 
 **Expected result.** Long values are wrapped onto a second line.
 
 **Attachments.**
 
-![SSI-16: a 50-character address stays on one line and runs out of the order data block](img/ssi-16.png)
+![SSI-16: a 50-character address stays on one line, runs to the left and covers the field name "Address: where the shuttle will arrive"](img/ssi-16.png)
 
 ---
 
@@ -615,7 +617,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Attachments.**
 
-![SSI-21: the "Order canceled." window fills the whole 1280×720 screen](img/ssi-21.png)
+![SSI-21: at 1280×720 the "Order canceled." window is as wide as the screen](img/ssi-21.png)
 
 ---
 
@@ -646,7 +648,11 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Expected result.** Both windows are the same size.
 
-**Attachments.** Two screenshots (first window, second window).
+**Attachments.**
+
+![SSI-22: at 1920×1080 the first window, "Do you want to cancel the order?"](img/ssi-22-1.png)
+
+![SSI-22: the next window, "Order canceled.", is a third smaller than the first one](img/ssi-22-2.png)
 
 ---
 
@@ -822,7 +828,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 <a id="ssi-28"></a>
 
-## SSI-28: Caption of the "Okay, let's fly now" status changes after the rental period expires
+## SSI-28: Status "Okay, let's fly now" changes after the rental period expires
 
 | | |
 |---|---|
@@ -830,7 +836,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 | **Area** | Web, order status page |
 | **Environment** | Beskar (1920×1080), Vulptex Browser (1280×720) |
 
-**Description.** When the rental period ends, the caption of the "Okay, let's fly now" status changes from "Rental ends on…" to the text of the next status, "Rental time has ended".
+**Description.** When the rental period ends, status 4 "Okay, let's fly now" takes the title and caption of status 5, so the status chain shows "Rental time has ended" twice in a row.
 
 **Preconditions**
 
@@ -846,13 +852,13 @@ Found with the Check List Web: finding an order by its number, its details, deli
 4. Submit the number.
 5. Set the date on the device to 08.08.2025.
 
-**Actual result.** The caption of "Okay, let's fly now" changes to "Rental time has ended".
+**Actual result.** Status 4 shows the title and caption of status 5, "Rental time has ended".
 
-**Expected result.** The caption stays the same: "Rental ends on <day and month> at <time>".
+**Expected result.** Status 4 stays as it was: "Okay, let's fly now", with the caption "Rental ends on <day and month> at <time>".
 
 **Attachments.**
 
-![SSI-28: after the rental has ended the caption of "Okay, let's fly now" reads "Rental time has ended"](img/ssi-28.png)
+![SSI-28: after the rental has ended status 4 shows "Rental time has ended" with the caption of status 5, the same as status 5 below it](img/ssi-28.png)
 
 ---
 

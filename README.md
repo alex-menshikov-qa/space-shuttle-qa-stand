@@ -524,7 +524,7 @@ form: SSI-65…SSI-94; mobile app: SSI-96…SSI-102);
 `new` — a defect that first appeared on this stand.
 
 For a seeded report, its **Expected result** is how the stand behaves by default and its **Actual
-result** is what happens with the flag on. 77 of the 98 reports are seeded; the other 21 are
+result** is what happens with the flag on. 78 of the 98 reports are seeded; the other 20 are
 listed under [Not seeded](#not-seeded).
 
 Each defect is off by default and is switched on with `BUG_<NAME>=1` in `.env`
@@ -554,13 +554,13 @@ below links to its report.
 | `BUG_TRACK_DATE_PLUS_DAY` | [SSI-13](docs/bug-reports/web-order-status.md#ssi-13) | UI | `/track` shows the delivery date one day late; the API is right | the ordered date |
 | `BUG_TRACK_EMPTY_COLOR` | [SSI-14](docs/bug-reports/web-order-status.md#ssi-14) | UI | an order without a colour shows `any` as its **Shuttle Color** | an empty value |
 | `BUG_TRACK_EMPTY_COMMENT` | [SSI-15](docs/bug-reports/web-order-status.md#ssi-15) | UI | an order without a comment has no **Comment for Autopilot** row at all: no caption, no `track-comment-value` | the caption with an empty value |
-| `BUG_TRACK_NO_WRAP` | [SSI-16](docs/bug-reports/web-order-status.md#ssi-16) | UI | values on `/track` never wrap: a 50-character address stays on one line and runs out of the data block | long values wrap inside the block |
+| `BUG_TRACK_NO_WRAP` | [SSI-16](docs/bug-reports/web-order-status.md#ssi-16) | UI | values on `/track` never wrap: a 50-character address stays on one line and runs to the left, over the field names | long values wrap inside the block |
 | `BUG_TRACK_AUTOPILOT_NAME_TRUNCATED` | [SSI-18](docs/bug-reports/web-order-status.md#ssi-18) | UI | in "Autopilot <firstName> is heading towards you" a name of 10 or more characters is cut to its first two and an ellipsis ("Averyveryl" → "Av…"); the API is right | the name in full |
 | `BUG_STATUS_ON_SITE_SKIPPED` | [SSI-19](docs/bug-reports/web-order-status.md#ssi-19) | API, UI | after finish the order stays `heading` (status 2) until `PICKUP_MINUTES` pass, then goes straight to `flying` (status 4) | `on_site` (status 3) right after finish |
-| `BUG_CANCELED_MODAL_FULLSCREEN` | [SSI-21](docs/bug-reports/web-order-status.md#ssi-21) | UI | the "Order canceled." window fills the whole screen | the same small centred window as "Do you want to cancel the order?" |
+| `BUG_CANCELED_MODAL_SIZE` | [SSI-21](docs/bug-reports/web-order-status.md#ssi-21), [SSI-22](docs/bug-reports/web-order-status.md#ssi-22) | UI | the "Order canceled." window is full width in a window up to 1280 px wide; in a wider window it is about a third smaller than "Do you want to cancel the order?", centred | the same small centred window as "Do you want to cancel the order?" |
 | `BUG_TRACK_CANCEL_HIDDEN_ON_ACCEPT` | [SSI-24](docs/bug-reports/web-order-status.md#ssi-24) | UI | once an autopilot has accepted the order **Cancel order** is gone from the page (`track-cancel-button` is absent) | the button stays on the page, disabled |
 | `BUG_DELAYED_ONE_DAY_EARLY` | [SSI-27](docs/bug-reports/web-order-status.md#ssi-27) | API, UI | an undelivered order becomes `delayed` a day early: from 00:00 of the delivery day | after 23:59 of the delivery day |
-| `BUG_ENDED_STATUS_4_CAPTION` | [SSI-28](docs/bug-reports/web-order-status.md#ssi-28) | UI | after the rental has ended the caption of status 4 turns into the next status's text, "Rental time has ended"; the highlighting is right | the caption stays "Rental ends on <day> at <time>" |
+| `BUG_ENDED_STATUS_4_AS_5` | [SSI-28](docs/bug-reports/web-order-status.md#ssi-28) | UI | after the rental has ended status 4 takes the title and caption of status 5: "Rental time has ended" twice in a row; the highlighting is right | status 4 stays "Okay, let's fly now" with the caption "Rental ends on <day> at <time>" |
 | `BUG_FORM_CONFIRM_YES_DEAD` | [SSI-65](docs/bug-reports/web-order-form.md#ssi-65) | UI | **Yes** in "Do you want to place the order?" does not respond, so no order can be placed from the form; `POST /orders` works | **Yes** places the order |
 | `BUG_FORM_NAME_DASH` | [SSI-66](docs/bug-reports/web-order-form.md#ssi-66) | UI, API | the order **Name** rejects a hyphen: "Meetra-Koth" → "Enter the correct name" | accepted |
 | `BUG_FORM_LAST_NAME_16` | [SSI-67](docs/bug-reports/web-order-form.md#ssi-67) | UI, API | **Last Name** accepts 16 characters ("Grandmoffftarkin"); 17 are still rejected | "Enter the correct last name" from 16 characters |
@@ -585,7 +585,7 @@ below links to its report.
 
 ### Not seeded
 
-These 21 bug reports are not reproduced by a flag.
+These 20 bug reports are not reproduced by a flag.
 
 | Bug | Report | Why not |
 |---|---|---|
@@ -594,7 +594,6 @@ These 21 bug reports are not reproduced by a flag.
 | [SSI-11](docs/bug-reports/web-order-status.md#ssi-11) | the station's colour circle is too far from the station name | pixel-level spacing |
 | [SSI-17](docs/bug-reports/web-order-status.md#ssi-17) | the status chain is centred on the screen (1280×720 only) | pixel-level alignment |
 | [SSI-20](docs/bug-reports/web-order-status.md#ssi-20) | the buttons of "Do you want to cancel the order?" sit too high (1920×1080 only) | pixel-level alignment |
-| [SSI-22](docs/bug-reports/web-order-status.md#ssi-22) | the "Order canceled" window is smaller than the previous window | the flag shared with SSI-21 makes the window fill the screen; a window smaller than the previous one is not seeded |
 | [SSI-23](docs/bug-reports/web-order-status.md#ssi-23) | **Okay** in "Order canceled" sits too high | pixel-level alignment |
 | [SSI-95](docs/bug-reports/web-order-status.md#ssi-95) | "There is no such order" flashes when the order page is refreshed | a race: a flag cannot reproduce it honestly |
 | [SSI-77](docs/bug-reports/web-order-form.md#ssi-77) | an unexpected "Do you want to place the order?" window | by design on the stand: the window was kept and added to the requirements |
@@ -609,9 +608,11 @@ These 21 bug reports are not reproduced by a flag.
 
 The bug reports were filed in two environments. On this stand they map onto the browsers the
 tests use: **"Beskar, 1920×1080" is Chrome** and **"Vulptex Browser, 1280×720" is Firefox**, each at
-that window size. A bug reported in both, or in Beskar only, is seeded for every browser. The one
-bug reported in Vulptex Browser only and seeded, SSI-7, acts in that browser only:
-`BUG_ORDER_HOVER_VULPTEX` works in Firefox and never in Chrome.
+that window size. A bug reported in both, or in Beskar only, is seeded for every browser. Two bugs
+reported in Vulptex Browser only are seeded. SSI-7 acts in that browser only:
+`BUG_ORDER_HOVER_VULPTEX` works in Firefox and never in Chrome. SSI-21 acts in a window up to
+1280 px wide: together with SSI-22 it is one flag, `BUG_CANCELED_MODAL_SIZE`, which depends on the
+window width, not on the browser.
 
 Notes:
 
