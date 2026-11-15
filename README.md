@@ -608,10 +608,11 @@ These 20 bug reports are not reproduced by a flag.
 
 The bug reports were filed in two environments. On this stand they map onto the browsers the
 tests use: **"Beskar, 1920×1080" is Chrome** and **"Vulptex Browser, 1280×720" is Firefox**, each at
-that window size. A bug reported in both, or in Beskar only, is seeded for every browser. The one
-bug reported in Vulptex Browser only and seeded, SSI-7, acts in that browser only:
-`BUG_ORDER_HOVER_VULPTEX` works in Firefox and never in Chrome. `BUG_CANCELED_MODAL_SIZE` depends
-on the window width, not on the browser.
+that window size. A bug reported in both, or in Beskar only, is seeded for every browser. Two bugs
+reported in Vulptex Browser only are seeded. SSI-7 acts in that browser only:
+`BUG_ORDER_HOVER_VULPTEX` works in Firefox and never in Chrome. SSI-21 acts in a window up to
+1280 px wide: together with SSI-22 it is one flag, `BUG_CANCELED_MODAL_SIZE`, which depends on the
+window width, not on the browser.
 
 Notes:
 
