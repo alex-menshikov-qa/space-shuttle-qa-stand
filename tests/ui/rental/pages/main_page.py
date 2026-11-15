@@ -7,7 +7,7 @@ class MainPage(BasePage):
 
     def wait_for_dropdown_load(self):
         with allure.step(f"Loading the dropdown area"):
-            self.find_element(MainPageLocators.SAMOKAT_LOGO)
+            self.find_element(MainPageLocators.SHUTTLE_LOGO)
             self.scroll_to_the_area(MainPageLocators.QUESTIONS_AREA)
 
     def click_cookies(self):

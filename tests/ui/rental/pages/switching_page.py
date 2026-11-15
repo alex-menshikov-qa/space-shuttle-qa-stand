@@ -11,23 +11,23 @@ class SwitchingPage(BasePage):
 
     def open_order_page(self):
         with allure.step(f"Opening the side page"):
-            self.driver.get(f'{Links.URL}order')
+            self.driver.get(f'{Links.URL}/order')
 
     def load_for_whom_page(self):
         with allure.step(f"Loading the side page"):
             self.wait_for_element_visible(OrderPageLocators.FOR_WHOM_WINDOW)
 
-    def click_the_samokat_logo(self):
-        with allure.step(f"Clicking the 'Самокат' logo"):
-            self.click_element(MainPageLocators.SAMOKAT_LOGO)
+    def click_the_shuttle_logo(self):
+        with allure.step(f"Clicking the 'Space Shuttle' logo"):
+            self.click_element(MainPageLocators.SHUTTLE_LOGO)
 
-    def load_samokat_window(self):
-        with allure.step(f"Loading the 'Самокат' window"):
-            self.wait_for_element_visible(MainPageLocators.SAMOKAT_LOGO)
+    def load_shuttle_window(self):
+        with allure.step(f"Loading the home page"):
+            self.wait_for_element_visible(MainPageLocators.SHUTTLE_LOGO)
 
-    def click_the_yandex_logo(self):
-        with allure.step(f"Clicking the 'Яндекс' logo"):
-            self.click_element(MainPageLocators.YANDEX_LOGO)
+    def click_the_holonet_logo(self):
+        with allure.step(f"Clicking the 'HoloNet' logo"):
+            self.click_element(MainPageLocators.HOLONET_LOGO)
 
     def switch_to_new_window(self):
         with allure.step(f"Switching to new window"):
@@ -39,6 +39,6 @@ class SwitchingPage(BasePage):
                     self.driver.switch_to.window(window)
                     break
 
-    def load_dzen_window(self):
-        with allure.step(f"Loading the 'Дзен' window"):
-            self.wait_for_element_visible(SwitchingPageLocators.DZEN_SEARCH_BUTTON)
+    def load_holonet_window(self):
+        with allure.step(f"Loading the 'HoloNet' page"):
+            self.wait_for_element_visible(SwitchingPageLocators.HOLONET_TITLE)
