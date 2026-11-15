@@ -63,7 +63,7 @@ curl http://localhost:8000/health   # {"status":"ok"}
 
 On every start the stand applies migrations and seeds, idempotently:
 
-- the test user from `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the same variables the tests read);
+- the test user from `TEST_NAME` / `TEST_EMAIL` / `TEST_PASSWORD` (the tests read `TEST_EMAIL` and `TEST_PASSWORD`);
 - the eight Coruscant stations from `app/data/stations.json`;
 - the shipyard catalog of 16 parts from `app/data/shipyard_parts.json`;
 - the fleet of nine autopilots from `app/data/fleet.json` (`ilves`, `pupu`, `kissa`, `kettu`, `karhu`,
@@ -78,19 +78,20 @@ One `.env` (copied from `.env.example`, which holds fake values only) feeds both
 
 | Variable | Used by | Meaning |
 |---|---|---|
-| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | stand, tests | Database credentials (avoid `@ : / #` in the password: it goes into a URL) |
-| `POSTGRES_PORT` | stand, tests | Host port the database is published on |
-| `DB_HOST` | tests | Database host for SQL checks (`localhost`) |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | stand, manual SQL checks | Database credentials (avoid `@ : / #` in the password: it goes into a URL) |
+| `POSTGRES_PORT` | stand, manual SQL checks | Host port the database is published on |
+| `DB_HOST` | manual SQL checks | Database host for SQL checks (`localhost`) |
 | `APP_PORT` | stand | Host port the app is published on |
 | `BASE_URL` | tests | Stand URL; keep it in sync with `APP_PORT` |
 | `JWT_SECRET` | stand | HS256 key for access tokens |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | stand | Token and session lifetime (default 60) |
-| `TEST_NAME`, `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Seeded test user |
-| `FLEET_PASSWORD` | stand, tests | Password of the seeded fleet autopilots, exactly 4 digits (default `0101`) |
+| `TEST_NAME` | stand | Name of the seeded test user |
+| `TEST_EMAIL`, `TEST_PASSWORD` | stand, tests | Email and password of the seeded test user |
+| `FLEET_PASSWORD` | stand | Password of the seeded fleet autopilots, exactly 4 digits (default `0101`) |
 | `STAND_TZ` | stand | Time zone in which the stand counts days (default `UTC`) |
 | `PICKUP_MINUTES` | stand | Minutes from "Autopilot is on site" to "Okay, let's fly now" (default 10) |
 | `TEST_HOOKS` | stand | `1` switches on `/api/v1/testing/*` (default off; CI switches it on) |
-| `BUG_<NAME>` | stand | Switches a seeded defect on (see [Known defects](#known-defects)) |
+| `BUG_<NAME>` | stand, tests | Switches a seeded defect on (see [Known defects](#known-defects)); `tests/api/api_data.py` reads the flags for the conditional `xfail` |
 
 The app gets `DATABASE_URL` from `docker-compose.yml`, assembled from the `POSTGRES_*` variables.
 
@@ -400,19 +401,27 @@ its lists and date picker, and the modals. `order-title` is one `<h1>` whose tex
 
 ## Tests
 
-The suites live in this repo, next to the stand:
+The suites live in this repo, next to the stand: 50 tests in three suites, moved here from my
+earlier repos.
 
 ```
 tests/
-  api/              API tests (requests), marker `api`
-  ui/               UI tests (Selenium), marker `ui`
+  ui/               shipyard suite, 17 tests: registration, login, logout, account, shipyard tabs (Chrome)
+    add/            its config (reads .env), locators and helpers
+    rental/         rental suite, 12 tests: FAQ, order form, header logos (Firefox, Page Object)
+      pages/        page objects
+      locators/     their locators
+  api/              API suite, 21 tests: autopilot registration and login, orders (requests)
   requirements.txt  pinned test dependencies
 pytest.ini          test paths, markers, Allure results directory
 ```
 
+`pytest.ini` declares the markers `ui` and `api`, but no test is marked with them yet, so
+`pytest -m ui` or `pytest -m api` selects nothing. Select a suite by its path instead.
+
 ### Running the tests locally
 
-Requires Docker with Compose v2, Python 3.12+ and Chrome. All commands run from the repo root.
+Requires Docker with Compose v2, Python 3.12+, Chrome and Firefox. All commands run from the repo root.
 
 1. Start the stand in Docker (see [Quick start](#quick-start) for `.env`):
 
@@ -440,16 +449,26 @@ Requires Docker with Compose v2, Python 3.12+ and Chrome. All commands run from 
 
    ```bash
    pip install -r tests/requirements.txt
-   pytest                 # everything
-   pytest tests/ui        # UI only
-   allure serve allure-results   # optional, needs the Allure CLI locally
+   pytest                                    # everything, 50 tests
+   pytest tests/api                          # API suite, 21
+   pytest tests/ui                           # both UI suites, 29
+   pytest tests/ui --ignore=tests/ui/rental  # shipyard suite only, 17
+   pytest tests/ui/rental                    # rental suite only, 12
+   allure serve allure-results               # optional, needs the Allure CLI locally
    ```
 
-`tests/ui/add/config.py` reads the stand's `.env` by itself (`BASE_URL`, `TEST_EMAIL`,
-`TEST_PASSWORD`), so there is nothing to export. To test another stand, change `BASE_URL`.
-If the stand is not reachable, the UI tests are skipped.
+The tests read the stand's `.env` by themselves, so there is nothing to export:
+`tests/ui/add/config.py` (`BASE_URL`, `TEST_EMAIL`, `TEST_PASSWORD`) and `tests/api/api_data.py`
+(`BASE_URL` and the `BUG_*` flags) load it with python-dotenv. `tests/ui/rental/data.py` takes
+`BASE_URL` from the environment only; it gets the value from `.env` because pytest always loads
+`tests/ui/conftest.py`, which imports `config.py`, before the rental suite. A variable already set in
+the environment wins over `.env`. Without `BASE_URL` the suites use `http://localhost:8000`. To test
+another stand, change `BASE_URL`.
 
-Locally Chrome opens a window; in CI it runs headless, switched on by the `CI` environment variable.
+**If the stand is not reachable**, the shipyard suite (the tests directly in `tests/ui/`) and the API suite are skipped:
+the shipyard `driver` fixture opens `BASE_URL` first, and a session-scoped autouse fixture of the
+API suite calls `GET /health`. The rental suite has no such check (its own `driver` fixture replaces
+the shipyard one): its 12 tests error out with a connection error.
 
 On Windows, if `app` exits with `exec app/entrypoint.sh: no such file or directory`, the clone
 predates `.gitattributes` and the script has CRLF line endings. Restore it and rebuild:
@@ -460,12 +479,26 @@ git reset --hard
 docker compose up -d --build --wait
 ```
 
-**Browsers.** In CI the UI tests run headless Chrome (`--headless=new`).
-Selenium ≥ 4.6 includes Selenium Manager: it finds the installed browser and a matching
-driver, downloading the driver on first use if needed, so there is nothing to install by hand.
-How a run picks a browser (for example a `BROWSER` env var) is up to the test suite.
+**Browsers.** Each UI suite has its own browser, set in its `conftest.py`; there is no switch
+such as a `BROWSER` variable:
 
-**SQL checks** connect to `DB_HOST:POSTGRES_PORT` with the `POSTGRES_*` credentials,
+- the shipyard suite runs Chrome. Locally Chrome opens a window; with the `CI` environment variable
+  set (GitHub Actions sets it) it runs headless (`--headless=new`);
+- the rental suite runs Firefox, always headless (`--headless`), locally too.
+
+Selenium ≥ 4.6 includes Selenium Manager: it finds the installed Chrome and Firefox and matching
+drivers, downloading a driver on first use if needed, so there is nothing to install by hand.
+
+**xfail and seeded defects.** Two API tests check behaviour that a seeded defect breaks:
+`test_login_without_password` (`BUG_LOGIN_NO_PASSWORD_504`) and
+`test_create_autopilot_without_first_name` (`BUG_MISSING_NAME_409`). Each is marked `xfail` only
+when its flag is on in the tests' environment (read from the same `.env` as the stand, so restart
+the stand after changing it), with `strict=True` and `raises=AssertionError`: only a failed assertion
+counts as the expected failure, and a pass with the flag on fails the test. With no `BUG_*` flags
+every test must pass.
+
+**SQL checks.** No suite connects to the database yet. The stand publishes it on `POSTGRES_PORT`
+so that such checks can connect to `DB_HOST:POSTGRES_PORT` with the `POSTGRES_*` credentials,
 e.g. to assert that `users.password_hash` and `autopilots.password_hash` hold an argon2id hash,
 not the password.
 
