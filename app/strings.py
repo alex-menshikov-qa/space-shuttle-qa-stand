@@ -47,6 +47,16 @@ ORDER_NOT_FOUND = "Order not found"
 ORDER_NO_SUCH_ID = "There is no order with such id"
 ORDER_IN_PROGRESS = "This order is already in progress"
 ORDER_CANNOT_FINISH = "This order cannot be finished"
+# GET /orders query parameters (paging and the station filter).
+ORDERS_LIMIT_INVALID = "Parameter 'limit' must be a number from 1 to 30"
+ORDERS_PAGE_INVALID = "Parameter 'page' must be a number, 0 or greater"
+ORDERS_STATIONS_INVALID = (
+    "Parameter 'nearestStation' must be a JSON array of station numbers as strings"
+)
+ORDERS_STATION_UNKNOWN = "Station {station} not found"
+
+# --- Ping ---
+PING_REPLY = "pong"
 
 # --- Order fields (shared by the API and the order form) ---
 ORDER_NAME_INVALID = "Enter the correct name"

@@ -645,3 +645,149 @@ again, so 78 of the 98 reports are seeded and 20 are not.
 | SSI-7 | Sasha's own Firefox recording (1280×720 page in the responsive mode), committed as it is | the defect acts in Firefox only |
 | SSI-21 / SSI-22 | SSI-21 at 1280×720; SSI-22 at 1920×1080, two frames (first window, second window) | the flag depends on the window width |
 
+---
+
+# Track 5 — the stand's API catches up with the original
+
+## Goal
+On 15.11.2026 we read the API documentation of the original training stand this stand was built
+after. It has three things ours does not: an autopilot's order count, a ping, and paging plus a
+station filter in the order list. Track 5 adds them, so Sasha's API tests have new ground:
+paging, filters, query parameters, field types. Three seeded defects come with them.
+
+## Ground rules (as in tracks 2–4)
+- Branch `feat/api-like-original`, draft PR into `main`, merge only by Sasha. Stage 0 is this
+  section plus questions; then stage by stage, each ending with a report (done / how to check by
+  hand / deviations from PLAN.md as a separate list / CI result on the PR) and a stop.
+- PR events are only reported.
+- `tests/` is Sasha's: not edited, not extended. All 50 tests stay green without changes.
+- Error texts live in `strings.py`, in the style of the existing ones.
+- Defects: the BUG_* mechanism as before. Off by default, an unknown flag blocks the start, no
+  trace in any response without the flag. Verification scripts live outside the repo.
+
+## What the code says today
+- `GET /orders` ignores `limit`, `page` and `nearestStation`: FastAPI drops unknown query
+  parameters, so `?limit=abc` is `200` with every order. After this track such requests get `400`.
+- No UI page reads `GET /orders`: there is no autopilot page; `order.js` only calls
+  `POST /orders`, `track.js` only `PUT /orders/cancel`. The new checks cannot break the UI.
+- The only test of `GET /orders` (`tests/api/test_order_list.py`) sends no parameters and checks
+  that `orders` is a list.
+- The list is ordered by order `id`, oldest first. That stays.
+- `DELETE /autopilot` without an id is caught by explicit routes (`""`, `"/"`). The same trick
+  works for the order count: an explicit `GET /autopilot//ordersCount` route (Starlette does not
+  merge `//`, and `{id}` needs at least one character, so nothing else matches it).
+- The seed creates no rental orders: a fresh stand has none.
+
+## Stage 1 — three endpoints
+
+### `GET /api/v1/autopilot/{id}/ordersCount`
+How many orders the autopilot has accepted: in progress and finished; canceled ones do not count.
+- `200 {"id": <int>, "ordersCount": <int>}`.
+- `404` "There is no autopilot with such id": no such autopilot, or a non-numeric id (as DELETE).
+- `/autopilot//ordersCount` (empty id): `400` "Insufficient data to perform the search", from
+  a route outside the OpenAPI schema (as DELETE without an id).
+- The count is the autopilot's visible orders, so `ordersCount` always equals `pageInfo.total`
+  of `GET /orders?autopilotId=<id>`.
+
+### `GET /api/v1/ping`
+`200`, `text/plain`, body `pong`. No database. `/health` does not change.
+
+### `GET /api/v1/orders` — paging and a station filter
+New optional parameters, combinable with each other and with `autopilotId`:
+- `limit` — orders per page, 1–30, default 30;
+- `page` — page number from zero, default 0;
+- `nearestStation` — a JSON array of station numbers as strings, `?nearestStation=["1","2"]`;
+  only orders at these stations are listed.
+
+The response gains two fields; the existing ones do not change:
+```json
+{
+  "orders": [ ... ],
+  "pageInfo": {"page": 0, "total": 42, "limit": 30},
+  "availableStations": [{"number": 1, "name": "Alderaanian", "color": "blue"}]
+}
+```
+- `total` — how many orders match the filters, regardless of the page.
+- `availableStations` — the stations from `nearestStation` (no duplicates, by number); without the
+  filter, every station.
+- Order: by order `id`, oldest first (as today).
+- A page past the end: `200`, empty `orders`, the real `total`.
+- Checks, in this order: `limit`, `page`, `nearestStation` (shape, then unknown station), then
+  `autopilotId` (`404` as today). A malformed request is rejected before any lookup.
+
+Error texts (`strings.py`):
+
+| Case | Status | Text |
+|---|---|---|
+| `limit` not a number, or outside 1–30 (empty too) | 400 | Parameter 'limit' must be a number from 1 to 30 |
+| `page` not a number, or below 0 (empty too) | 400 | Parameter 'page' must be a number, 0 or greater |
+| `nearestStation` not a JSON array of number strings (`["a"]`, `[1]`, `{}`, `1`, broken JSON) | 400 | Parameter 'nearestStation' must be a JSON array of station numbers as strings |
+| a station in `nearestStation` that does not exist | 400 | Station {number} not found |
+
+Numbers follow the stand's existing rule for ids: plain digits, up to 9 of them.
+
+### Swagger
+The new endpoints and parameters are described in `/docs` like the existing ones: a description
+of every parameter, an example of the `200` body (`pong` as `text/plain` for ping) and every error
+status with its model. `//ordersCount` stays out of the schema, as DELETE without an id does.
+
+## Stage 2 — seeded defects for the new tests
+Origin in the README: `new (2026)`.
+
+| Flag | With the flag |
+|---|---|
+| `BUG_ORDERS_COUNT_AS_STRING` | `ordersCount` returns `id` and `ordersCount` as strings (`"id": "7"`), exactly as the example in the original's documentation |
+| `BUG_ORDERS_PAGE_FROM_ONE` | `page` counts from one: `page=0` and `page=1` return the same first page; `pageInfo.page` is as requested |
+| `BUG_ORDERS_LIMIT_OVER_30` | a `limit` above 30 is not rejected: as many orders as asked are returned, `pageInfo.limit` is as requested |
+
+Without a flag the behaviour is exactly as in stage 1.
+
+## Stage 3 — README, PLAN, finish
+- README: the API table (three changes), three rows in Known defects (count 45 → 48, the Origin
+  legend gains `new (2026)`), one sentence in the seed paragraph: the seed creates no orders.
+- PLAN.md: final decisions and deviations in this section.
+- Regression: all 50 tests green with every flag off (CI); every new flag on its own, by a script
+  outside the repo. CI green → PR ready → report and stop.
+
+## Decisions (track 5)
+| Topic | Decision | Why |
+|---|---|---|
+| Default `limit` | 30, as in the original | Sasha. **Deviation** from "nothing changes without the new parameters": with more than 30 orders a request without parameters returns the 30 oldest; `pageInfo.total` gives the real count. No test is affected |
+| `nearestStation=[]` | `200`, `orders: []`, `total: 0`, `availableStations: []` | Sasha: "only orders at these stations" of an empty set |
+| Order of checks | `400`s (limit, page, nearestStation) before the `autopilotId` `404` | Sasha |
+| `ordersCount` `404` text | the existing "There is no autopilot with such id" | Sasha: as DELETE and accept |
+| `nearestStation` items | strings only; `[1]` is a `400` | the original's format |
+| `.env.example` | the new flags are not added | it lists only a few flags as examples |
+
+## Result (track 5)
+Built as planned: `51b33af` (stage 1), `0e35ec2` (stage 2), this commit (stage 3). 48 flags; 41
+reproduce bug reports, 4 have another origin, 3 are `new (2026)`.
+
+| Flag | Origin |
+|---|---|
+| `BUG_ORDERS_COUNT_AS_STRING` | new (2026) |
+| `BUG_ORDERS_PAGE_FROM_ONE` | new (2026) |
+| `BUG_ORDERS_LIMIT_OVER_30` | new (2026) |
+
+Details settled along the way (all in the README):
+- `GET /autopilot/ordersCount` (no id segment at all) stays a `405`: the path is DELETE's
+  `/autopilot/{id}`. Only the empty segment, `//ordersCount`, is the `400`.
+- Numbers in `limit`, `page` and `nearestStation` follow the stand's rule for ids: digits only, up
+  to 9, surrounding spaces and leading zeros allowed (`" 03"` is station 3).
+- `nearestStation` names the unknown station by its number: `["09"]` → "Station 9 not found".
+- With `BUG_ORDERS_COUNT_AS_STRING` Swagger still documents both fields as integers: the defect
+  is a break of the documented contract.
+- With `BUG_ORDERS_LIMIT_OVER_30` only the upper bound goes: `limit=0` and `limit=abc` are still
+  `400` with the same text.
+- Swagger: every new parameter has a description and an example, every error status is listed,
+  `/ping` shows `pong` as `text/plain`; `//ordersCount` is out of the schema.
+
+Deviations from this plan: none beyond the default `limit` (Decisions above).
+
+Verification: a script outside the repo (76 checks of stage 1), one script per flag, each flag on
+its own, the unknown and the malformed flag blocking the start; the 21 API tests locally; all 50
+tests in CI on every stage.
+
+## Out of scope
+Tests; UI; changes to the existing fields of `GET /orders`; `PUT /orders/cancel` (the original
+takes `?t=`, ours keeps the body).

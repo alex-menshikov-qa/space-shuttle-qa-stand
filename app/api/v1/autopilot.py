@@ -1,4 +1,4 @@
-"""Autopilot API: create, log in, delete. No tokens.
+"""Autopilot API: create, log in, delete, count accepted orders. No tokens.
 
 Bodies are read as raw JSON and checked by app/validation.py, so a missing
 field, null or a number all get the documented 400 message.
@@ -10,10 +10,10 @@ from fastapi import APIRouter, Body, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from app import strings
+from app import defects, strings
 from app.db import get_session
 from app.errors import ApiError, ErrorResponse
-from app.schemas import AutopilotIdResponse, OkResponse
+from app.schemas import AutopilotIdResponse, OkResponse, OrdersCountResponse
 from app.services import autopilots, orders
 
 router = APIRouter(prefix="/autopilot", tags=["autopilot"])
@@ -100,3 +100,31 @@ def delete(autopilot_id: str, session: Session = Depends(get_session)) -> OkResp
         raise ApiError(404, strings.AUTOPILOT_NO_SUCH_ID)
     autopilots.delete(session, autopilot)
     return OkResponse()
+
+
+@router.get("//ordersCount", include_in_schema=False)
+def orders_count_without_id() -> None:
+    raise ApiError(400, strings.ORDER_SEARCH_INSUFFICIENT)
+
+
+@router.get(
+    "/{autopilot_id}/ordersCount",
+    response_model=OrdersCountResponse,
+    responses={
+        400: {"model": ErrorResponse, "description": "No id in the path"},
+        404: {"model": ErrorResponse, "description": "No autopilot with this id"},
+    },
+)
+def orders_count(autopilot_id: str, session: Session = Depends(get_session)) -> Any:
+    """How many orders the autopilot has accepted: in progress and finished;
+    canceled orders do not count. Equals `pageInfo.total` of
+    `GET /orders?autopilotId=<id>`. A non-numeric id is a 404."""
+    number = orders.parse_number(autopilot_id)
+    autopilot = autopilots.get(session, number) if number is not None else None
+    if autopilot is None:
+        raise ApiError(404, strings.AUTOPILOT_NO_SUCH_ID)
+    count = orders.orders_count(session, autopilot.id)
+    if defects.is_enabled("ORDERS_COUNT_AS_STRING"):
+        # Seeded defect: both numbers as strings, as in the original's docs example.
+        return JSONResponse(content={"id": str(autopilot.id), "ordersCount": str(count)})
+    return OrdersCountResponse(id=autopilot.id, ordersCount=count)
