@@ -1244,15 +1244,15 @@ Found with the Check List API: registering an autopilot, deleting it, getting an
 
 **Preconditions**
 
-1. An autopilot with id 1 exists.
-2. An order with tracking number 241615 exists and has been accepted by this autopilot.
+1. An autopilot with id 10 exists.
+2. An order with tracking number 16639 exists and has been accepted by this autopilot.
 
 **Steps to reproduce**
 
-1. Send `DELETE /api/v1/autopilot/1`.
-2. Send `GET /api/v1/orders/track?t=241615`.
+1. Send `DELETE /api/v1/autopilot/10`.
+2. Send `GET /api/v1/orders/track?t=16639`.
 
-**Actual result.** Status 200 OK. The order is returned in full (`"inDelivery": true`, `"status": 1`).
+**Actual result.** Status 200 OK. The order is returned in full and is still assigned to the deleted autopilot (`"status": "heading"`, `"autopilotId": 10`).
 
 **Expected result.** Status 404 Not Found:
 
@@ -1262,4 +1262,8 @@ Found with the Check List API: registering an autopilot, deleting it, getting an
 }
 ```
 
-**Attachments.** Two screenshots (delete response, track response).
+**Attachments.**
+
+![SSI-62: the order of the deleted autopilot is still found by its tracking number](img/ssi-62-1.png)
+
+![SSI-62: the autopilot is gone, its order list answers 404](img/ssi-62-2.png)
