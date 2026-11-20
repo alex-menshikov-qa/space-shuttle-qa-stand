@@ -470,7 +470,7 @@ SSI-65 blocks placing an order from the form. SSI-66 to SSI-76 are the failed ch
 
 **Attachments.** Screenshot.
 
-**Resolution.** The window was kept and added to the requirements.
+**Resolution.** Requirements updated: the window was kept on purpose and added to the requirements and mockups.
 
 ---
 
