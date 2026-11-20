@@ -1252,7 +1252,7 @@ Found with the Check List API: registering an autopilot, deleting it, getting an
 1. Send `DELETE /api/v1/autopilot/10`.
 2. Send `GET /api/v1/orders/track?t=16639`.
 
-**Actual result.** Status 200 OK. The order is returned in full and is still assigned to the deleted autopilot (`"status": "heading"`, `"autopilotId": 10`).
+**Actual result.** Status 200 OK. The order is returned in full and is still assigned to the deleted autopilot (`"status": "heading"`, `"autopilotId": 10`). The autopilot itself is gone: its order list returns 404 "Autopilot with identifier 10 not found".
 
 **Expected result.** Status 404 Not Found:
 
