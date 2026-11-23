@@ -854,7 +854,7 @@ Found with the Check List Web: finding an order by its number, its details, deli
 
 **Actual result.** Status 4 shows the title and caption of status 5, "Rental time has ended".
 
-**Expected result.** Status 4 stays as it was: "Okay, let's fly now", with the caption "Rental ends on <day and month> at <time>".
+**Expected result.** Status 4 stays as it was: "Okay, let's fly now", with the caption "Rental ends on `<day and month>` at `<time>`".
 
 **Attachments.**
 

@@ -110,10 +110,10 @@ Autopilot; an empty comment or color keeps its caption with an empty value) and 
 | # | Title | Caption while current | Caption while not current |
 |---|---|---|---|
 | 1 | Shuttle in the hangar | Your autopilot is warming up for departure | same |
-| 2 | Autopilot <firstName> is heading towards you ("Autopilot is heading towards you" before accept) | Contact number: 0101 | same |
+| 2 | Autopilot `<firstName>` is heading towards you ("Autopilot is heading towards you" before accept) | Contact number: 0101 | same |
 | 3 | Autopilot is on site | Pick up the shuttle and pay the rental fee | same |
-| 4 | Okay, let's fly now | Rental ends on <day> at <time> | before the flight: Until the rental is over; once passed: still Rental ends on <day> at <time> (gray) |
-| 5 | Rental time has ended | <firstName> is heading home to recharge. Thanks for flying with us. | no caption |
+| 4 | Okay, let's fly now | Rental ends on `<day>` at `<time>` | before the flight: Until the rental is over; once passed: still Rental ends on `<day>` at `<time>` (gray) |
+| 5 | Rental time has ended | `<firstName>` is heading home to recharge. Thanks for flying with us. | no caption |
 | — | Autopilot delayed (red, takes the place of status 2) | We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101 | — |
 
 Every status is an element with `data-state` = `done` / `current` / `upcoming` and
@@ -146,8 +146,8 @@ landing, and `#444444` on step 2 of the form.
   modal with the description and Mass, t · Power, MW · Cargo, m³ · Comfort, ★; it closes by the
   cross, Esc or a click on the backdrop.
 - **Adding:** drag a card into the build area, or press **Add**. A drop anywhere else adds nothing.
-- **Hull:** one per build, a new one replaces the old. It is shown twice — "<name> (Top plating)"
-  above and "<name> (Belly plating)" below the other parts — and priced twice. Without a hull the
+- **Hull:** one per build, a new one replaces the old. It is shown twice — "`<name>` (Top plating)"
+  above and "`<name>` (Belly plating)" below the other parts — and priced twice. Without a hull the
   build shows "No hull, no shuttle. Drag one here to begin."
 - **Engines and modules:** any number. Drag one onto another inside the build to reorder (the
   dragged part takes the place of the one it is dropped on); the cross removes it.
