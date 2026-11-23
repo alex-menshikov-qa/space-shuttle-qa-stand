@@ -1,3 +1,5 @@
+> Working log of the stand's development, kept as it was written: the plans Claude Code worked from and the decisions made along the way. Some early ideas were dropped later and stay here as history. The current behavior is described in the [README](../README.md) and the reference files next to this one.
+
 # PLAN — QA test stand, track 1 (stand skeleton, story-agnostic)
 
 ## Goal
