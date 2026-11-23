@@ -2,7 +2,7 @@
 
 Every defect is registered in KNOWN_DEFECTS and switched on with the env
 variable BUG_<NAME>=1 (also accepted: true / yes / on). All defects are off by
-default. Each one is documented in the "Known defects" table in README.md.
+default. Each one is documented in the "Known defects" table in docs/defects.md.
 
 A typo must never silently disable a defect, so check_flags() (called on app
 startup) rejects BUG_* variables with an unknown name or an unrecognised value,
@@ -20,7 +20,7 @@ ENV_PREFIX = "BUG_"
 _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"", "0", "false", "no", "off"}
 
-# name -> one-line description (keep in sync with README.md)
+# name -> one-line description (keep in sync with docs/defects.md)
 KNOWN_DEFECTS: dict[str, str] = {
     "AUTOPILOT_LOGIN_RULES": "POST /autopilot accepts a login that breaks the rules",
     "AUTOPILOT_PASSWORD_RULES": "POST /autopilot accepts a password that breaks the rules",
