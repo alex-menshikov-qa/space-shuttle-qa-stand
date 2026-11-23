@@ -9,7 +9,7 @@
 | [API](api.md) | 34 | 0 | 2 | 32 | 0 | 0 |
 | [Mobile app for autopilots](mobile.md) | 7 | 1 | 0 | 2 | 2 | 2 |
 
-78 of the 98 reports can be reproduced on the stand with `BUG_*` flags: see [Known defects](../../README.md#known-defects) in the main README.
+78 of the 98 reports can be reproduced on the stand with `BUG_*` flags: see [Known defects](../defects.md#known-defects).
 
 The screenshots and GIFs were taken on this stand in 2026 with a single flag switched on, so the dates in them differ from the example dates in the reports; attachments that are only named in words belong to the original reports and are not published.
 

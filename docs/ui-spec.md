@@ -59,7 +59,7 @@ Forms have `novalidate` and no `maxlength`: every error is our own DOM element u
 ### Order form
 
 One page, two steps; the page posts to `POST /api/v1/orders`, so the form and the API share the
-field rules and messages listed under [Order fields](#autopilot-station-and-order-api).
+field rules and messages listed under [Order fields](api.md#autopilot-station-and-order-api).
 Placeholders are the field names; required fields start with `*`. An invalid field gets its
 message under it and a red border. Every field keeps an empty line for that message, so the form
 does not move when one appears. Field borders: gray `#8c959f` untouched, blue `#0969da` in

@@ -7,7 +7,7 @@
 PostgreSQL database, built to be tested: my automation suites in `tests/` (pytest, Selenium,
 Requests, Allure) run against it in CI instead of third-party training stands. It has stable
 locators, a documented contract, a seeded test user, and 48 switchable
-[known defects](#known-defects) for the tests to catch; 41 of them reproduce bugs from my bug reports.
+[known defects](docs/defects.md#known-defects) for the tests to catch; 41 of them reproduce bugs from my bug reports.
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
 itself, steered by its autopilot, a droid employee who takes orders through the API. At the Shipyard
@@ -31,7 +31,7 @@ documentation grew out of.
 **What Claude Code did.** It wrote the application, the database schema and migrations, the Docker
 setup, and the CI workflow, stage by stage, to those requirements. Its commits are authored as
 Claude. The plans it worked from, with the decisions made along the way, are in
-[`PLAN.md`](PLAN.md).
+[`docs/PLAN.md`](docs/PLAN.md).
 
 **What I did.** I made the product decisions: the storyline, what the stand keeps from the 2023
 documentation, and which bugs become seeded defects. Every stage was reviewed before merge (the
@@ -93,7 +93,7 @@ One `.env` (copied from `.env.example`, which holds fake values only) feeds both
 | `STAND_TZ` | stand | Time zone in which the stand counts days (default `UTC`) |
 | `PICKUP_MINUTES` | stand | Minutes from "Autopilot is on site" to "Okay, let's fly now" (default 10) |
 | `TEST_HOOKS` | stand | `1` switches on `/api/v1/testing/*` (default off; CI switches it on) |
-| `BUG_<NAME>` | stand, tests | Switches a seeded defect on (see [Known defects](#known-defects)); `tests/api/api_data.py` reads the flags for the conditional `xfail` |
+| `BUG_<NAME>` | stand, tests | Switches a seeded defect on (see [Known defects](docs/defects.md#known-defects)); `tests/api/api_data.py` reads the flags for the conditional `xfail` |
 
 The app gets `DATABASE_URL` from `docker-compose.yml`, assembled from the `POSTGRES_*` variables.
 
