@@ -89,7 +89,7 @@ These 20 bug reports are not reproduced by a flag.
 | [SSI-20](bug-reports/web-order-status.md#ssi-20) | the buttons of "Do you want to cancel the order?" sit too high (1920×1080 only) | pixel-level alignment |
 | [SSI-23](bug-reports/web-order-status.md#ssi-23) | **Okay** in "Order canceled" sits too high | pixel-level alignment |
 | [SSI-95](bug-reports/web-order-status.md#ssi-95) | "There is no such order" flashes when the order page is refreshed | a race: a flag cannot reproduce it honestly |
-| [SSI-77](bug-reports/web-order-form.md#ssi-77) | an unexpected "Do you want to place the order?" window | by design on the stand: the window was kept and added to the requirements |
+| [SSI-77](bug-reports/web-order-form.md#ssi-77) | an unexpected "Do you want to place the order?" window | by design on the stand: the window was kept on purpose and added to the requirements and mockups |
 | [SSI-78](bug-reports/web-order-form.md#ssi-78) | the delivery date can be typed in by hand | by design on the stand: typing `DD.MM.YYYY` is allowed |
 | [SSI-79](bug-reports/web-order-form.md#ssi-79) | both shuttle colours can be selected | by design on the stand: two checkboxes, both may be ticked |
 | [SSI-87](bug-reports/web-order-form.md#ssi-87) | the content of the two lower fields is shifted to the left | pixel-level alignment |

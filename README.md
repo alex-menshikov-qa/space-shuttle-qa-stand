@@ -7,7 +7,7 @@
 PostgreSQL database, built to be tested: my automation suites in `tests/` (pytest, Selenium,
 Requests, Allure) run against it in CI instead of third-party training stands. It has stable
 locators, a documented contract, a seeded test user, and 48 switchable
-[known defects](docs/defects.md#known-defects) for the tests to catch; 41 of them reproduce bugs from my bug reports.
+[known defects](docs/defects.md#known-defects) for the tests to catch; 41 of them reproduce 78 of my bug reports.
 
 The story: **Space Shuttle Inc** rents shuttles on Coruscant. A shuttle flies to the customer by
 itself, steered by its autopilot, a droid employee who takes orders through the API. At the Shipyard
@@ -25,7 +25,7 @@ The stand is my design and Claude Code's implementation.
 expected, and the manual test documentation I wrote in 2023 for Space Shuttle Inc, a fictional
 product I built my QA portfolio around (a mind map of the order form, UI and API checklists, a
 field-validation table, and [the bug reports SSI-3…SSI-102](docs/bug-reports/)). 41 of the 48 seeded defects reproduce
-bugs from those bug reports; I had found them by hand in the training applications the
+78 of those bug reports; I had found them by hand in the training applications the
 documentation grew out of.
 
 **What Claude Code did.** It wrote the application, the database schema and migrations, the Docker
