@@ -1,3 +1,5 @@
+> Working log of the stand's development, kept as it was written: the plans Claude Code worked from and the decisions made along the way. Some early ideas were dropped later and stay here as history. The current behavior is described in the [README](../README.md) and the reference files next to this one.
+
 # PLAN — QA test stand, track 1 (stand skeleton, story-agnostic)
 
 ## Goal
@@ -223,10 +225,10 @@ Autopilots are their own entity (table `autopilots`), no tokens. Request fields 
   - Order data in three groups separated by gray lines: (Name, Last Name, Address, Shuttle Station with its colored dot, Phone) · (When to Bring the Shuttle, Rental Period) · (Shuttle Color, Comment for Autopilot). With no comment only the caption is shown and the value is empty. Every value has its own testid (`track-name-value`, `track-last-name-value`, `track-address-value`, `track-station-value`, `track-phone-value`, `track-date-value`, `track-period-value`, `track-color-value`, `track-comment-value`).
   - The status chain, current one highlighted:
   1. "Shuttle in the hangar" — "Your autopilot is warming up for departure"
-  2. "Autopilot <firstName> is heading towards you" — after accept; shows support phone 0101
+  2. "Autopilot `<firstName>` is heading towards you" — after accept; shows support phone 0101
   3. "Autopilot is on site" — after finish; "Pick up the shuttle and pay the rental fee"
-  4. "Okay, let's fly now" — `PICKUP_MINUTES` (default 10) after finish; "Rental ends on <day> at <time>" (finish + rentTime days)
-  5. "Rental time has ended" — after the rental end; caption, verbatim: "<firstName> is heading home to recharge. Thanks for flying with us."
+  4. "Okay, let's fly now" — `PICKUP_MINUTES` (default 10) after finish; "Rental ends on `<day>` at `<time>`" (finish + rentTime days)
+  5. "Rental time has ended" — after the rental end; caption, verbatim: "`<firstName>` is heading home to recharge. Thanks for flying with us."
   - "Autopilot delayed" — delivery day is over (after 23:59 `STAND_TZ`) and the order is not finished (status 1 or 2); finish returns it to 3. Caption, verbatim from the 2023 checklist: "We won't be able to deliver the shuttle on time. To check the status of your order, please call support at: 0101". Both the status and the caption are red.
 - "Cancel order" only while not accepted: modal "Do you want to cancel the order?" → "Order canceled. Come back, we are always waiting for you :)". Not found (incl. canceled) → "There is no such order. Are you sure you entered the correct number?".
 - **Time travel for tests.** Status is a pure function of the order's timestamps and the order's own clock (`now + clock_offset`). `POST /api/v1/testing/orders/{track}/time-shift {"hours": N}` (also `minutes`, `days`) adds to that order's offset → 200 `{"order": {...}}`. Enabled only with `TEST_HOOKS=1`; off by default (code and `.env.example`) → 404. CI switches it on explicitly. Per-order, so tests stay parallel-safe and date validation is unaffected.
@@ -235,7 +237,7 @@ Autopilots are their own entity (table `autopilots`), no tokens. Request fields 
 - Title "Build your shuttle". Tabs Hulls / Engines / Modules: click scrolls to the section's `<h2>`, scroll-spy switches the active tab, first is active by default; active = class `tab--active` + `data-active="true"`.
 - Part cards: inline SVG picture, name, price in credits, in-build counter (hidden at 0), "Add". Card click → modal with description and Mass, t · Power, MW · Cargo, m³ · Comfort, ★; closed by ✕, Esc, backdrop click.
 - **Build:** add by drag into the build area or by "Add". Dragging and in-build reordering are built on `mousedown` / `mousemove` / `mouseup`, **not** HTML5 Drag and Drop; verified by me with Selenium ActionChains (`click_and_hold → move_to_element → release`) in headless Chrome and Firefox.
-- One hull (a new one replaces the old), shown as "<name> (Top plating)" and "<name> (Belly plating)", priced twice. Any number of engines and modules, reorderable, removable. Empty: "No hull, no shuttle. Drag one here to begin."
+- One hull (a new one replaces the old), shown as "`<name>` (Top plating)" and "`<name>` (Belly plating)", priced twice. Any number of engines and modules, reorderable, removable. Empty: "No hull, no shuttle. Drag one here to begin."
 - Total recalculated on every change on the client; the server recomputes from its own prices on order. Build state lives in `sessionStorage` (survives the guest → login round trip).
 - Guest: "Sign in" → `/login`; logged in: "Order this shuttle". No hull → clear error, no order. Success → modal with the build order number. Not related to `/order` and `/track`.
 - **API:** `GET /api/v1/shipyard/parts` → 200 `{"parts": [{id, category, name, price, description, mass, power, cargo, comfort}]}` · `POST /api/v1/shipyard/orders` (Bearer) `{"parts": [id, ...]}` → 201 `{"number", "total"}`; 401 without token; 400 for no hull / two hulls / unknown id · `GET /api/v1/shipyard/orders` (Bearer) → own orders. The page itself posts to the cookie-authenticated web route `POST /shipyard/orders`, same service.
@@ -475,7 +477,7 @@ Implementation notes:
 | Topic | Decision | Why |
 |---|---|---|
 | Header "Go!" | gone by default; only `BUG_HEADER_SEARCH_EXTRA_BUTTON` brings it back | SSI-4: the field has no buttons |
-| Caption of status 4 | "Until the rental is over" before the flight; "Rental ends on <day> at <time>" while current **and** once passed (gray) | SSI-28 and Web 6.2: the caption must not change when the rental ends |
+| Caption of status 4 | "Until the rental is over" before the flight; "Rental ends on `<day>` at `<time>`" while current **and** once passed (gray) | SSI-28 and Web 6.2: the caption must not change when the rental ends |
 | "Cancel order" after accept | stays visible and disabled (track 3); the flag removes it | SSI-24: the button must still be shown |
 | Long autopilot name | "long" is 10+ characters; cut to two characters plus "…" (one character), only in the status 2 title | the rule allows 2–10, so one flag is enough to see SSI-18 |
 | Runway testid | `track-not-found-runway` on the group with everything that draws the runway | SSI-6 would otherwise be visible on a screenshot only |
@@ -630,7 +632,7 @@ were reproduced differently from them; the stand now follows the originals.
 
 | Was | Becomes | Bug | With the flag |
 |---|---|---|---|
-| `BUG_ENDED_STATUS_4_CAPTION` | `BUG_ENDED_STATUS_4_AS_5` | SSI-28 | after the rental has ended status 4 takes the title and caption of status 5 ("Rental time has ended", "<name> is heading home to recharge. Thanks for flying with us."); the highlighting is as without the flag |
+| `BUG_ENDED_STATUS_4_CAPTION` | `BUG_ENDED_STATUS_4_AS_5` | SSI-28 | after the rental has ended status 4 takes the title and caption of status 5 ("Rental time has ended", "`<name>` is heading home to recharge. Thanks for flying with us."); the highlighting is as without the flag |
 | `BUG_CANCELED_MODAL_FULLSCREEN` | `BUG_CANCELED_MODAL_SIZE` | SSI-21, SSI-22 | in a window up to 1280 px wide "Order canceled" is full width, as high as the first window (SSI-21); in a wider one it is about a third smaller than "Do you want to cancel the order?" in width and height, centred (SSI-22) |
 | `BUG_TRACK_NO_WRAP` | same name | SSI-16 | a long value is not wrapped and runs to the left, over the field names (it used to run to the right, onto the status chain) |
 

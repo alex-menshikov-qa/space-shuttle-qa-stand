@@ -44,7 +44,7 @@ def _order_by_id(session: Session, order_id: str) -> Order:
 def create(
     body: Any = Body(None, examples=[_ORDER_EXAMPLE]), session: Session = Depends(get_session)
 ) -> TrackResponse:
-    """Field rules are the order form's (see README). `station` is a station
+    """Field rules are the order form's (see docs/api.md). `station` is a station
     number, `rentTime` is 1-7 days, `deliveryDate` is YYYY-MM-DD and not earlier
     than tomorrow; `comment` and `color` are optional."""
     if not isinstance(body, dict):

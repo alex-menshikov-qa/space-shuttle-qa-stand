@@ -165,11 +165,11 @@ Found with the Test Cases Mobile: the push notification two hours before the end
 
 **Actual result.** Notification text:
 
-> 2 hours until the end of the order. The order to "<address>" must be completed. If you can't make it on time, please contact support: 0101
+> 2 hours until the end of the order. The order to "`<address>`" must be completed. If you can't make it on time, please contact support: 0101
 
 **Expected result.** Notification text:
 
-> 2 hours until the end of the order. The order to "<address>" must be completed by time N.
+> 2 hours until the end of the order. The order to "`<address>`" must be completed by time N.
 > If you can't make it on time, please contact support: 0101
 
 **Attachments.** Screenshot.
